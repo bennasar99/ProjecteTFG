@@ -1,0 +1,9 @@
+.vs
+*.exe
+Debug/
+Release/
+BaseOpenGL/Debug/
+Etapa6/Debug/
+Etapa6/Release/
+Etapa6/x64/
+x64/
