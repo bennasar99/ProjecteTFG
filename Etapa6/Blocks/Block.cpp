@@ -37,7 +37,7 @@ void Block::draw(bool wireframe) {
 			glutWireCube(1.0f);
 		}
 		else {
-			glutSolidCube(1.0f);
+			ModelManager::drawModel(Model::CUB);
 		}
 		break;
 	case Bloc::CONO: //Cono
@@ -132,7 +132,7 @@ void Block::draw(bool wireframe) {
 		}
 		else {
 			glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::TERRA));
-			draw3dRect(1, 1, 1);
+			ModelManager::drawModel(Model::CUB);
 		}
 		break;
 	case Bloc::VIDRE: //cub transparent/opac (vidre?)
@@ -311,12 +311,12 @@ void Block::draw(bool wireframe) {
 		glColor3f(0.76f, 0.60f, 0.42f);
 		//Aplicam la textura corresponent
 		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::FUSTA));
-		draw3dRect(1, 1, 1);
+		ModelManager::drawModel(Model::CUB);
 		break;
 	case Bloc::PEDRA:
 		glColor3f(0.5f, 0.5f, 0.5f);
 		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::PEDRA));
-		draw3dRect(1, 1, 1);
+		ModelManager::drawModel(Model::CUB);
 		break;
 	case Bloc::NORIA: { //Noria (icona)
 		glPushMatrix();
@@ -367,7 +367,7 @@ void Block::draw(bool wireframe) {
 	case Bloc::ALTAVEU:
 		glColor3f(0.5f, 0.5f, 0.5f);
 		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::ALTAVEU));
-		draw3dRect(1, 1, 1);
+		ModelManager::drawModel(Model::CUB);
 		break;
 	case Bloc::ESTALAGMITA: //Només icona, sense textura ni NURBS
 		glColor3f(0.5f, 0.35f, 0.05f);

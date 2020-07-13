@@ -1,3 +1,4 @@
+#include <GL/glew.h>
 #include "Utils.h"
 
 #include <GL/glut.h>
@@ -58,6 +59,7 @@ char* loadWAV(const char* fn, int& chan, int& samplerate, int& bps, int& size)
 
 //Dibuixa un paralepipede d'una mida determinada. generant les coordenades de textures corresponents
 void draw3dRect(float midaX, float midaY, float midaZ) {
+
     static GLfloat n[6][3] =
     {
       {-1.0, 0.0, 0.0}, //Esquerra

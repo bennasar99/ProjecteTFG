@@ -1,5 +1,6 @@
 #pragma once
 #include "../TextureManager.h"
+#include "../ModelManager.h"
 
 enum class Bloc {
 	AIRE,

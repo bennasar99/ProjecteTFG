@@ -8,6 +8,7 @@
 #include "Vector3.h"
 #include "TextureManager.h"
 #include "SoundManager.h"
+#include "ModelManager.h"
 
 int w_width = 500; // Tamano incial de la ventana
 int w_height = 500;
@@ -67,7 +68,7 @@ void Display(void)
 	int temps = glutGet(GLUT_ELAPSED_TIME);
 	int delta = temps - darrerDisplay;
 	float fps = 1.0f / ((float)delta / 1000.0f);
-	//printf("%f\n", fps);
+	printf("%f\n", fps);
 	//if (fps < 26) {
 	//	zFar--;
 	//}
@@ -360,9 +361,9 @@ int main(int argc, char** argv)
 	world->setBlock(Bloc::CONO, Vector3(66, 65, 64));
 
 	//Entitats
-	world->addEntity(Entitat::COTXE, Vector3(70, 65, 66));
-	world->addEntity(Entitat::COTXE2, Vector3(70, 65, 60));
-	world->setBlock(Bloc::GRUA, Vector3(60, 65, 66));
+	//world->addEntity(Entitat::COTXE, Vector3(70, 65, 66));
+	//world->addEntity(Entitat::COTXE2, Vector3(70, 65, 60));
+	//world->setBlock(Bloc::GRUA, Vector3(60, 65, 66));
 
 	glEnable(GL_CULL_FACE); //Cull face, no renderitza les cares no visibles
 	glCullFace(GL_BACK);
@@ -382,6 +383,9 @@ int main(int argc, char** argv)
 	SoundManager::loadSound("Sons/switch.wav", So::ONOFF);
 	SoundManager::loadSound("Sons/break.wav", So::DESTRUEIX);
 	SoundManager::loadSound("Sons/place.wav", So::COLOCA);
+
+	//Models
+	ModelManager::initialize();
 
 	//Antialising
 	glEnable(GL_MULTISAMPLE);
