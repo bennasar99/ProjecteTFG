@@ -21,6 +21,7 @@
 #include "Entities/Car.h"
 #include "Entities/Grua.h"
 #include "Entities/Noria.h"
+#include "Chunk.h"
 
 
 class Block;
@@ -31,6 +32,7 @@ enum class Bloc;
 class World {
 private:
 	Block **blocs;
+	Chunk *chunks;
 	int sol = 0;
 	float daytime = 0;
 	Vector3 solpos;

@@ -5,10 +5,13 @@ World::World(int sizex, int sizey, int sizez, Camera* camera)
 {
 	this->camera = camera;
 	this->minpos = Vector3((float)sizex-1, (float)sizey-1, (float)sizez-1);
-	this->blocs = new Block*[(size_t)sizex * (size_t)sizey * (size_t)sizez];
-    if (this->blocs != 0) { //S'ha reservat bé la memòria, inicialitzam tots els blocs a 0 (Bloc::RES)
-        memset(this->blocs, 0, (size_t)sizex * (size_t)sizey * (size_t)sizez * sizeof(Block*));
-    }
+	//this->blocs = new Block*[(size_t)sizex * (size_t)sizey * (size_t)sizez];
+ //   if (this->blocs != 0) { //S'ha reservat bé la memòria, inicialitzam tots els blocs a 0 (Bloc::RES)
+ //       memset(this->blocs, 0, (size_t)sizex * (size_t)sizey * (size_t)sizez * sizeof(Block*));
+ //   }
+
+	//NOU CODI CHUNKS:
+	this->chunks = new Chunk[sizex * sizey * sizez];
 
     this->sizex = sizex;
     this->sizey = sizey;
@@ -116,14 +119,15 @@ void World::update(int delta, Vector3 pos) {
 		glDisable(sol);
 	}
 	
-	float dist = camera->getViewDist()/2; //Distància d'actualització dels blocs/estructures
+	//float dist = camera->getViewDist()/2; //Distància d'actualització dels blocs/estructures
 
-	int x1 = (int)std::max(pos.x - dist, minpos.x), x2 = (int)std::min(pos.x + dist, maxpos.x);
+	/*int x1 = (int)std::max(pos.x - dist, minpos.x), x2 = (int)std::min(pos.x + dist, maxpos.x);
 	int y1 = (int)std::max(pos.y - dist, minpos.y), y2 = (int)std::min(pos.y + dist, maxpos.y);
-	int z1 = (int)std::max(pos.z - dist, minpos.z), z2 = (int)std::min(pos.z + dist, maxpos.z);
+	int z1 = (int)std::max(pos.z - dist, minpos.z), z2 = (int)std::min(pos.z + dist, maxpos.z);*/
+
 
 	//Actualitzam els blocs dins els limits definits
-	for (int x = x1; x <= x2; x++) {
+	/*for (int x = x1; x <= x2; x++) {
 		for (int y = y1; y <= y2; y++) {
 			for (int z = z1; z <= z2; z++) {
 				if (blocs[x + this->sizey * (y + this->sizez * z)] != 0) {
@@ -131,8 +135,17 @@ void World::update(int delta, Vector3 pos) {
 				}
 			}
 		}
-	}
+	}*/
 
+	//NOU CODI CHUNKS
+	pos = pos / 16;
+	pos.floor();
+	float dist = floor(camera->getViewDist() / 16.0f);
+	for (int x = pos.x - dist; x < pos.x + dist; x++) {
+		for (int x = pos.x - dist; x < pos.x + dist; x++) {
+
+		}
+	}
 
 	//Actualitzam les entitats
 	std::list<Entity*>::iterator ent;
@@ -196,59 +209,115 @@ bool World::deleteBlock(Vector3 pos, bool destroy) { //Eliminar Bloc::RES?
 
 //Col·locam un bloc d'un tipus determinat a la posició indicada
 bool World::setBlock(Bloc tipus, Vector3 pos, Block* parent) {
-	pos.noDecimals();
-	int desp = getDesp(pos);
+	//pos.noDecimals();
+	//int desp = getDesp(pos);
+	//if (desp == -1) {
+	//	return false;
+	//}
+
+	////Actualitzam maxpos i minpos
+	//maxpos.x = std::max(maxpos.x, pos.x); minpos.x = std::min(minpos.x, pos.x);
+	//maxpos.y = std::max(maxpos.y, pos.y); minpos.y = std::min(minpos.y, pos.y);
+	//maxpos.z = std::max(maxpos.z, pos.z); minpos.z = std::min(minpos.z, pos.z);
+
+	////Hi ha blocs amb les seves pròpies classes, sinó s'utilitza la classe genèrica
+	//switch (tipus) {
+	//case Bloc::PENDUL:
+	//	blocs[desp] = new Pendul(this, pos);
+	//	break;
+	//case Bloc::LLUMSOTIL: case Bloc::LLUMTERRA: case Bloc::TORXA: case Bloc::FAROLA:
+	//	blocs[desp] = new LightBlock(this, tipus, pos);
+	//	break;
+	//case Bloc::ALTAVEU:
+	//	blocs[desp] = new Jukebox(this, pos);
+	//	break;
+	//case Bloc::ESTALAGMITA:
+	//	blocs[desp] = new SurfaceBlock(this, tipus);
+	//	break;
+	//case Bloc::MIRALL:
+	//	blocs[desp] = new Mirror(this, pos);
+	//	break;
+	//case Bloc::NORIA: case Bloc::GRUA:
+	//	blocs[desp] = new EntityBlock(this, tipus, pos);
+	//	break;
+	//default:
+	//	blocs[desp] = new Block(this, tipus, parent);
+	//}
+	//return true;
+
+	//NOU CODI CHUNKS:
+	Vector3 cpos = pos / 16.0f;
+	cpos.floor();
+	Vector3 bpos = Vector3((int)pos.x % 16, (int)pos.y % 16, (int)pos.z % 16);
+	int desp = getDesp(cpos);
 	if (desp == -1) {
 		return false;
 	}
 
-	//Actualitzam maxpos i minpos
-	maxpos.x = std::max(maxpos.x, pos.x); minpos.x = std::min(minpos.x, pos.x);
-	maxpos.y = std::max(maxpos.y, pos.y); minpos.y = std::min(minpos.y, pos.y);
-	maxpos.z = std::max(maxpos.z, pos.z); minpos.z = std::min(minpos.z, pos.z);
-
-	//Hi ha blocs amb les seves pròpies classes, sinó s'utilitza la classe genèrica
+	Block* bloc;
 	switch (tipus) {
 	case Bloc::PENDUL:
-		blocs[desp] = new Pendul(this, pos);
+		bloc = new Pendul(this, pos);
 		break;
 	case Bloc::LLUMSOTIL: case Bloc::LLUMTERRA: case Bloc::TORXA: case Bloc::FAROLA:
-		blocs[desp] = new LightBlock(this, tipus, pos);
+		bloc = new LightBlock(this, tipus, pos);
 		break;
 	case Bloc::ALTAVEU:
-		blocs[desp] = new Jukebox(this, pos);
+		bloc = new Jukebox(this, pos);
 		break;
 	case Bloc::ESTALAGMITA:
-		blocs[desp] = new SurfaceBlock(this, tipus);
+		bloc = new SurfaceBlock(this, tipus);
 		break;
 	case Bloc::MIRALL:
-		blocs[desp] = new Mirror(this, pos);
+		bloc = new Mirror(this, pos);
 		break;
 	case Bloc::NORIA: case Bloc::GRUA:
-		blocs[desp] = new EntityBlock(this, tipus, pos);
+		bloc = new EntityBlock(this, tipus, pos);
 		break;
 	default:
-		blocs[desp] = new Block(this, tipus, parent);
+		bloc = new Block(this, tipus, parent);
 	}
+	chunks[desp].setBlock(bloc, bpos);
+
+	//Actualitzam maxpos i minpos
+	maxpos.x = std::max(maxpos.x, cpos.x); minpos.x = std::min(minpos.x, cpos.x);
+	maxpos.y = std::max(maxpos.y, cpos.y); minpos.y = std::min(minpos.y, cpos.y);
+	maxpos.z = std::max(maxpos.z, cpos.z); minpos.z = std::min(minpos.z, cpos.z);
+
 	return true;
 }
 
 //Assignam un bloc (per punter) a la posició indicada
 bool World::setBlock(Block* bloc, Vector3 pos) {
-	pos.noDecimals();
-	int desp = getDesp(pos);
+	Vector3 cpos = pos / 16.0f;
+	cpos.floor();
+	Vector3 bpos = Vector3((int)pos.x % 16, (int)pos.y % 16, (int)pos.z % 16);
+	int desp = getDesp(cpos);
 	if (desp == -1) {
 		return false;
 	}
-	maxpos.x = std::max(maxpos.x, pos.x); minpos.x = std::min(minpos.x, pos.x);
-	maxpos.y = std::max(maxpos.y, pos.y); minpos.y = std::min(minpos.y, pos.y);
-	maxpos.z = std::max(maxpos.z, pos.z); minpos.z = std::min(minpos.z, pos.z);
-	if (blocs[desp] != 0) {
-		blocs[desp]->destroy();
-		delete blocs[desp];
-	}
-	blocs[desp] = bloc;
-	return true;
+
+	//Actualitzam maxpos i minpos
+	maxpos.x = std::max(maxpos.x, cpos.x); minpos.x = std::min(minpos.x, cpos.x);
+	maxpos.y = std::max(maxpos.y, cpos.y); minpos.y = std::min(minpos.y, cpos.y);
+	maxpos.z = std::max(maxpos.z, cpos.z); minpos.z = std::min(minpos.z, cpos.z);
+
+	return chunks[desp].setBlock(bloc, bpos);
+
+	//pos.noDecimals();
+	//int desp = getDesp(pos);
+	//if (desp == -1) {
+	//	return false;
+	//}
+	//maxpos.x = std::max(maxpos.x, pos.x); minpos.x = std::min(minpos.x, pos.x);
+	//maxpos.y = std::max(maxpos.y, pos.y); minpos.y = std::min(minpos.y, pos.y);
+	//maxpos.z = std::max(maxpos.z, pos.z); minpos.z = std::min(minpos.z, pos.z);
+	//if (blocs[desp] != 0) {
+	//	blocs[desp]->destroy();
+	//	delete blocs[desp];
+	//}
+	//blocs[desp] = bloc;
+	//return true;
 }
 
 //Obtenim el bloc a la posició indicada
@@ -307,19 +376,36 @@ void World::draw(Vector3 pos, float dist) {
 	xmin = std::max(xmin, 0);				ymin = std::max(ymin, 0);				zmin = std::max(zmin, 0);
 	xmax = std::min(xmax, this->sizex);		ymax = std::min(ymax, this->sizey);		zmax = std::min(zmax, this->sizez);
 
-	//Dibuixam tots els blocs dins el volum de possible visibilitat de la càmera
-	for (int x = xmin; x <= xmax; x++) {
-		for (int y = ymin; y <= ymax; y++) {
-			for (int z = zmin; z <= zmax; z++) {
-				int desp = getDesp(Vector3((float)x, (float)y, (float)z));
-				if (blocs[desp] != 0) {
-					if (camera->isVisible(Vector3((float)x, (float)y, (float)z), 100)) {
-						glPushMatrix();
-						glTranslatef((float)x, (float)y, (float)z); //Ens translladam a la posició del bloc
-						blocs[desp]->draw(); //El dibuixam
-						glPopMatrix();
-					}
-				}
+	////Dibuixam tots els blocs dins el volum de possible visibilitat de la càmera
+	//for (int x = xmin; x <= xmax; x++) {
+	//	for (int y = ymin; y <= ymax; y++) {
+	//		for (int z = zmin; z <= zmax; z++) {
+	//			int desp = getDesp(Vector3((float)x, (float)y, (float)z));
+	//			if (blocs[desp] != 0) {
+	//				if (camera->isVisible(Vector3((float)x, (float)y, (float)z), 100)) {
+	//					glPushMatrix();
+	//					glTranslatef((float)x, (float)y, (float)z); //Ens translladam a la posició del bloc
+	//					blocs[desp]->draw(); //El dibuixam
+	//					glPopMatrix();
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+
+	//NOU CODI CHUNKS
+	Vector3 cMin = Vector3(xmin, ymin, zmin);
+	cMin = cMin / 16.0f;
+	cMin.floor();
+
+	Vector3 cMax = Vector3(xmax, ymax, zmax);
+	cMax = cMax / 16.0f;
+	cMax.floor();
+	for (int x = cMin.x; x < cMax.x; x++) {
+		for (int y = cMin.y; y < cMax.y; y++) {
+			for (int z = cMin.z; z < cMax.z; z++) {
+				int desp = getDesp(Vector3(x, y, z));
+				chunks[desp].draw();
 			}
 		}
 	}

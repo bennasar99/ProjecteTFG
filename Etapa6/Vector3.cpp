@@ -48,6 +48,11 @@ Vector3 Vector3::operator*(float b) {
 	return Vector3(this->x * b, this->y * b, this->z * b);
 }
 
+//Divisió d'un vector per un nombre
+Vector3 Vector3::operator/(float b) {
+	return Vector3(this->x / b, this->y / b, this->z / b);
+}
+
 //Producte escalar
 float Vector3::operator*(const Vector3& b) {
 	return this->x * b.x + this->y * b.y + this->z * b.z;
@@ -71,6 +76,12 @@ void Vector3::noDecimals() {
 	this->x = roundf(this->x);
 	this->y = roundf(this->y);
 	this->z = roundf(this->z);
+}
+
+void Vector3::floor() {
+	this->x = floorf(this->x);
+	this->y = floorf(this->y);
+	this->z = floorf(this->z);
 }
 
 //Escriu l'informació del vector

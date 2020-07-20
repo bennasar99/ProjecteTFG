@@ -14,6 +14,7 @@ public:
 	Vector3 operator-(const Vector3& b);
 	float operator*(const Vector3& b);
 	Vector3 operator*(float b);
+	Vector3 operator/(float b);
 
 	static Vector3 cross(Vector3 a, Vector3 b);
 	static float angle(Vector3 a, Vector3 b);
@@ -24,5 +25,6 @@ public:
 	void noDecimals();
 	bool equals(Vector3 other);
 	void print();
+	void floor();
 };
 

@@ -158,6 +158,7 @@
     <ClInclude Include="Blocks\Pendul.h" />
     <ClInclude Include="Blocks\SurfaceBlock.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Chunk.h" />
     <ClInclude Include="Entities\Car.h" />
     <ClInclude Include="Entities\Entity.h" />
     <ClInclude Include="Entities\Grua.h" />
@@ -184,6 +185,7 @@
     <ClCompile Include="Blocks\Pendul.cpp" />
     <ClCompile Include="Blocks\SurfaceBlock.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="Entities\Car.cpp" />
     <ClCompile Include="Entities\Entity.cpp" />
     <ClCompile Include="Entities\Grua.cpp" />
