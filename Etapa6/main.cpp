@@ -280,7 +280,7 @@ int main(int argc, char** argv)
 {
 
 	// necessari inicialitzar el món dins el main (físiques)
-	world = new World(128, 128, 128, &camera);
+	world = new World(32, 32, 32, &camera);
 	//cotxe = Car(world, Vector3(66, 65, 66));
 
 	// Inicializamos la libreria GLUT

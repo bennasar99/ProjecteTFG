@@ -12,6 +12,9 @@ public:
 	Vector3 getPos();
 
 	bool setBlock(Block* bloc, Vector3 pos);
-	void delBlock(Block);
+	bool delBlock(Vector3 bpos, bool destroy);
 	void update(int delta);
+	void destroy();
+
+	Chunk();
 };
