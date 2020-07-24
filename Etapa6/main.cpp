@@ -128,7 +128,7 @@ void Display(void)
 
 	// dibuixar els 3 eixos
 	if (axisVisible) {
-		world->drawAxis(Vector3((float)world->sizex/2, (float)world->sizey / 2 + 1, (float)world->sizez / 2), 50.0f);
+		world->drawAxis(Vector3((float)(world->sizex*16)/2, (float)(world->sizey*16) / 2 + 1, (float)(world->sizez*16) / 2), 50.0f);
 	}
 
 	glPopMatrix(); 
@@ -280,7 +280,7 @@ int main(int argc, char** argv)
 {
 
 	// necessari inicialitzar el món dins el main (físiques)
-	world = new World(32, 32, 32, &camera);
+	world = new World(8,8,8, &camera);
 	//cotxe = Car(world, Vector3(66, 65, 66));
 
 	// Inicializamos la libreria GLUT

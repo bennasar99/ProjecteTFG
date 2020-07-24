@@ -40,6 +40,13 @@ bool Chunk::setBlock(Block* bloc, Vector3 pos) {
 	return true;
 }
 
+Bloc Chunk::getBlock(Vector3 pos) {
+	if (blocs[(int)pos.x][(int)pos.y][(int)pos.z] == 0) {
+		return Bloc::RES;
+	}
+	return blocs[(int)pos.x][(int)pos.y][(int)pos.z]->getId();
+}
+
 void Chunk::update(int delta) {
 	for (int x = 0; x < 16; x++) {
 		for (int y = 0; y < 16; y++) {
@@ -74,4 +81,11 @@ bool Chunk::delBlock(Vector3 bpos, bool destroy) {
 		this->blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z] = 0;
 	}
 	return true;
+}
+
+void Chunk::interact(Vector3 bpos) {
+	if (blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z] == 0) {
+		return;
+	}
+	blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z]->interact();
 }

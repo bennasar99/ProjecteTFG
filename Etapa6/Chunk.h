@@ -11,8 +11,11 @@ public:
 	void draw();
 	Vector3 getPos();
 
-	bool setBlock(Block* bloc, Vector3 pos);
+	bool setBlock(Block* bloc, Vector3 bpos);
 	bool delBlock(Vector3 bpos, bool destroy);
+	Bloc getBlock(Vector3 bpos);
+
+	void interact(Vector3 bpos);
 	void update(int delta);
 	void destroy();
 
