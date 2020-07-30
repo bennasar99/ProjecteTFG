@@ -14,7 +14,7 @@ LightBlock::LightBlock(World* world, Bloc id, Vector3 pos) : Block(world, id, 0)
     this->pos = pos;
     switch (id) { //Segons el bloc, inicialitzam el llum d'una manera o una altre
     case Bloc::TORXA: 
-        this->light = world->addLight(pos);
+        this->light = world->addLight(pos + Vector3(0.5f,0.5f,0.5f));
         this->light->setLightConcentration(3.0f);
         this->light->setAttenuation(Attenuation::QUADRATIC, 1.0f);
         break;

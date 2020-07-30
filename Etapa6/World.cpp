@@ -11,9 +11,9 @@ World::World(int sizex, int sizey, int sizez, Camera* camera)
  //   }
 
 	//NOU CODI CHUNKS:
-	this->chunks = new Chunk*[sizex * sizey * sizez];
+	this->chunks = new Chunk[sizex * sizey * sizez];
 	for (int i = 0; i < sizex * sizey * sizez; i++) {
-		this->chunks[i] = new Chunk();
+		this->chunks[i] = Chunk();
 	}
 
     this->sizex = sizex;
@@ -149,7 +149,7 @@ void World::update(int delta, Vector3 pos) {
 			for (int z = pos.z - dist; z < pos.z + dist; z++) {
 				int desp = getDesp(Vector3(x, y, z));
 				if (desp != -1) {
-					chunks[desp]->update(delta);
+					chunks[desp].update(delta);
 				}
 			}
 		}
@@ -178,7 +178,7 @@ void World::destroy() {
 
 	//NOU CODI CHUNKS
 	for (int i = 0; i < this->sizex * this->sizey * this->sizez; i++) {
-		this->chunks[i]->destroy();
+		this->chunks[i].destroy();
 	}
 
 	std::list<Entity*>::iterator ent;
@@ -219,7 +219,7 @@ bool World::deleteBlock(Vector3 pos, bool destroy) { //Eliminar Bloc::RES?
 	//}
 	//return true;
 
-	pos.noDecimals();
+	pos.floor();
 	Vector3 cpos = pos / 16.0f;
 	cpos.floor();
 	Vector3 bpos = Vector3((int)pos.x % 16, (int)pos.y % 16, (int)pos.z % 16);
@@ -227,7 +227,7 @@ bool World::deleteBlock(Vector3 pos, bool destroy) { //Eliminar Bloc::RES?
 	if (desp == -1) {
 		return false;
 	}
-	return this->chunks[desp]->delBlock(bpos, true);
+	return this->chunks[desp].delBlock(bpos, true);
 }
 
 //Col·locam un bloc d'un tipus determinat a la posició indicada
@@ -269,7 +269,7 @@ bool World::setBlock(Bloc tipus, Vector3 pos, Block* parent) {
 	//return true;
 
 	//NOU CODI CHUNKS:
-	pos.noDecimals();
+	pos.floor();
 	Vector3 cpos = pos / 16.0f;
 	cpos.floor();
 	Vector3 bpos = Vector3((int)pos.x % 16, (int)pos.y % 16, (int)pos.z % 16);
@@ -301,7 +301,7 @@ bool World::setBlock(Bloc tipus, Vector3 pos, Block* parent) {
 	default:
 		bloc = new Block(this, tipus, parent);
 	}
-	chunks[desp]->setBlock(bloc, bpos);
+	chunks[desp].setBlock(bloc, bpos);
 
 	//Actualitzam maxpos i minpos
 	maxpos.x = std::max(maxpos.x, pos.x); minpos.x = std::min(minpos.x, pos.x);
@@ -313,7 +313,7 @@ bool World::setBlock(Bloc tipus, Vector3 pos, Block* parent) {
 
 //Assignam un bloc (per punter) a la posició indicada
 bool World::setBlock(Block* bloc, Vector3 pos) {
-	pos.noDecimals();
+	pos.floor();
 	Vector3 cpos = pos / 16.0f;
 	cpos.floor();
 	Vector3 bpos = Vector3((int)pos.x % 16, (int)pos.y % 16, (int)pos.z % 16);
@@ -327,7 +327,7 @@ bool World::setBlock(Block* bloc, Vector3 pos) {
 	maxpos.y = std::max(maxpos.y, cpos.y); minpos.y = std::min(minpos.y, cpos.y);
 	maxpos.z = std::max(maxpos.z, cpos.z); minpos.z = std::min(minpos.z, cpos.z);
 
-	return chunks[desp]->setBlock(bloc, bpos);
+	return chunks[desp].setBlock(bloc, bpos);
 
 	//pos.noDecimals();
 	//int desp = getDesp(pos);
@@ -347,7 +347,7 @@ bool World::setBlock(Block* bloc, Vector3 pos) {
 
 //Obtenim el bloc a la posició indicada
 Bloc World::getBlock(Vector3 pos) {
-	pos.noDecimals();
+	pos.floor();
 	Vector3 cpos = pos / 16.0f;
 	cpos.floor();
 	Vector3 bpos = Vector3((int)pos.x % 16, (int)pos.y % 16, (int)pos.z % 16);
@@ -355,7 +355,7 @@ Bloc World::getBlock(Vector3 pos) {
 	if (desp == -1) {
 		return Bloc::RES;
 	}
-	return chunks[desp]->getBlock(bpos); 
+	return chunks[desp].getBlock(bpos); 
 }
 
 //remove indica si el bloc s'ha d'eliminar del món (NO S'ALLIBERA LA MEMÒRIA)
@@ -429,27 +429,43 @@ void World::draw(Vector3 pos, float dist) {
 
 	//printf("%f %f %f, %f %f %f\n", cMin.x, cMin.y, cMin.z, cMax.x, cMax.y, cMax.z);
 
+	int nchunks = 0;
 	for (float x = cMin.x; x <= cMax.x; x++) {
 		for (float y = cMin.y; y <= cMax.y; y++) {
 			for (float z = cMin.z; z <= cMax.z; z++) {
+				float dist = Vector3::module(camera->getPos() - Vector3(x * 16.0f, y * 16.0f, z * 16.0f));
+				if (dist > 32) {
+					if (!camera->isVisible(Vector3(x * 16.0f + 8.0f, y * 16.0f + 8.0f, z * 16.0f + 8.0f), 8.0f)) {
+						continue;
+					}
+					float angle = toDegree(Vector3::angle(camera->getFront(), Vector3(x * 16.0f + 8.0f, y * 16.0f + 8.0f, z * 16.0f + 8.0f) - camera->getPos()));
+					if (camera->getAspect() > 1 && angle > camera->getFov()* camera->getAspect()) {
+						continue;
+					}
+					else if (camera->getAspect() <= 1 && angle > camera->getFov()) {
+						continue;
+					}
+				}
 				int desp = getDesp(Vector3(x, y, z));
 				glPushMatrix();
 				glTranslatef(x * 16.0f, y * 16.0f, z * 16.0f);
-				chunks[desp]->draw();
+				chunks[desp].draw();
 				glPopMatrix();
+				nchunks++;
 			}
 		}
 	}
+	printf("Chunks: %d\n", nchunks);
 }
 
 //Dibuixa un bloc a una posició determinada (Sense guardar-lo al món)
 void World::drawBloc(Vector3 pos, Bloc tipus, bool wireframe) {
 	glPushMatrix();
-	pos.noDecimals();
+	pos.floor();
 	Vector3 oldpos = pos;
-	pos.noDecimals();
+	pos.floor();
 	Vector3 front = camera->getFront();
-	glTranslatef(pos.x, pos.y, pos.z);
+	glTranslatef(pos.x+0.5f, pos.y+0.5f, pos.z+0.5f);
 	Block bloc = Block(this, tipus, 0);
 	bloc.draw(wireframe);
 	bloc.destroy();
@@ -509,7 +525,7 @@ void World::drawSol(Vector3 pos, float dist) {
 
 //Interacció amb un bloc
 void World::interact(Vector3 pos) {
-	pos.noDecimals();
+	pos.floor();
 	Vector3 cpos = pos / 16.0f;
 	cpos.floor();
 	Vector3 bpos = Vector3((int)pos.x % 16, (int)pos.y % 16, (int)pos.z % 16);
@@ -517,7 +533,7 @@ void World::interact(Vector3 pos) {
 	if (desp == -1) {
 		return;
 	}
-	return chunks[desp]->interact(bpos);
+	return chunks[desp].interact(bpos);
 }
 
 //Comprova que una posició valida i retorna el desplaçament corresponent a la posició

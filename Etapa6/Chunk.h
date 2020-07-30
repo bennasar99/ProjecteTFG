@@ -6,6 +6,7 @@ class Chunk {
 private:
 	Block* blocs[16][16][16];
 	Vector3 cpos;
+
 	//GLuint vbo;
 public:
 	void draw();
@@ -18,6 +19,8 @@ public:
 	void interact(Vector3 bpos);
 	void update(int delta);
 	void destroy();
+
+	int nblocs;
 
 	Chunk();
 };

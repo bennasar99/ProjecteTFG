@@ -9,17 +9,27 @@ Chunk::Chunk() {
 			}
 		}
 	}
+	nblocs = 0;
 }
 
 void Chunk::draw() {
+	if (nblocs == 0) {
+		return;
+	}
+	glTranslatef(0.5f, 0.5f, 0.5f);
+	int nb = 0;
 	for (int x = 0; x < 16; x++) {
-		for (int y = 0; y < 16; y++) {
-			for (int z = 0; z < 16; z++) {
+		for (int z = 0; z < 16; z++) {
+			for (int y = 0; y < 16; y++) {
 				if (blocs[x][y][z] != 0) {
 					glPushMatrix();
 					glTranslatef(x, y, z);
 					blocs[x][y][z]->draw();
 					glPopMatrix();
+					nb++;
+					if (nb >= nblocs) { //No cal dibuixar més blocs
+						return;
+					}
 				}
 			}
 		}
@@ -35,8 +45,10 @@ bool Chunk::setBlock(Block* bloc, Vector3 pos) {
 	if (this->blocs[(int)pos.x][(int)pos.y][(int)pos.z] != 0) {
 		this->blocs[(int)pos.x][(int)pos.y][(int)pos.z]->destroy();
 		delete this->blocs[(int)pos.x][(int)pos.y][(int)pos.z];
+		nblocs--;
 	}
 	this->blocs[(int)pos.x][(int)pos.y][(int)pos.z] = bloc;
+	nblocs++;
 	return true;
 }
 
@@ -79,6 +91,7 @@ bool Chunk::delBlock(Vector3 bpos, bool destroy) {
 		}
 		delete this->blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z];
 		this->blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z] = 0;
+		nblocs--;
 	}
 	return true;
 }

@@ -242,7 +242,7 @@ void Camera::lookAt(Vector3 pos) {
 //Indica si un punt és visible per la càmera
 bool Camera::isVisible(Vector3 pos, float marge) {
 	float dist = Vector3::module(pos - this->pos);
-	if (dist < 4 * aspect) {
+	if (dist < aspect) { //Abans 4 * aspect
 		return true;
 	}
 
@@ -255,12 +255,12 @@ bool Camera::isVisible(Vector3 pos, float marge) {
 	GLint viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport); //viewport[2] = width, viewport[3] = height
 
-	double min = floor(-marge * 100/fov);
-	double max = ceil(marge * 100/fov);
+	double min = floor(marge*100/fov); //Abans marge*100
+	double max = ceil(marge*100/fov);
 
 	GLdouble winX, winY, winZ;
 	gluProject(pos.x, pos.y, pos.z, model_view, projection, viewport, &winX, &winY, &winZ);
-	if (min <= winX && winX <= (viewport[2] + max) && min <= winY && winY <= (viewport[3] + max) && winZ >= 0 && winZ <= 1) {
+	if (-min <= winX && winX <= (viewport[2] + max) && -min <= winY && winY <= (viewport[3] + max) && winZ >= 0 && winZ <= 1) {
 		return true;
 	}
 	else {

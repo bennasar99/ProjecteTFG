@@ -32,7 +32,7 @@ enum class Bloc;
 class World {
 private:
 	//Block **blocs;
-	Chunk **chunks;
+	Chunk *chunks;
 	int sol = 0;
 	float daytime = 0;
 	Vector3 solpos;
