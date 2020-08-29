@@ -31,8 +31,7 @@ enum class Bloc;
 
 class World {
 private:
-	//Block **blocs;
-	Chunk *chunks;
+	Chunk **chunks;
 	int sol = 0;
 	float daytime = 0;
 	Vector3 solpos;
@@ -55,8 +54,8 @@ public:
 
 
 	bool setBlock(Bloc tipus, Vector3 pos);
-	bool setBlock(Bloc tipus, Vector3 pos, Block* parent);
-	bool setBlock(Block* bloc, Vector3 pos);
+	bool setBlock(Bloc tipus, Vector3 pos, Block* parent, bool listUpdate);
+	bool setBlock(Block* bloc, Vector3 pos, bool listUpdate);
 	Bloc getBlock(Vector3 pos);
 	Block* getBlockPointer(Vector3 pos, bool remove);
 	bool deleteBlock(Vector3 pos, bool destroy);
@@ -83,6 +82,9 @@ public:
 	//Sol
 	void setSol(int sol);
 	void drawSol(Vector3 pos, float dist); //Respecte una posició i a una distància determinada
+
+	//Chunks
+	void updateNeighborChunks(Vector3 cpos, Vector3 bpos);
 
 	void update(int delta, Vector3 camPos);
 

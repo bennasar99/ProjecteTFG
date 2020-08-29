@@ -42,7 +42,7 @@ void Grua::control(unsigned char key) {
 		}
 		else if (this->bloc != 0) {
 			if (world->getBlock(hookPos) == Bloc::RES) {
-				world->setBlock(this->bloc, hookPos);
+				world->setBlock(this->bloc, hookPos, false); //Potser true
 			}
 			this->bloc = 0;
 		}

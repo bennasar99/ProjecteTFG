@@ -52,6 +52,8 @@ public:
 	Bloc getId();
 	void setId(Bloc id);
 
+	static bool isTransparent(Bloc tipus);
+
 	Block(World *world, Bloc id, Block* parent);
 	Block();
 };

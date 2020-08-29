@@ -30,11 +30,11 @@ Pendul::Pendul(World* world, Vector3 pos) : Block(world, Bloc::PENDUL, 0) {
     this->w2 = 0;
     this->a2 = 0;
 
-    world->setBlock(Bloc::AIRE, pos + Vector3(1, 0, 0), this);
-    world->setBlock(Bloc::AIRE, pos + Vector3(-1, 0, 0), this);
-    world->setBlock(Bloc::AIRE, pos + Vector3(1, -1, 0), this);
-    world->setBlock(Bloc::AIRE, pos + Vector3(-1, -1, 0), this);
-    world->setBlock(Bloc::AIRE, pos + Vector3(0, -1, 0), this);
+    //world->setBlock(Bloc::AIRE, pos + Vector3(1, 0, 0), this);
+    //world->setBlock(Bloc::AIRE, pos + Vector3(-1, 0, 0), this);
+    //world->setBlock(Bloc::AIRE, pos + Vector3(1, -1, 0), this);
+    //world->setBlock(Bloc::AIRE, pos + Vector3(-1, -1, 0), this);
+    //world->setBlock(Bloc::AIRE, pos + Vector3(0, -1, 0), this);
 }
 
 /**
@@ -141,10 +141,10 @@ void Pendul::togglePoints() {
 }
 
 void Pendul::destroy() { //Eliminam els blocs fills
-    world->deleteBlock(pos + Vector3(1, 0, 0), false);
-    world->deleteBlock(pos + Vector3(-1, 0, 0), false);
-    world->deleteBlock(pos + Vector3(1, -1, 0), false);
-    world->deleteBlock(pos + Vector3(-1, -1, 0), false);
-    world->deleteBlock(pos + Vector3(0, -1, 0), false);
+    //world->deleteBlock(pos + Vector3(1, 0, 0), false);
+    //world->deleteBlock(pos + Vector3(-1, 0, 0), false);
+    //world->deleteBlock(pos + Vector3(1, -1, 0), false);
+    //world->deleteBlock(pos + Vector3(-1, -1, 0), false);
+    //world->deleteBlock(pos + Vector3(0, -1, 0), false);
     world->deleteBlock(pos, false);
 }

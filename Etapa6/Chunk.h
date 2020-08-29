@@ -1,11 +1,17 @@
 #pragma once
 
-#include "Blocks//Block.h"
+#include "Blocks/Block.h"
 
 class Chunk {
 private:
 	Block* blocs[16][16][16];
 	Vector3 cpos;
+
+	GLuint dlist;
+
+	World* world;
+
+	bool firstdraw;
 
 	//GLuint vbo;
 public:
@@ -20,7 +26,12 @@ public:
 	void update(int delta);
 	void destroy();
 
+	bool isVisible(Vector3 bpos);
+	Bloc getBlockWorld(Vector3 bpos);
+
+	void updateDL();
+
 	int nblocs;
 
-	Chunk();
+	Chunk(World* world, Vector3 pos);
 };

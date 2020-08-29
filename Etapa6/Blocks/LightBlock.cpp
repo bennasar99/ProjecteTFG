@@ -34,8 +34,8 @@ LightBlock::LightBlock(World* world, Bloc id, Vector3 pos) : Block(world, id, 0)
         this->light = world->addLight(pos + Vector3(0, 1.f, 0));
         this->light->setLightConcentration(1.0f);
         this->light->setAttenuation(Attenuation::QUADRATIC, 0.5f);
-        this->world->setBlock(Bloc::AIRE, pos + Vector3(0, 2, 0), this);
-        this->world->setBlock(Bloc::AIRE, pos + Vector3(0, 1, 0), this);
+        this->world->setBlock(Bloc::AIRE, pos + Vector3(0, 2, 0), this, false);
+        this->world->setBlock(Bloc::AIRE, pos + Vector3(0, 1, 0), this, false);
         break;
     }
 }

@@ -15,7 +15,7 @@ int w_height = 500;
 
 //Clipping planes
 const float zNear = 1.0f;
-float zFar = 64.0f;
+float zFar = 48.0f;
 
 const float axisSize = zFar;
 
