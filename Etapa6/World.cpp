@@ -256,41 +256,6 @@ bool World::deleteBlock(Vector3 pos, bool destroy) { //Eliminar Bloc::RES?
 
 //Col·locam un bloc d'un tipus determinat a la posició indicada
 bool World::setBlock(Bloc tipus, Vector3 pos, Block* parent, bool listUpdate) {
-	//pos.noDecimals();
-	//int desp = getDesp(pos);
-	//if (desp == -1) {
-	//	return false;
-	//}
-
-	////Actualitzam maxpos i minpos
-	//maxpos.x = std::max(maxpos.x, pos.x); minpos.x = std::min(minpos.x, pos.x);
-	//maxpos.y = std::max(maxpos.y, pos.y); minpos.y = std::min(minpos.y, pos.y);
-	//maxpos.z = std::max(maxpos.z, pos.z); minpos.z = std::min(minpos.z, pos.z);
-
-	////Hi ha blocs amb les seves pròpies classes, sinó s'utilitza la classe genèrica
-	//switch (tipus) {
-	//case Bloc::PENDUL:
-	//	blocs[desp] = new Pendul(this, pos);
-	//	break;
-	//case Bloc::LLUMSOTIL: case Bloc::LLUMTERRA: case Bloc::TORXA: case Bloc::FAROLA:
-	//	blocs[desp] = new LightBlock(this, tipus, pos);
-	//	break;
-	//case Bloc::ALTAVEU:
-	//	blocs[desp] = new Jukebox(this, pos);
-	//	break;
-	//case Bloc::ESTALAGMITA:
-	//	blocs[desp] = new SurfaceBlock(this, tipus);
-	//	break;
-	//case Bloc::MIRALL:
-	//	blocs[desp] = new Mirror(this, pos);
-	//	break;
-	//case Bloc::NORIA: case Bloc::GRUA:
-	//	blocs[desp] = new EntityBlock(this, tipus, pos);
-	//	break;
-	//default:
-	//	blocs[desp] = new Block(this, tipus, parent);
-	//}
-	//return true;
 
 	//NOU CODI CHUNKS:
 	pos.floor();
@@ -365,21 +330,6 @@ bool World::setBlock(Block* bloc, Vector3 pos, bool listUpdate) {
 		chunks[desp]->updateDL();
 		updateNeighborChunks(cpos, bpos);
 	}
-
-	//pos.noDecimals();
-	//int desp = getDesp(pos);
-	//if (desp == -1) {
-	//	return false;
-	//}
-	//maxpos.x = std::max(maxpos.x, pos.x); minpos.x = std::min(minpos.x, pos.x);
-	//maxpos.y = std::max(maxpos.y, pos.y); minpos.y = std::min(minpos.y, pos.y);
-	//maxpos.z = std::max(maxpos.z, pos.z); minpos.z = std::min(minpos.z, pos.z);
-	//if (blocs[desp] != 0) {
-	//	blocs[desp]->destroy();
-	//	delete blocs[desp];
-	//}
-	//blocs[desp] = bloc;
-	//return true;
 }
 
 //Obtenim el bloc a la posició indicada
@@ -438,23 +388,6 @@ void World::draw(Vector3 pos, float dist) {
 
 	xmin = std::max(xmin, 0);				ymin = std::max(ymin, 0);				zmin = std::max(zmin, 0);
 	xmax = std::min(xmax, this->sizex*16);		ymax = std::min(ymax, this->sizey*16);		zmax = std::min(zmax, this->sizez*16);
-
-	////Dibuixam tots els blocs dins el volum de possible visibilitat de la càmera
-	//for (int x = xmin; x <= xmax; x++) {
-	//	for (int y = ymin; y <= ymax; y++) {
-	//		for (int z = zmin; z <= zmax; z++) {
-	//			int desp = getDesp(Vector3((float)x, (float)y, (float)z));
-	//			if (blocs[desp] != 0) {
-	//				if (camera->isVisible(Vector3((float)x, (float)y, (float)z), 100)) {
-	//					glPushMatrix();
-	//					glTranslatef((float)x, (float)y, (float)z); //Ens translladam a la posició del bloc
-	//					blocs[desp]->draw(); //El dibuixam
-	//					glPopMatrix();
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
 
 	//NOU CODI CHUNKS
 	Vector3 cMin = Vector3(xmin, ymin, zmin);
