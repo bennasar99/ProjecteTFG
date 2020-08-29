@@ -4,6 +4,7 @@
 
 enum class Bloc {
 	AIRE,
+	AIGUA,
 	CUB,
 	CONO,
 	ESFERA,
@@ -12,6 +13,7 @@ enum class Bloc {
 	ESFERA4C,
 	DONUT,
 	HERBA,
+	HERBAFULL,
 	TERRA,
 	VIDRE,
 	TORXA,

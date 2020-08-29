@@ -31,6 +31,10 @@ void Block::draw(bool wireframe) {
 	float specularZero[4] = { 0,0,0,0 };
 	float specularDef[4] = { 1,1,1,1 };
 	switch (this->id) { //Dibuixam el que correspongui per cada bloc
+	case Bloc::AIGUA: //Aigua
+		glColor4f(0, 0, 1, 0.5f);
+		draw3dRect(1, 1, 1);
+		break;
 	case Bloc::CUB: //Cub vermell
 		glColor3f(1, 0, 0);
 		if (wireframe) {
@@ -122,6 +126,32 @@ void Block::draw(bool wireframe) {
 		glVertex3d(0, 0.5, 0.25); glVertex3d(0, -0.5, 0.25);
 		glVertex3d(-0.25, 0.1, 0); glVertex3d(-0.25, -0.5, 0);
 		glVertex3d(0, 0.4, -0.25); glVertex3d(0, -0.5, -0.25);
+		glEnd();
+		glLineWidth(1.0f);
+		break;
+	case Bloc::HERBAFULL: //Herba
+		glColor3f(0, 1, 0);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specularZero); //No volem que brilli
+		glLineWidth(3.0f);
+		glBegin(GL_LINES);
+		glNormal3f(0, 1, 0);
+		glVertex3d(0.5, 0.5, 0.5); glVertex3d(0.5, -0.5, 0.5);
+		glVertex3d(-0.5, 0.5, 0.5); glVertex3d(-0.5, -0.5, 0.5);
+		glVertex3d(0.5, 0.5, -0.5); glVertex3d(0.5, -0.5, -0.5);
+		glVertex3d(-0.5, 0.5, -0.5); glVertex3d(-0.5, -0.5, -0.5);
+		glVertex3d(0.0, 0.5, 0.0); glVertex3d(0.0, -0.5, 0.0);
+		glVertex3d(0.5, 0.5, 0.0); glVertex3d(0.5, -0.5, 0.0);
+		glVertex3d(0.0, 0.5, 0.5); glVertex3d(0.0, -0.5, 0.5);
+		glVertex3d(-0.5, 0.5, 0.0); glVertex3d(-0.5, -0.5, 0.0);
+		glVertex3d(0.0, 0.5, -0.5); glVertex3d(0.0, -0.5, -0.5);
+		glVertex3d(0.25, 0.5, 0.25); glVertex3d(0.25, -0.5, 0.25);
+		glVertex3d(-0.25, 0.5, 0.25); glVertex3d(-0.25, -0.5, 0.25);
+		glVertex3d(0.25, 0.5, -0.25); glVertex3d(0.25, -0.5, -0.25);
+		glVertex3d(-0.25, 0.5, -0.25); glVertex3d(-0.25, -0.5, -0.25);
+		glVertex3d(0.25, 0.5, 0); glVertex3d(0.25, -0.5, 0);
+		glVertex3d(0, 0.5, 0.25); glVertex3d(0, -0.5, 0.25);
+		glVertex3d(-0.25, 0.5, 0); glVertex3d(-0.25, -0.5, 0);
+		glVertex3d(0, 0.5, -0.25); glVertex3d(0, -0.5, -0.25);
 		glEnd();
 		glLineWidth(1.0f);
 		break;
@@ -457,7 +487,8 @@ void Block::interact() {
 };
 
 bool Block::isTransparent(Bloc tipus) {
-	if (tipus == Bloc::RES || tipus == Bloc::AIRE || tipus == Bloc::HERBA || tipus == Bloc::VIDRE || tipus == Bloc::TORXA) {
+	if (tipus == Bloc::RES || tipus == Bloc::AIRE || tipus == Bloc::HERBA || tipus == Bloc::VIDRE || tipus == Bloc::TORXA
+		|| tipus == Bloc::HERBAFULL || tipus == Bloc::AIGUA) {
 		return true;
 	}
 	return false;

@@ -4,21 +4,21 @@
 World::World(int sizex, int sizey, int sizez, Camera* camera)
 {
 	this->camera = camera;
-	this->minpos = Vector3((float)sizex-1, (float)sizey-1, (float)sizez-1);
+	this->minpos = Vector3((float)sizex - 1, (float)sizey - 1, (float)sizez - 1);
 	//this->blocs = new Block*[(size_t)sizex * (size_t)sizey * (size_t)sizez];
  //   if (this->blocs != 0) { //S'ha reservat bé la memòria, inicialitzam tots els blocs a 0 (Bloc::RES)
  //       memset(this->blocs, 0, (size_t)sizex * (size_t)sizey * (size_t)sizez * sizeof(Block*));
  //   }
 
 	//NOU CODI CHUNKS:
-	this->chunks = new Chunk*[(size_t)sizex * (size_t)sizey * (size_t)sizez];
+	this->chunks = new Chunk * [(size_t)sizex * (size_t)sizey * (size_t)sizez];
 	for (int i = 0; i < sizex * sizey * sizez; i++) {
 		this->chunks[i] = nullptr;
 	}
 
-    this->sizex = sizex;
-    this->sizey = sizey;
-    this->sizez = sizez;
+	this->sizex = sizex;
+	this->sizey = sizey;
+	this->sizez = sizez;
 
 	//Omplim el món de terra i herbes
 	//Vector3 pos = Vector3(0, (float)((this->sizey / 2) * 16), 0);
@@ -33,17 +33,38 @@ World::World(int sizex, int sizey, int sizez, Camera* camera)
 
 	//Versió heavy
 	Vector3 pos = Vector3(0, 0, 0);
+	float lasty = (this->sizey * 16.0f) / 2.0f;
 	for (pos.x = 0; pos.x < this->sizex * 16; pos.x++) {
 		for (pos.z = 0; pos.z < this->sizez * 16; pos.z++) {
-			for (pos.y = 0; pos.y <= (this->sizey * 16) / 2; pos.y++) {
+			for (pos.y = 0; pos.y <= lasty; pos.y++) {
 				this->setBlock(Bloc::TERRA, pos, nullptr, false);
-				if ((rand() % 20) == 1 && pos.y == (this->sizey * 16) / 2) {
-					this->setBlock(Bloc::HERBA, pos + Vector3(0, 1, 0), 0, false);
-				}
-				if ((rand() % 20) == 1 && pos.y == (this->sizey * 16) / 2) {
-					//this->deleteBlock(pos, true);
+				if (pos.y == lasty){
+					int random = rand() % 64;
+					if (random == 1) {
+						this->setBlock(Bloc::HERBA, pos + Vector3(0, 1, 0), 0, false);
+					}
+					else if (random == 2) {
+						this->setBlock(Bloc::HERBAFULL, pos + Vector3(0, 1, 0), 0, false);
+							this->setBlock(Bloc::HERBA, pos + Vector3(0, 2, 0), 0, false);
+					}
+					else if (random == 3) {
+						this->setBlock(Bloc::AIGUA, pos, 0, false);
+					}
 				}
 			}
+		}
+		int random = rand() % 4;
+		if (random == 2) {
+			lasty++;
+		}
+		else if (random == 1) {
+			lasty--;
+		}
+		if (lasty > this->sizey * 16 - 4) {
+			lasty = this->sizey * 16 - 4;
+		}
+		if (lasty < 1) {
+			lasty = 1;
 		}
 	}
 
@@ -405,7 +426,7 @@ void World::draw(Vector3 pos, float dist) {
 		for (float y = cMin.y; y <= cMax.y; y++) {
 			for (float z = cMin.z; z <= cMax.z; z++) {
 				int desp = getDesp(Vector3(x, y, z));
-				if (chunks[desp] == 0) {
+				if (chunks[desp] == nullptr) {
 					continue;
 				}
 				float dist = Vector3::module(camera->getPos() - Vector3(x * 16.0f, y * 16.0f, z * 16.0f));

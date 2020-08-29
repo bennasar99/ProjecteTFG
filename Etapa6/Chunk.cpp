@@ -102,7 +102,7 @@ void Chunk::interact(Vector3 bpos) {
 	blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z]->interact();
 }
 
-void Chunk::updateDL() { //TODO: blocs transparents/translucids
+void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc res i se dibuixarà, no cal
 	glDeleteLists(dlist, 1);
 	dlist = glGenLists(1);
 	glNewList(dlist, GL_COMPILE);
