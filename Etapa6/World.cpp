@@ -5,10 +5,6 @@ World::World(int sizex, int sizey, int sizez, Camera* camera)
 {
 	this->camera = camera;
 	this->minpos = Vector3((float)sizex - 1, (float)sizey - 1, (float)sizez - 1);
-	//this->blocs = new Block*[(size_t)sizex * (size_t)sizey * (size_t)sizez];
- //   if (this->blocs != 0) { //S'ha reservat bé la memòria, inicialitzam tots els blocs a 0 (Bloc::RES)
- //       memset(this->blocs, 0, (size_t)sizex * (size_t)sizey * (size_t)sizez * sizeof(Block*));
- //   }
 
 	//NOU CODI CHUNKS:
 	this->chunks = new Chunk * [(size_t)sizex * (size_t)sizey * (size_t)sizez];
@@ -20,18 +16,7 @@ World::World(int sizex, int sizey, int sizez, Camera* camera)
 	this->sizey = sizey;
 	this->sizez = sizez;
 
-	//Omplim el món de terra i herbes
-	//Vector3 pos = Vector3(0, (float)((this->sizey / 2) * 16), 0);
-	//for (pos.x = 0 ; pos.x < this->sizex*16; pos.x++) {
-	//	for (pos.z = 0; pos.z < this->sizez*16; pos.z++) {
-	//		this->setBlock(Bloc::TERRA, pos);
-	//		if ((rand() % 20) == 1) {
-	//			this->setBlock(Bloc::HERBA, pos + Vector3(0, 1, 0));
-	//		}
-	//	}
-	//}
-
-	//Versió heavy
+	//Generador del món
 	Vector3 pos = Vector3(0, 0, 0);
 	float lasty = (this->sizey * 16.0f) / 2.0f;
 	for (pos.x = 0; pos.x < this->sizex * 16; pos.x++) {
@@ -39,16 +24,35 @@ World::World(int sizex, int sizey, int sizez, Camera* camera)
 			for (pos.y = 0; pos.y <= lasty; pos.y++) {
 				this->setBlock(Bloc::TERRA, pos, nullptr, false);
 				if (pos.y == lasty){
-					int random = rand() % 64;
-					if (random == 1) {
+					int random = rand() % 128;
+					if (random == 1 || random == 5) {
 						this->setBlock(Bloc::HERBA, pos + Vector3(0, 1, 0), 0, false);
 					}
-					else if (random == 2) {
+					else if (random == 2 || random == 6) {
 						this->setBlock(Bloc::HERBAFULL, pos + Vector3(0, 1, 0), 0, false);
 							this->setBlock(Bloc::HERBA, pos + Vector3(0, 2, 0), 0, false);
 					}
 					else if (random == 3) {
 						this->setBlock(Bloc::AIGUA, pos, 0, false);
+					}
+					else if (random == 4) {
+						//Tronc
+						this->setBlock(Bloc::FUSTAARBRE, pos, 0, false);
+						int rand2 = rand() % 5 + 1;
+						for (int i = 1; i <= rand2; i++) {
+							this->setBlock(Bloc::FUSTAARBRE, pos + Vector3(0,i,0), 0, false);
+						}
+						//Fulles
+						int altura = rand() % 3 + 1;
+						int amplada = rand() % rand2 + 1;
+						for (int y = 0; y < altura; y++) {
+							for (int x = -amplada; x < amplada; x++) {
+								for (int z = -amplada; z < amplada; z++) {
+									this->setBlock(Bloc::FULLAARBRE, pos + Vector3(0, rand2 + y, 0)
+										+ Vector3(x,0,0) + Vector3(0,0,z), 0, false);
+								}
+							}
+						}
 					}
 				}
 			}

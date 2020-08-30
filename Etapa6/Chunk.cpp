@@ -143,6 +143,10 @@ bool Chunk::isVisible(Vector3 bpos) {
 }
 
 Bloc Chunk::getBlockWorld(Vector3 bpos) {
+	if (bpos.x >= world->sizex * 16.0f || bpos.y >= world->sizey * 16.0f || bpos.z >= world->sizez * 16.0f ||
+		bpos.x < 0 || bpos.y < 0 || bpos.z < 0) {
+		return Bloc::TERRA; //Optimització no dibuixar bloc border
+	}
 	if (bpos.x >= cpos.x * 16.0f && bpos.x < (cpos.x + 1) * 16.0f && bpos.y >= cpos.y * 16.0f &&
 		bpos.y < (cpos.y + 1) * 16.0f && bpos.z >= cpos.z * 16.0f && bpos.z < (cpos.z + 1) * 16.0f) {
 		if (this->blocs[(int)bpos.x % 16][(int)bpos.y % 16][(int)bpos.z % 16] == 0) {

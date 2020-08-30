@@ -456,6 +456,18 @@ void Block::draw(bool wireframe) {
 		glVertex3f(0.5f, 0.4f, 0);
 		glEnd();
 		break;
+	case Bloc::FUSTAARBRE:
+		glColor3f(0.76f, 0.60f, 0.42f);
+		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::FUSTAARBRE));
+		draw3dRect(1, 1, 1);
+		//ModelManager::drawModel(Model::CUB);
+		break;
+	case Bloc::FULLAARBRE:
+		glColor3f(0, 0.5f, 0);
+		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::FULLAARBRE));
+		draw3dRect(1, 1, 1);
+		//ModelManager::drawModel(Model::CUB);
+		break;
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specularDef); //Restauram la llum specular

@@ -9,7 +9,9 @@ enum class Textura {
 	FUSTA,
 	PEDRA,
 	ALTAVEU,
-	ESTALAGMITA
+	ESTALAGMITA,
+	FUSTAARBRE,
+	FULLAARBRE
 };
 
 /*

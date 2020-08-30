@@ -15,7 +15,7 @@ int w_height = 500;
 
 //Clipping planes
 const float zNear = 1.0f;
-float zFar = 48.0f;
+float zFar = 64.0f;
 
 const float axisSize = zFar;
 
@@ -189,7 +189,7 @@ void Display(void)
 
 		glEnable(GL_TEXTURE_2D);
 		glTranslatef(0.5f * aspect - 0.3f, 0.8f, -1);
-		for (int i = 0; i < 23; i++) { //Objectes de l'inventari
+		for (int i = 0; i < 26; i++) { //Objectes de l'inventari
 			glPushMatrix();
 			glScalef(0.1f, 0.1f, 0.1f);
 			Block bsel = Block(NULL, static_cast<Bloc>(i+1), NULL);
@@ -280,7 +280,7 @@ int main(int argc, char** argv)
 {
 
 	// necessari inicialitzar el món dins el main (físiques)
-	world = new World(12,12,12, &camera);
+	world = new World(16,16,16, &camera);
 	//cotxe = Car(world, Vector3(66, 65, 66));
 
 	// Inicializamos la libreria GLUT
@@ -375,6 +375,8 @@ int main(int argc, char** argv)
 	TextureManager::LoadTexture("Textures/pedra.png", Textura::PEDRA);
 	TextureManager::LoadTexture("Textures/altaveu.jpg", Textura::ALTAVEU);
 	TextureManager::LoadTexture("Textures/estalagmita.jfif", Textura::ESTALAGMITA);
+	TextureManager::LoadTexture("Textures/fustaarbre.png", Textura::FUSTAARBRE);
+	TextureManager::LoadTexture("Textures/fullaarbre.png", Textura::FULLAARBRE);
 
 	//Sons
 	SoundManager::initialize();
