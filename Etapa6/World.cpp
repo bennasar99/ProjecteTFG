@@ -44,10 +44,10 @@ World::World(int sizex, int sizey, int sizez, Camera* camera)
 						}
 						//Fulles
 						int altura = rand() % 3 + 1;
-						int amplada = rand() % rand2 + 1;
+						int amplada = (rand() % rand2)*2 + 1;
 						for (int y = 0; y < altura; y++) {
-							for (int x = -amplada; x < amplada; x++) {
-								for (int z = -amplada; z < amplada; z++) {
+							for (int x = -amplada; x <= amplada; x++) {
+								for (int z = -amplada; z <= amplada; z++) {
 									this->setBlock(Bloc::FULLAARBRE, pos + Vector3(0, rand2 + y, 0)
 										+ Vector3(x,0,0) + Vector3(0,0,z), 0, false);
 								}
@@ -69,6 +69,16 @@ World::World(int sizex, int sizey, int sizez, Camera* camera)
 		}
 		if (lasty < 1) {
 			lasty = 1;
+		}
+	}
+
+	//Col·locam càmera
+	int x = camera->getPos().x;
+	int z = camera->getPos().z;
+	for (int y = 0; y < this->sizey * 16.0f; y++) {
+		if (getBlock(Vector3(x, y, z)) == Bloc::RES) {
+			camera->setPos(Vector3(x, y+1, z));
+			break;
 		}
 	}
 
@@ -464,7 +474,8 @@ void World::drawBloc(Vector3 pos, Bloc tipus, bool wireframe) {
 	Vector3 front = camera->getFront();
 	glTranslatef(pos.x+0.5f, pos.y+0.5f, pos.z+0.5f);
 	Block bloc = Block(this, tipus, 0);
-	bloc.draw(wireframe);
+	bool visible[6] = { true, true, true, true, true, true };
+	bloc.draw(wireframe, visible);
 	bloc.destroy();
 	glPopMatrix();
 }

@@ -45,7 +45,7 @@ protected:
 							espai (que no s'hi puguin col·locar blocs) i que en destruir-lo es destrueixi tota l'estructura */
 public:
 
-	virtual void draw(bool wireframe);
+	virtual void draw(bool wireframe, bool visible[6]);
 	virtual void draw();
 	virtual void update(int delta);
 	virtual void destroy();
@@ -57,6 +57,7 @@ public:
 	void setId(Bloc id);
 
 	static bool isTransparent(Bloc tipus);
+	static bool isSolid(Bloc tipus);
 
 	Block(World *world, Bloc id, Block* parent);
 	Block();

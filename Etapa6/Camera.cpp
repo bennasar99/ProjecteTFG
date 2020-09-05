@@ -76,21 +76,29 @@ void Camera::lookAround(int x, int y, int lastX, int lastY) {
 void Camera::move(Camera::direction dir, int delta) {
 	if (this->freeMove) {
 		float camSpeed = delta * this->speed;
+		Vector3 front = this->front * camSpeed; front.y = 0;
+		Vector3 right = this->camRight * camSpeed; right.y = 0;
+		Vector3 up = Vector3(0, 1, 0) * camSpeed;
 		switch (dir) {
 		case direction::ENVANT:
-			this->pos = this->pos + this->front * camSpeed;
+			this->pos = this->pos + front;
 			break;
 		case direction::ENRERE:
-			this->pos = this->pos - this->front * camSpeed;
+			this->pos = this->pos - front;
 			break;
 		case direction::DRETA:
-			this->pos = this->pos + this->camRight * camSpeed;
+			this->pos = this->pos + right;
 			break;
 		case direction::ESQUERRA:
-			this->pos = this->pos - this->camRight * camSpeed;
+			this->pos = this->pos - right;
+			break;
+		case direction::ADALT:
+			this->pos = this->pos + up;
+			break;
+		case direction::ABAIX:
+			this->pos = this->pos - up;
 			break;
 		}
-
 		//Actualitzam la posició de l'escoltador OpenAL
 		alListener3f(AL_POSITION, this->pos.x, this->pos.y, this->pos.z);
 

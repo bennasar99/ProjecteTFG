@@ -36,7 +36,9 @@ public:
 		ENVANT,
 		ENRERE,
 		ESQUERRA,
-		DRETA
+		DRETA,
+		ADALT,
+		ABAIX
 	};
 
 	enum class angle { //Angles

@@ -9,6 +9,7 @@
 #include "TextureManager.h"
 #include "SoundManager.h"
 #include "ModelManager.h"
+#include <windows.h>
 
 int w_width = 500; // Tamano incial de la ventana
 int w_height = 500;
@@ -237,6 +238,14 @@ void Display(void)
 // Funcion que se ejecuta cuando el sistema no esta ocupado
 void Idle(void)
 {
+	//Solució temporal shift, fins que empri glfw o algo així
+	if (GetKeyState(VK_SHIFT) & 0x8000) {
+		KeyboardManager::onKeyDown('{');
+	}
+	else {
+		KeyboardManager::onKeyUp('{');
+	}
+
 	//Gestió del temps
 	int temps = glutGet(GLUT_ELAPSED_TIME);
 	int delta = temps - darrerIdle;
@@ -259,6 +268,15 @@ void Idle(void)
 		camera.move(Camera::direction::ESQUERRA, delta);
 		updatePlayerBlock();
 	}
+	if (KeyboardManager::isPressed('{')) {
+		camera.move(Camera::direction::ABAIX, delta);
+		updatePlayerBlock();
+	}
+	else if (KeyboardManager::isPressed(' ')) {
+		camera.move(Camera::direction::ADALT, delta);
+		updatePlayerBlock();
+	}
+
 
 	//Actualitzam el món
 	world->update(delta, camera.getPos());
@@ -280,6 +298,11 @@ int main(int argc, char** argv)
 {
 
 	// necessari inicialitzar el món dins el main (físiques)
+	//Càmera
+	camera.setPos(Vector3(64, 66, 64));
+	camera.setFreeLook(true);
+	camera.setFreeMove(true);
+	camera.setDrawMove(true);
 	world = new World(16,16,16, &camera);
 	//cotxe = Car(world, Vector3(66, 65, 66));
 
@@ -560,9 +583,10 @@ void changeScene(unsigned char sceneNumber) {
 		numScene = scene;
 		if (numScene == 0) {
 			//Establim la boira
-			glFogf(GL_FOG_DENSITY, 0.03f);
+			glFogf(GL_FOG_DENSITY, 0.02f);
 			glFogf(GL_FOG_MODE, GL_EXP2);
-			glFogf(GL_FOG_END, zFar - 1);
+			glFogf(GL_FOG_END, zFar);
+			glFogf(GL_FOG_START, zFar-4);
 
 			//LLum ambient
 			GLfloat lluma[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
@@ -578,12 +602,6 @@ void changeScene(unsigned char sceneNumber) {
 			world->setSol(GL_LIGHT1); //Triam quina llum farà de sol (llum direccional)
 
 			std::cout << "Scene is " << scene << std::endl;
-
-			//Càmera
-			camera.setPos(Vector3(64, 66, 64));
-			camera.setFreeLook(true);
-			camera.setFreeMove(true);
-			camera.setDrawMove(true);
 		}
 	}
 }

@@ -15,7 +15,8 @@ Block::Block() {
 }
 
 void Block::draw() {
-	this->draw(false); //Dibuixam el bloc sense wireframe
+	bool visible[6] = { true, true, true, true, true, true };
+	this->draw(false, visible); //Dibuixam el bloc sense wireframe
 }
 
 void Block::update(int delta) {
@@ -26,7 +27,7 @@ void Block::update(int delta) {
 /*
 	Dibuixam el bloc segons el seu tipus
 */
-void Block::draw(bool wireframe) {
+void Block::draw(bool wireframe, bool visible[6]) {
 	glBindTexture(GL_TEXTURE_2D, 0); //Ens asseguram que no hi ha cap textura assignada
 	float specularZero[4] = { 0,0,0,0 };
 	float specularDef[4] = { 1,1,1,1 };
@@ -41,7 +42,7 @@ void Block::draw(bool wireframe) {
 			glutWireCube(1.0f);
 		}
 		else {
-			draw3dRect(1, 1, 1);
+			drawCub(visible);
 			//ModelManager::drawModel(Model::CUB);
 		}
 		break;
@@ -163,7 +164,7 @@ void Block::draw(bool wireframe) {
 		}
 		else {
 			glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::TERRA));
-			draw3dRect(1, 1, 1);
+			drawCub(visible);
 			//ModelManager::drawModel(Model::CUB);
 		}
 		break;
@@ -343,13 +344,13 @@ void Block::draw(bool wireframe) {
 		glColor3f(0.76f, 0.60f, 0.42f);
 		//Aplicam la textura corresponent
 		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::FUSTA));
-		draw3dRect(1, 1, 1);
+		drawCub(visible);
 		//ModelManager::drawModel(Model::CUB);
 		break;
 	case Bloc::PEDRA:
 		glColor3f(0.5f, 0.5f, 0.5f);
 		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::PEDRA));
-		draw3dRect(1, 1, 1);
+		drawCub(visible);
 		//ModelManager::drawModel(Model::CUB);
 		break;
 	case Bloc::NORIA: { //Noria (icona)
@@ -401,7 +402,7 @@ void Block::draw(bool wireframe) {
 	case Bloc::ALTAVEU:
 		glColor3f(0.5f, 0.5f, 0.5f);
 		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::ALTAVEU));
-		draw3dRect(1, 1, 1);
+		drawCub(visible);
 		//ModelManager::drawModel(Model::CUB);
 		break;
 	case Bloc::ESTALAGMITA: //Només icona, sense textura ni NURBS
@@ -459,13 +460,13 @@ void Block::draw(bool wireframe) {
 	case Bloc::FUSTAARBRE:
 		glColor3f(0.76f, 0.60f, 0.42f);
 		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::FUSTAARBRE));
-		draw3dRect(1, 1, 1);
+		drawCub(visible);
 		//ModelManager::drawModel(Model::CUB);
 		break;
 	case Bloc::FULLAARBRE:
 		glColor3f(0, 0.5f, 0);
 		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::FULLAARBRE));
-		draw3dRect(1, 1, 1);
+		drawCub(visible);
 		//ModelManager::drawModel(Model::CUB);
 		break;
 	}
@@ -501,6 +502,14 @@ void Block::interact() {
 bool Block::isTransparent(Bloc tipus) {
 	if (tipus == Bloc::RES || tipus == Bloc::AIRE || tipus == Bloc::HERBA || tipus == Bloc::VIDRE || tipus == Bloc::TORXA
 		|| tipus == Bloc::HERBAFULL || tipus == Bloc::AIGUA) {
+		return true;
+	}
+	return false;
+}
+
+bool Block::isSolid(Bloc tipus) {
+	if (tipus != Bloc::RES && tipus != Bloc::AIRE && tipus == Bloc::HERBA && tipus == Bloc::TORXA || tipus == Bloc::HERBAFULL 
+		|| tipus == Bloc::AIGUA) { //Exclude list
 		return true;
 	}
 	return false;

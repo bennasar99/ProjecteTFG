@@ -109,16 +109,36 @@ void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc
 
 	glTranslatef(0.5f, 0.5f, 0.5f);
 	int nb = 0;
-	for (int x = 0; x < 16; x++) { //1,15
-		for (int z = 0; z < 16; z++) { //1,15
-			for (int y = 0; y < 16; y++) { //1,15
-				if (blocs[x][y][z] != 0) { //Abans: casos especials (x,y,z == 15,0 a s'or)
-					if (this->isVisible(Vector3(x,y,z))) {
+	for (int x = 0; x < 16; x++) {
+		for (int z = 0; z < 16; z++) { 
+			for (int y = 0; y < 16; y++) { 
+				if (blocs[x][y][z] != 0) {
+					Vector3 bpos = Vector3(x, y, z);
+					//VERSIÓ ALTERNATIVA
+					//Ordre: Esquerra, Damunt, Dreta, Abaix, Davant, Darrera
+					Vector3 pos = cpos * 16.0f + bpos;
+					Vector3 toCheck[6] = { pos - Vector3(1,0,0), pos + Vector3(0,1,0), pos + Vector3(1,0,0), pos - Vector3(0,1,0),
+						pos + Vector3(0,0,1), pos - Vector3(0,0,1) };
+					bool visible[6] = { false, false, false };
+					bool qualcun = false;
+					for (int i = 0; i < 6; i++) {
+						if (Block::isTransparent(getBlockWorld(toCheck[i]))) {
+							visible[i] = true;
+							qualcun = true;
+						}
+					}
+					if (qualcun) {
+						glPushMatrix();
+						glTranslatef(x, y, z);
+						blocs[x][y][z]->draw(false, visible);
+						glPopMatrix();
+					}
+					/*if (this->isVisible(Vector3(x,y,z))) {
 						glPushMatrix();
 						glTranslatef(x, y, z);
 						blocs[x][y][z]->draw();
 						glPopMatrix();
-					}
+					}*/
 					nb++;
 					if (nb >= nblocs) { //No cal dibuixar més blocs
 						y = 16; z = 16; x = 16;
@@ -139,6 +159,7 @@ bool Chunk::isVisible(Vector3 bpos) {
 			return true;
 		}
 	}
+	
 	return false;
 }
 
