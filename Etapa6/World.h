@@ -43,6 +43,7 @@ private:
 	std::list<Entity*> entities;
 
 	int getDesp(Vector3 pos);
+	Vector3 spawn; //Spawn point
 
 public:
 	//Han de ser nombres parells
@@ -63,6 +64,8 @@ public:
 	void interact(Vector3 pos);
 
 	void destroy();
+
+	Vector3 getSpawn();
 
 	void drawAxis(Vector3 pos, float axisSize);
 	void drawBloc(Vector3 pos, Bloc tipus, bool wireframe);

@@ -35,6 +35,16 @@ void Camera::setFront(Vector3 front) {
 	this->updateCorners();
 }
 
+Vector3 Camera::getRight() {
+	return this->right;
+}
+
+void Camera::setRight(Vector3 right) {
+	this->right = right;
+	this->updateVec();
+	this->updateCorners();
+}
+
 /*
 	Estableix l'orientació de la càmera segons els moviments del ratolí
 */

@@ -65,6 +65,9 @@ public:
 	Vector3 getFront();
 	void setFront(Vector3 front);
 
+	Vector3 getRight();
+	void setRight(Vector3 right);
+
 	void setFov(float fov);
 	float getFov();
 

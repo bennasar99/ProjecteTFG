@@ -17,6 +17,7 @@ World::World(int sizex, int sizey, int sizez, Camera* camera)
 	this->sizez = sizez;
 
 	//Generador del món
+	srand(1999); //Seed? xD
 	Vector3 pos = Vector3(0, 0, 0);
 	float lasty = (this->sizey * 16.0f) / 2.0f;
 	for (pos.x = 0; pos.x < this->sizex * 16; pos.x++) {
@@ -73,11 +74,11 @@ World::World(int sizex, int sizey, int sizez, Camera* camera)
 	}
 
 	//Col·locam càmera
-	int x = camera->getPos().x;
-	int z = camera->getPos().z;
+	int x = rand() % (sizex * 16);
+	int z = rand() % (sizez * 16);
 	for (int y = 0; y < this->sizey * 16.0f; y++) {
 		if (getBlock(Vector3(x, y, z)) == Bloc::RES) {
-			camera->setPos(Vector3(x, y+1, z));
+			spawn = Vector3(x, y+1, z);
 			break;
 		}
 	}
@@ -601,41 +602,48 @@ Entity* World::getNearestEntity(Vector3 pos, float range, bool controllable){
 
 void World::updateNeighborChunks(Vector3 cpos, Vector3 bpos) {
 	int desp;
+	Vector3 ncpos;
 	if (bpos.x == 15) {
-		desp = getDesp(cpos + Vector3(1,0,0));
-		if (desp != -1) {
-			chunks[desp]->updateDL();
-		}
+		ncpos = cpos + Vector3(1, 0, 0);
 	}
 	else if (bpos.x == 0) {
-		desp = getDesp(cpos - Vector3(1, 0, 0));
-		if (desp != -1) {
-			chunks[desp]->updateDL();
+		ncpos = cpos - Vector3(1, 0, 0);
+	}
+	desp = getDesp(ncpos);
+	if (desp != -1) {
+		if (chunks[desp] == nullptr) {
+			chunks[desp] = new Chunk(this, ncpos);
 		}
+		chunks[desp]->updateDL();
 	}
 	if (bpos.y == 15) {
-		desp = getDesp(cpos + Vector3(0, 1, 0));
-		desp = getDesp(cpos + Vector3(0, 1, 0));
-		if (desp != -1) {
-			chunks[desp]->updateDL();
-		}
+		ncpos = cpos + Vector3(0, 1, 0);
 	}
 	else if (bpos.y == 0) {
-		desp = getDesp(cpos - Vector3(0, 1, 0));
-		if (desp != -1) {
-			chunks[desp]->updateDL();
+		ncpos = cpos - Vector3(0, 1, 0);
+	}
+	desp = getDesp(ncpos);
+	if (desp != -1) {
+		if (chunks[desp] == nullptr) {
+			chunks[desp] = new Chunk(this, ncpos);
 		}
+		chunks[desp]->updateDL();
 	}
 	if (bpos.z == 15) {
-		desp = getDesp(cpos + Vector3(0, 0, 1));
-		if (desp != -1) {
-			chunks[desp]->updateDL();
-		}
+		ncpos = cpos + Vector3(0, 0, 1);
 	}
 	else if (bpos.z == 0) {
-		desp = getDesp(cpos - Vector3(1, 0, 0));
-		if (desp != -1) {
-			chunks[desp]->updateDL();
-		}
+		ncpos = cpos - Vector3(1, 0, 0);
 	}
+	desp = getDesp(ncpos);
+	if (desp != -1) {
+		if (chunks[desp] == nullptr) {
+			chunks[desp] = new Chunk(this, ncpos);
+		}
+		chunks[desp]->updateDL();
+	}
+}
+
+Vector3 World::getSpawn() {
+	return this->spawn;
 }

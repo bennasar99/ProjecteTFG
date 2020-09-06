@@ -9,7 +9,7 @@
 #include "TextureManager.h"
 #include "SoundManager.h"
 #include "ModelManager.h"
-#include <windows.h>
+#include "Entities/Player.h"
 
 int w_width = 500; // Tamano incial de la ventana
 int w_height = 500;
@@ -69,7 +69,7 @@ void Display(void)
 	int temps = glutGet(GLUT_ELAPSED_TIME);
 	int delta = temps - darrerDisplay;
 	float fps = 1.0f / ((float)delta / 1000.0f);
-	printf("%f\n", fps);
+	//printf("%f\n", fps);
 	//if (fps < 26) {
 	//	zFar--;
 	//}
@@ -251,39 +251,19 @@ void Idle(void)
 	int delta = temps - darrerIdle;
 	darrerIdle = temps;
 
-	//Movem la càmera en la direcció que toqui
-	if (KeyboardManager::isPressed('w')) {
-		camera.move(Camera::direction::ENVANT, delta);
-		updatePlayerBlock();
-	}
-	else if (KeyboardManager::isPressed('s')) {
-		camera.move(Camera::direction::ENRERE, delta);
-		updatePlayerBlock();
-	}
-	if (KeyboardManager::isPressed('d')) {
-		camera.move(Camera::direction::DRETA, delta);
-		updatePlayerBlock();
-	}
-	else if (KeyboardManager::isPressed('a')) {
-		camera.move(Camera::direction::ESQUERRA, delta);
-		updatePlayerBlock();
-	}
-	if (KeyboardManager::isPressed('{')) {
-		camera.move(Camera::direction::ABAIX, delta);
-		updatePlayerBlock();
-	}
-	else if (KeyboardManager::isPressed(' ')) {
-		camera.move(Camera::direction::ADALT, delta);
-		updatePlayerBlock();
-	}
+	updatePlayerBlock();
 
 
 	//Actualitzam el món
 	world->update(delta, camera.getPos());
 
+	if (ent != nullptr) { //TEMPORAL: se n'ha d'encarregar el món
+		ent->update(delta);
+	}
+
 	//Si tenim una entitat controlada
 	if (ent != 0) {
-		ent->control(delta); //Actualitzam el seu estat intern
+		ent->control(delta, &camera); //Actualitzam el seu estat intern
 		Vector3 pos = ent->getPos();
 		alListener3f(AL_POSITION, pos.x, pos.y, pos.z); //Actualitzam la posició de l'escoltador a l'entitat
 	}
@@ -304,6 +284,7 @@ int main(int argc, char** argv)
 	camera.setFreeMove(true);
 	camera.setDrawMove(true);
 	world = new World(16,16,16, &camera);
+	ent = new Player(world, world->getSpawn() + Vector3(0, 10, 0));
 	//cotxe = Car(world, Vector3(66, 65, 66));
 
 	// Inicializamos la libreria GLUT
@@ -473,7 +454,7 @@ void movement(unsigned char key) {
 	if (ent != 0) {
 		ent->control(key);
 	}
-	else if (key == 'f' || key == 'F') {
+	if (key == 'f' || key == 'F') {
 		llanterna = !llanterna;
 		if (llanterna) {
 			glEnable(GL_LIGHT0);
@@ -482,22 +463,13 @@ void movement(unsigned char key) {
 			glDisable(GL_LIGHT0);
 		}
 	}
-	else if (key == '\t') { //Tab: obrir inventari
+	if (key == '\t') { //Tab: obrir inventari
 		inv = !inv;
 		if (inv) {
 			glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 		}
 		else {
 			glutSetCursor(GLUT_CURSOR_NONE);
-		}
-	}
-	else if (key == ' ') { //Canvi de model d'ombrejat
-		smoothlight = !smoothlight;
-		if (smoothlight) {
-			glShadeModel(GL_FLAT);
-		}
-		else {
-			glShadeModel(GL_SMOOTH);
 		}
 	}
 

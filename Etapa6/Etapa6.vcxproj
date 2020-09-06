@@ -163,6 +163,7 @@
     <ClInclude Include="Entities\Entity.h" />
     <ClInclude Include="Entities\Grua.h" />
     <ClInclude Include="Entities\Noria.h" />
+    <ClInclude Include="Entities\Player.h" />
     <ClInclude Include="KeyboardManager.h" />
     <ClInclude Include="lib\stb_image.h" />
     <ClInclude Include="Light.h" />
@@ -190,6 +191,7 @@
     <ClCompile Include="Entities\Entity.cpp" />
     <ClCompile Include="Entities\Grua.cpp" />
     <ClCompile Include="Entities\Noria.cpp" />
+    <ClCompile Include="Entities\Player.cpp" />
     <ClCompile Include="KeyboardManager.cpp" />
     <ClCompile Include="lib\stb_image.cpp" />
     <ClCompile Include="Light.cpp" />

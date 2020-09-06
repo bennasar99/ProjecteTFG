@@ -34,6 +34,10 @@ void Entity::control(unsigned char key) {}
 
 void Entity::control(int delta) {}
 
+void Entity::control(int delta, Camera* cam)
+{
+}
+
 void Entity::setCam(Camera* cam) {}
 
 bool Entity::getControllable() {

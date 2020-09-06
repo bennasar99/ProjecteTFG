@@ -28,6 +28,7 @@ public:
 
 	virtual void control(unsigned char key); //Control actiu (entitat controlada i tecla pitjada)
 	virtual void control(int delta); //Actualitzacions actives (entitat controlada)
+	virtual void control(int delta, Camera *cam); //Actualitzacions actives (entitat controlada)
 
 	virtual void onAttach(); //Es crida quan l'usuari agafa el control de l'entitat
 	virtual void onDeattach(); //Es crida quan l'usuari deixa de controlar l'entitat

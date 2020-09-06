@@ -508,8 +508,8 @@ bool Block::isTransparent(Bloc tipus) {
 }
 
 bool Block::isSolid(Bloc tipus) {
-	if (tipus != Bloc::RES && tipus != Bloc::AIRE && tipus == Bloc::HERBA && tipus == Bloc::TORXA || tipus == Bloc::HERBAFULL 
-		|| tipus == Bloc::AIGUA) { //Exclude list
+	if (tipus != Bloc::RES && tipus != Bloc::AIRE && tipus != Bloc::HERBA && tipus != Bloc::TORXA && tipus != Bloc::HERBAFULL 
+		&& tipus != Bloc::AIGUA) { //Exclude list
 		return true;
 	}
 	return false;
