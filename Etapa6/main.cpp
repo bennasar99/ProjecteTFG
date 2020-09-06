@@ -15,7 +15,7 @@ int w_width = 500; // Tamano incial de la ventana
 int w_height = 500;
 
 //Clipping planes
-const float zNear = 1.0f;
+const float zNear = 0.001f;
 float zFar = 64.0f;
 
 const float axisSize = zFar;
@@ -238,12 +238,18 @@ void Display(void)
 // Funcion que se ejecuta cuando el sistema no esta ocupado
 void Idle(void)
 {
-	//Solució temporal shift, fins que empri glfw o algo així
+	//Solució temporal shift i ctrl, fins que empri glfw o algo així
 	if (GetKeyState(VK_SHIFT) & 0x8000) {
 		KeyboardManager::onKeyDown('{');
 	}
 	else {
 		KeyboardManager::onKeyUp('{');
+	}
+	if (GetKeyState(VK_CONTROL) & 0x8000) {
+		KeyboardManager::onKeyDown('}');
+	}
+	else {
+		KeyboardManager::onKeyUp('}');
 	}
 
 	//Gestió del temps
@@ -299,6 +305,9 @@ int main(int argc, char** argv)
 	// Creamos la nueva ventana
 	glutCreateWindow("Etapa 6");
 	glutSetCursor(GLUT_CURSOR_NONE);
+	//glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
+
+	//glutIgnoreKeyRepeat(1);
 
 	//Inicialització Glew
 	GLenum err = glewInit();
@@ -344,7 +353,7 @@ int main(int argc, char** argv)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	gluPerspective(camera.getFov() , 1, 1, zFar);
+	gluPerspective(camera.getFov() , 1, zNear, zFar);
 	camera.setViewDist(zFar); //Establim la distància de visió de la càmera
 
 	glMatrixMode(GL_MODELVIEW);

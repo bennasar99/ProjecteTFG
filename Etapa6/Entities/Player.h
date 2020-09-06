@@ -21,9 +21,11 @@ private:
 	int health;
 	float rot = 0;
 
+	float eyesOffset = 0.5f; //Alçada ulls
+
 	//Inventari *inv;
 
-	int gamemode = 0; //0 = creative, 1 = survival
+	int gamemode = 1; //0 = creative, 1 = survival
 
 public:
 	Player(World* world, Vector3 pos);

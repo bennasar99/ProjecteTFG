@@ -25,19 +25,25 @@ void Player::update(int delta) {
 	if (this->gamemode == 1) {
 		Vector3 grav = Vector3(0, -1, 0) * (((float)delta / 100.0f) * this->grav);
 		Vector3 newPos = this->pos + grav;
-		if (!Block::isSolid(world->getBlock(newPos - Vector3(0, 1, 0)))) {
+		if (!Block::isSolid(world->getBlock(newPos - Vector3(0, 1, 0))) && this->grav >= 0) { //Caiem
 			this->pos = newPos;
 		}
-		if (this->grav < 1) {
-			this->grav += 0.001f * delta;
+		if (this->grav < 1) { //"Gravetat"
+			this->grav += 0.003f * delta;
+		}
+		if (this->grav < 0) { //Si tocam adalt, tornam caure
+			if (Block::isSolid(world->getBlock(this->pos + Vector3(0,eyesOffset + 0.2f,0)))) {
+				this->grav = 0;
+			}
 		}
 	}
 }
 
 //Control per teclat
 void Player::control(unsigned char key) {
-	if (key == ' ' && Block::isSolid(world->getBlock(this->pos - Vector3(0, 2, 0))) && this->gamemode == 1) {
-		grav = -1;
+	if (key == ' ' && Block::isSolid(world->getBlock(this->pos - Vector3(0, 2, 0))) && grav >= 1 && this->gamemode == 1) {
+		grav = -1.0f;
+		printf("HEY");
 	}
 }
 
@@ -59,23 +65,28 @@ void Player::control(int delta, Camera *cam) {
 	else if (KeyboardManager::isPressed('a')) {
 		add = add + cam->getRight();
 	}
-	if (KeyboardManager::isPressed(' ')) {
+	if ((KeyboardManager::isPressed(' ') && this->gamemode==0) || (grav < 0)) { //Creatiu o acabam de botar
 		add = add + Vector3(0, 1, 0);
 	}
-	else if (KeyboardManager::isPressed('{')) {
+	else if (KeyboardManager::isPressed('{') && this->gamemode == 0) {
 		add = add - Vector3(0, 1, 0);
 	}
-	Vector3 toAdd = add * ((float)delta / 100.0f);
-	//printf("%f, %f, %f\n", toAdd.x, toAdd.y, toAdd.z);
-	Vector3 newPos = this->pos + add * ((float)delta / 100.0f);
-	printf("%f %f %f. %f, %f, %f. %f, %f, %f\n", toAdd.x, toAdd.y, toAdd.z, this->pos.x, this->pos.y, this->pos.z, newPos.x, newPos.y, newPos.z);
-	if (Block::isSolid(world->getBlock(newPos - Vector3(0,1,0)))) {
+	if (KeyboardManager::isPressed('}')) { //Crouch
+		this->eyesOffset = 0.0f;
+	}
+	else {
+		this->eyesOffset = 0.5f;
+	}
+	Vector3 newPos = this->pos + add * ((float)delta / 200.0f);
+	if (Block::isSolid(world->getBlock(newPos + add * ((float)delta / 200.0f) - Vector3(0,1,0))) || 
+		Block::isSolid(world->getBlock(newPos + add * ((float)delta / 200.0f)))) {
 		Vector3 poss[6] = { Vector3(add.x, add.y, 0), Vector3(add.x, 0, add.z), Vector3(0, add.y, add.z), 
 			Vector3(add.x, 0, 0), Vector3(0, add.y, 0), Vector3(0, 0, add.z) };
 		for (int i = 0; i < 6; i++) {
 			Vector3 newAdd = poss[i];
-			newPos = this->pos + newAdd * ((float)delta / 100.0f);
-			if (!Block::isSolid(world->getBlock(newPos - Vector3(0,1,0)))) {
+			newPos = this->pos + newAdd * ((float)delta / 200.0f);
+			if (!Block::isSolid(world->getBlock(newPos + newAdd * ((float)delta / 200.0f) - Vector3(0,1,0))) &&
+				!Block::isSolid(world->getBlock(newPos + newAdd * ((float)delta / 200.0f) + Vector3(0, eyesOffset, 0)))) {
 				this->pos = newPos;
 				break;
 			}
@@ -96,7 +107,7 @@ void Player::destroy() {
 }
 
 void Player::setCam(Camera* cam) {
-	cam->setPos(this->pos - cam->getFront()*1.0f);
+	cam->setPos(this->pos + Vector3(0, eyesOffset, 0));
 }
 
 void Player::onAttach() {
