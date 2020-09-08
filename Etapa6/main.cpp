@@ -2,6 +2,7 @@
 ////////////////////////////////////////////////////
 
 #include <iostream>
+#include <stdio.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include "Utils.h"
@@ -10,6 +11,7 @@
 #include "SoundManager.h"
 #include "ModelManager.h"
 #include "Entities/Player.h"
+#include <sys/stat.h>
 
 int w_width = 500; // Tamano incial de la ventana
 int w_height = 500;
@@ -50,6 +52,9 @@ Entity* ent; //Entitat controlada
 bool axisVisible = true; //Eixos ON/OFF
 int numScene = 0; //Escena per defecte
 
+//Nom del món
+std::string wname;
+
 void onWindowResize(int width, int height);
 void onKeyboardUp(unsigned char key, int x, int y);
 void onKeyboardDown(unsigned char key, int x, int y);
@@ -69,7 +74,7 @@ void Display(void)
 	int temps = glutGet(GLUT_ELAPSED_TIME);
 	int delta = temps - darrerDisplay;
 	float fps = 1.0f / ((float)delta / 1000.0f);
-	//printf("%f\n", fps);
+	printf("%f\n", fps);
 	//if (fps < 26) {
 	//	zFar--;
 	//}
@@ -190,10 +195,10 @@ void Display(void)
 
 		glEnable(GL_TEXTURE_2D);
 		glTranslatef(0.5f * aspect - 0.3f, 0.8f, -1);
-		for (int i = 0; i < 26; i++) { //Objectes de l'inventari
+		for (int i = 0; i < 27; i++) { //Objectes de l'inventari
 			glPushMatrix();
 			glScalef(0.1f, 0.1f, 0.1f);
-			Block bsel = Block(NULL, static_cast<Bloc>(i+1), NULL);
+			Block bsel = Block(NULL, static_cast<Bloc>(i+2), NULL); //+2 perque botam aire i null
 			glDisable(GL_LIGHTING);
 			bsel.draw();
 			glPopMatrix();
@@ -289,9 +294,28 @@ int main(int argc, char** argv)
 	camera.setFreeLook(true);
 	camera.setFreeMove(true);
 	camera.setDrawMove(true);
-	world = new World(16,16,16, &camera);
-	ent = new Player(world, world->getSpawn() + Vector3(0, 10, 0));
-	//cotxe = Car(world, Vector3(66, 65, 66));
+	//world = new World(16,16,16, &camera);
+	printf("World name: ");
+	std::cin >> wname;
+	std::string path = "worlds/" + wname;
+	struct stat buffer;
+	if (stat(path.c_str(), &buffer) == 0) {
+		//Si existeix
+		printf("Loading world %s... \n", wname);
+		world = new World(wname, &camera);
+		ent = new Player(world, world->getSpawn() + Vector3(0, 10, 0));
+		//cotxe = Car(world, Vector3(66, 65, 66));
+	}
+	else {
+		printf("Creating world %s... \n", wname);
+		printf("Seed: ");
+		std::string sseed;
+		std::cin >> sseed;
+		int seed = std::atoi(sseed.c_str());
+		world = new World(seed, 16, 16, 16, &camera);
+		ent = new Player(world, world->getSpawn() + Vector3(0, 10, 0));
+		world->save(wname);
+	}
 
 	// Inicializamos la libreria GLUT
 	glutInit(&argc, argv);
@@ -429,8 +453,8 @@ void mouseListener(int button, int state, int x, int y) {
 			float yi = ((float)y - miny) / (maxy-miny) * 6;// *7.02f;
 			float xi = ((float)x - minx) / (maxx - minx) * 6;// *7.1f;
 
-			btipus = (int)floor(yi) * 6 +  (int)floor(xi) + 1;
-			if (btipus > 23) { //Si no se selecciona cap objecte, no n'hi haurà cap de seleccionat
+			btipus = (int)floor(yi) * 6 +  (int)floor(xi) + 2; //+2 per botar aire i res
+			if (btipus > 28) { //Si no se selecciona cap objecte, no n'hi haurà cap de seleccionat
 				btipus = 0;
 			}
 		}
@@ -497,6 +521,10 @@ void movement(unsigned char key) {
 				ent->onAttach();
 			}
 		}
+	}
+
+	if (key == 'T' || key == 't') {
+		world->save(wname);
 	}
 }
 

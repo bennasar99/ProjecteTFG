@@ -40,8 +40,10 @@ bool Chunk::setBlock(Block* bloc, Vector3 pos) {
 		delete this->blocs[(int)pos.x][(int)pos.y][(int)pos.z];
 		this->nblocs--;
 	}
-	this->blocs[(int)pos.x][(int)pos.y][(int)pos.z] = bloc;
-	this->nblocs++;
+	if (bloc->getId() != Bloc::RES) {
+		this->blocs[(int)pos.x][(int)pos.y][(int)pos.z] = bloc;
+		this->nblocs++;
+	}
 
 	return true;
 }
@@ -178,4 +180,30 @@ Bloc Chunk::getBlockWorld(Vector3 bpos) {
 	else {
 		return this->world->getBlock(bpos);
 	}
+}
+
+bool Chunk::getByteData(char* arr) {
+	int desp = 0;
+	for (int x = 0; x < 16; x++) {
+		for (int y = 0; y < 16; y++) {
+			for (int z = 0; z < 16; z++) {
+				arr[desp++] = static_cast<unsigned char>(this->getBlock(Vector3((float)x, (float)y, (float)z)));
+			}
+		}
+	}
+	return true;
+}
+
+bool Chunk::readFromByteData(char* arr) {
+	int desp = 0;
+	for (int x = 0; x < 16; x++) {
+		for (int y = 0; y < 16; y++) {
+			for (int z = 0; z < 16; z++) {
+				//printf("%d ", arr[desp]);
+				Bloc tipus = static_cast<Bloc>(arr[desp++]);
+				world->setBlock(tipus, (this->cpos * 16.0f) + Vector3(x, y, z), nullptr, false);
+			}
+		}
+	}
+	return true;
 }

@@ -29,6 +29,9 @@ public:
 	bool isVisible(Vector3 bpos);
 	Bloc getBlockWorld(Vector3 bpos);
 
+	bool getByteData(char* arr);
+	bool readFromByteData(char* arr);
+
 	void updateDL();
 
 	int nblocs;

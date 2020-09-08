@@ -6,6 +6,9 @@
 #include <stdlib.h>  
 #include <string.h>
 #include <list>
+#include <iostream>
+#include <fstream>
+
 #include "Light.h"
 #include "Blocks/Block.h"
 #include "Blocks/LightBlock.h"
@@ -44,6 +47,8 @@ private:
 
 	int getDesp(Vector3 pos);
 	Vector3 spawn; //Spawn point
+
+	int seed;
 
 public:
 	//Han de ser nombres parells
@@ -91,5 +96,9 @@ public:
 
 	void update(int delta, Vector3 camPos);
 
-	World(int sizex, int sizey, int sizez, Camera* camera);
+	void generate(int seed);
+	void save(std::string file);
+
+	World(int seed, int sizex, int sizey, int sizez, Camera* camera);
+	World(std::string file, Camera* camera);
 };

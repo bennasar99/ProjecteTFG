@@ -1,8 +1,9 @@
 #include "World.h"
 #include "Object3D.h"
 
-World::World(int sizex, int sizey, int sizez, Camera* camera)
+World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
 {
+	this->seed = seed;
 	this->camera = camera;
 	this->minpos = Vector3((float)sizex - 1, (float)sizey - 1, (float)sizez - 1);
 
@@ -16,6 +17,124 @@ World::World(int sizex, int sizey, int sizez, Camera* camera)
 	this->sizey = sizey;
 	this->sizez = sizez;
 
+	this->generate(seed);
+
+	//Col·locam càmera
+	int x = rand() % (sizex * 16);
+	int z = rand() % (sizez * 16);
+	for (int y = 0; y < this->sizey * 16.0f; y++) {
+		if (getBlock(Vector3(x, y, z)) == Bloc::RES) {
+			spawn = Vector3(x, y + 1, z);
+			break;
+		}
+	}
+
+	//Fi generació món
+	for (int i = 0; i < this->sizex * this->sizey * this->sizez; i++) {
+		if (chunks[i] != nullptr) {
+			chunks[i]->updateDL();
+		}
+	}
+}
+
+World::World(std::string name, Camera* camera) {
+	this->camera = camera;
+	this->minpos = Vector3((float)sizex - 1, (float)sizey - 1, (float)sizez - 1);
+
+	std::fstream file;
+	file.open("worlds/" + name, std::ios::in | std::ios::binary);
+
+	//Mida del món
+	char buff[3];
+	file.read(buff, 3);
+	this->sizex = int(buff[0]);
+	this->sizey = int(buff[1]);
+	this->sizez = int(buff[2]);
+	this->chunks = new Chunk * [(size_t)sizex * (size_t)sizey * (size_t)sizez];
+
+	printf("Mides del mon: %d %d %d\n", this->sizex, this->sizey, this->sizez);
+
+	const int chunkSize = 16 * 16 * 16;
+	char buffer[chunkSize];
+	for (int x = 0; x < this->sizex; x++) {
+		for (int y = 0; y < this->sizey; y++) {
+			for (int z = 0; z < this->sizez; z++) {
+				printf("Chunk a %d %d %d...\n", x, y, z);
+				int desp = getDesp(Vector3(x, y, z));
+				file.read(buffer, chunkSize);
+				chunks[desp] = new Chunk(this, Vector3(x,y,z));
+				chunks[desp]->readFromByteData(buffer);
+				printf("LLEGIT\n");
+			}
+		}
+	}
+	printf("Món llegit");
+	fflush(stdout);;
+
+	file.close();
+
+	//Col·locam càmera
+	int x = rand() % (sizex * 16);
+	int z = rand() % (sizez * 16);
+	for (int y = 0; y < this->sizey * 16.0f; y++) {
+		if (getBlock(Vector3(x, y, z)) == Bloc::RES) {
+			spawn = Vector3(x, y + 1, z);
+			break;
+		}
+	}
+
+	//Fi generació món
+	for (int i = 0; i < this->sizex * this->sizey * this->sizez; i++) {
+		if (chunks[i] != nullptr) {
+			chunks[i]->updateDL();
+		}
+	}
+}
+
+void World::save(std::string name) {
+	std::fstream file;
+	file.open("worlds/" + name, std::ios::out | std::ios::binary);
+	char sX = this->sizex;
+	char sY = this->sizey;
+	char sZ = this->sizez;
+	file.write(&sX, 1);
+	file.write(&sY, 1);
+	file.write(&sZ, 1);
+
+	const int chunkSize = 16 * 16 * 16;
+	char buffer[chunkSize];
+
+	for (int x = 0; x < this->sizex; x++) {
+		for (int y = 0; y < this->sizey; y++) {
+			for (int z = 0; z < this->sizez; z++) {
+				int desp = getDesp(Vector3(x, y, z));
+				if (chunks[desp] != nullptr) {
+					chunks[desp]->getByteData(buffer);
+					file.write(buffer, chunkSize);
+				}
+				else {
+					char zeros[chunkSize];
+					memset(zeros, 0, chunkSize);
+					file.write(zeros, chunkSize);
+				}
+			}
+		}
+	}
+	//for (int i = 0; i < this->sizex * this->sizey * this->sizez; i++) {
+	//	if (chunks[i] != nullptr) {
+	//		chunks[i]->getByteData(buffer);
+	//		file.write(buffer, chunkSize);
+	//	}
+	//	else {
+	//		char zeros[chunkSize];
+	//		file.write(zeros, chunkSize);
+	//	}
+	//}
+
+	file.close();
+}
+
+void World::generate(int seed) {
 	//Generador del món
 	srand(1999); //Seed? xD
 	Vector3 pos = Vector3(0, 0, 0);
@@ -24,14 +143,14 @@ World::World(int sizex, int sizey, int sizez, Camera* camera)
 		for (pos.z = 0; pos.z < this->sizez * 16; pos.z++) {
 			for (pos.y = 0; pos.y <= lasty; pos.y++) {
 				this->setBlock(Bloc::TERRA, pos, nullptr, false);
-				if (pos.y == lasty){
+				if (pos.y == lasty) {
 					int random = rand() % 128;
 					if (random == 1 || random == 5) {
 						this->setBlock(Bloc::HERBA, pos + Vector3(0, 1, 0), 0, false);
 					}
 					else if (random == 2 || random == 6) {
 						this->setBlock(Bloc::HERBAFULL, pos + Vector3(0, 1, 0), 0, false);
-							this->setBlock(Bloc::HERBA, pos + Vector3(0, 2, 0), 0, false);
+						this->setBlock(Bloc::HERBA, pos + Vector3(0, 2, 0), 0, false);
 					}
 					else if (random == 3) {
 						this->setBlock(Bloc::AIGUA, pos, 0, false);
@@ -41,16 +160,16 @@ World::World(int sizex, int sizey, int sizez, Camera* camera)
 						this->setBlock(Bloc::FUSTAARBRE, pos, 0, false);
 						int rand2 = rand() % 5 + 1;
 						for (int i = 1; i <= rand2; i++) {
-							this->setBlock(Bloc::FUSTAARBRE, pos + Vector3(0,i,0), 0, false);
+							this->setBlock(Bloc::FUSTAARBRE, pos + Vector3(0, i, 0), 0, false);
 						}
 						//Fulles
 						int altura = rand() % 3 + 1;
-						int amplada = (rand() % rand2)*2 + 1;
+						int amplada = (rand() % rand2) * 2 + 1;
 						for (int y = 0; y < altura; y++) {
 							for (int x = -amplada; x <= amplada; x++) {
 								for (int z = -amplada; z <= amplada; z++) {
 									this->setBlock(Bloc::FULLAARBRE, pos + Vector3(0, rand2 + y, 0)
-										+ Vector3(x,0,0) + Vector3(0,0,z), 0, false);
+										+ Vector3(x, 0, 0) + Vector3(0, 0, z), 0, false);
 								}
 							}
 						}
@@ -70,23 +189,6 @@ World::World(int sizex, int sizey, int sizez, Camera* camera)
 		}
 		if (lasty < 1) {
 			lasty = 1;
-		}
-	}
-
-	//Col·locam càmera
-	int x = rand() % (sizex * 16);
-	int z = rand() % (sizez * 16);
-	for (int y = 0; y < this->sizey * 16.0f; y++) {
-		if (getBlock(Vector3(x, y, z)) == Bloc::RES) {
-			spawn = Vector3(x, y+1, z);
-			break;
-		}
-	}
-
-	//Fi generació món
-	for (int i = 0; i < this->sizex * this->sizey * this->sizez; i++) {
-		if (chunks[i] != nullptr) {
-			chunks[i]->updateDL();
 		}
 	}
 

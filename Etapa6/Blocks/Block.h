@@ -3,6 +3,7 @@
 #include "../ModelManager.h"
 
 enum class Bloc {
+	RES,
 	AIRE,
 	AIGUA,
 	CUB,
@@ -31,7 +32,6 @@ enum class Bloc {
 	ESTALAGMITA,
 	MIRALL,
 	GRUA,
-	RES //Sempre ha d'anar el darrer
 };
 
 class World;
