@@ -53,11 +53,12 @@ void Player::control(unsigned char key) {
 void Player::control(int delta, Camera *cam) {
 	//Actualitzam la posició del jugador
 	Vector3 add = Vector3(0, 0, 0);
+	Vector3 forward = Vector3::normalize(Vector3(cam->getFront().x, 0, cam->getFront().z));
 	if (KeyboardManager::isPressed('w')) {
-		add = add + Vector3(cam->getFront().x, 0, cam->getFront().z);
+		add = add + forward;
 	}
 	else if (KeyboardManager::isPressed('s')) {
-		add = add - Vector3(cam->getFront().x, 0, cam->getFront().z);
+		add = add - forward;
 	}
 	if (KeyboardManager::isPressed('d')) {
 		add = add - cam->getRight();

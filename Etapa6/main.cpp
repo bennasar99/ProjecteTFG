@@ -54,6 +54,7 @@ int numScene = 0; //Escena per defecte
 
 //Nom del món
 std::string wname;
+int updTimer = 500; //500 ms = 20tps
 
 void onWindowResize(int width, int height);
 void onKeyboardUp(unsigned char key, int x, int y);
@@ -74,7 +75,7 @@ void Display(void)
 	int temps = glutGet(GLUT_ELAPSED_TIME);
 	int delta = temps - darrerDisplay;
 	float fps = 1.0f / ((float)delta / 1000.0f);
-	printf("%f\n", fps);
+	//printf("%f\n", fps);
 	//if (fps < 26) {
 	//	zFar--;
 	//}
@@ -303,7 +304,8 @@ int main(int argc, char** argv)
 		//Si existeix
 		printf("Loading world %s... \n", wname);
 		world = new World(wname, &camera);
-		ent = new Player(world, world->getSpawn() + Vector3(0, 10, 0));
+		ent = new Player(world, world->getSpawn() + Vector3(0, 2, 0));
+		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
 		//cotxe = Car(world, Vector3(66, 65, 66));
 	}
 	else {
@@ -454,7 +456,7 @@ void mouseListener(int button, int state, int x, int y) {
 			float xi = ((float)x - minx) / (maxx - minx) * 6;// *7.1f;
 
 			btipus = (int)floor(yi) * 6 +  (int)floor(xi) + 2; //+2 per botar aire i res
-			if (btipus > 28) { //Si no se selecciona cap objecte, no n'hi haurà cap de seleccionat
+			if (btipus > 27) { //Si no se selecciona cap objecte, no n'hi haurà cap de seleccionat
 				btipus = 0;
 			}
 		}
@@ -471,9 +473,18 @@ void mouseListener(int button, int state, int x, int y) {
 		else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) { //Botó dret, col·locar bloc / interactuar
 			Vector3 front = camera.getFront();
 			Bloc tipusbloc = static_cast<Bloc>(btipus);
-			if (world->getBlock(ba - front * 0.1f) == Bloc::RES && tipusbloc != Bloc::AIRE) { //Només deixam posar un bloc si no n'hi ha un ja
-				world->setBlock(tipusbloc, ba - front * 0.1f);
-				SoundManager::playSound(So::COLOCA, ba, true);
+			if (world->getBlock(ba - front * 0.1f) == Bloc::RES && tipusbloc != Bloc::RES) { //Només deixam posar un bloc si no n'hi ha un ja
+				Vector3 bpos = ba - front * 0.1f;
+				Vector3 epos;
+				if (ent != nullptr) {
+					epos = ent->getPos() - Vector3(0,1,0);
+					epos.floor();
+				}
+				bpos.floor();
+				if (ent == nullptr || epos != bpos) {
+					world->setBlock(tipusbloc, bpos);
+					SoundManager::playSound(So::COLOCA, ba, true);
+				}
 			}
 			else {
 				world->interact(ba); //Si no tenim cap bloc seleccionat, interactuam

@@ -49,6 +49,7 @@ private:
 	Vector3 spawn; //Spawn point
 
 	int seed;
+	int updTimer = 1000;
 
 public:
 	//Han de ser nombres parells

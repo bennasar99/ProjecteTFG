@@ -155,7 +155,6 @@
     <ClInclude Include="Blocks\Jukebox.h" />
     <ClInclude Include="Blocks\LightBlock.h" />
     <ClInclude Include="Blocks\Mirror.h" />
-    <ClInclude Include="Blocks\Pendul.h" />
     <ClInclude Include="Blocks\SurfaceBlock.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Chunk.h" />
@@ -183,7 +182,6 @@
     <ClCompile Include="Blocks\Jukebox.cpp" />
     <ClCompile Include="Blocks\LightBlock.cpp" />
     <ClCompile Include="Blocks\Mirror.cpp" />
-    <ClCompile Include="Blocks\Pendul.cpp" />
     <ClCompile Include="Blocks\SurfaceBlock.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Chunk.cpp" />

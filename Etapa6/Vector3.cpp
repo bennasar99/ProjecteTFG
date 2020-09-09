@@ -53,6 +53,10 @@ Vector3 Vector3::operator/(float b) {
 	return Vector3(this->x / b, this->y / b, this->z / b);
 }
 
+bool Vector3::operator!=(const Vector3& b) {
+	return(this->x != b.x || this->y != b.y || this->z != b.z);
+}
+
 //Producte escalar
 float Vector3::operator*(const Vector3& b) {
 	return this->x * b.x + this->y * b.y + this->z * b.z;

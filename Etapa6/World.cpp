@@ -50,21 +50,27 @@ World::World(std::string name, Camera* camera) {
 	this->sizex = int(buff[0]);
 	this->sizey = int(buff[1]);
 	this->sizez = int(buff[2]);
+	file.read(buff, 3);
+	int sX = unsigned char(buff[0]);
+	int sY = unsigned char(buff[1]);
+	int sZ = unsigned char(buff[2]);
+	this->spawn = Vector3((float)sX, (float)sY, (float)sZ);
+
 	this->chunks = new Chunk * [(size_t)sizex * (size_t)sizey * (size_t)sizez];
 
-	printf("Mides del mon: %d %d %d\n", this->sizex, this->sizey, this->sizez);
+	printf("Mides del mon: %d %d %d, spawn a: %d %d %d\n", this->sizex, this->sizey, this->sizez, sX, sY, sZ);
 
 	const int chunkSize = 16 * 16 * 16;
 	char buffer[chunkSize];
 	for (int x = 0; x < this->sizex; x++) {
 		for (int y = 0; y < this->sizey; y++) {
 			for (int z = 0; z < this->sizez; z++) {
-				printf("Chunk a %d %d %d...\n", x, y, z);
+				//printf("Chunk a %d %d %d...\n", x, y, z);
 				int desp = getDesp(Vector3(x, y, z));
 				file.read(buffer, chunkSize);
 				chunks[desp] = new Chunk(this, Vector3(x,y,z));
 				chunks[desp]->readFromByteData(buffer);
-				printf("LLEGIT\n");
+				//printf("LLEGIT\n");
 			}
 		}
 	}
@@ -72,16 +78,6 @@ World::World(std::string name, Camera* camera) {
 	fflush(stdout);;
 
 	file.close();
-
-	//Col·locam càmera
-	int x = rand() % (sizex * 16);
-	int z = rand() % (sizez * 16);
-	for (int y = 0; y < this->sizey * 16.0f; y++) {
-		if (getBlock(Vector3(x, y, z)) == Bloc::RES) {
-			spawn = Vector3(x, y + 1, z);
-			break;
-		}
-	}
 
 	//Fi generació món
 	for (int i = 0; i < this->sizex * this->sizey * this->sizez; i++) {
@@ -94,9 +90,17 @@ World::World(std::string name, Camera* camera) {
 void World::save(std::string name) {
 	std::fstream file;
 	file.open("worlds/" + name, std::ios::out | std::ios::binary);
+
+	//Guardam mides i spawn
 	char sX = this->sizex;
 	char sY = this->sizey;
 	char sZ = this->sizez;
+	file.write(&sX, 1);
+	file.write(&sY, 1);
+	file.write(&sZ, 1);
+	sX = (int)this->spawn.x;
+	sY = (int)this->spawn.y;
+	sZ = (int)this->spawn.z;
 	file.write(&sX, 1);
 	file.write(&sY, 1);
 	file.write(&sZ, 1);
@@ -134,9 +138,9 @@ void World::save(std::string name) {
 	file.close();
 }
 
-void World::generate(int seed) {
+void World::generate(int seed) { //TODO: guardar spawn a world
 	//Generador del món
-	srand(1999); //Seed? xD
+	srand(seed); //Seed? xD
 	Vector3 pos = Vector3(0, 0, 0);
 	float lasty = (this->sizey * 16.0f) / 2.0f;
 	for (pos.x = 0; pos.x < this->sizex * 16; pos.x++) {
@@ -269,11 +273,6 @@ static bool compareLights(Light* a, Light* b) {
  * Actualitza l'estat intern de les estructures del món, a més de la distància de les llums
  */
 void World::update(int delta, Vector3 pos) {
-	std::list<Light*>::iterator it;
-	for (it = lights.begin(); (it != lights.end()); it++) {
-		(*it)->setDist(Vector3::module(pos - (*it)->getPosVec())); //Actualitzam la distància de les llums
-	}
-	lights.sort(compareLights); //Ordenam les llums per distància
 
 	daytime += ((float)delta);
 	if (daytime >= 86400.0f) {
@@ -284,23 +283,17 @@ void World::update(int delta, Vector3 pos) {
 		glDisable(sol);
 	}
 	
-	//float dist = camera->getViewDist()/2; //Distància d'actualització dels blocs/estructures
-
-	/*int x1 = (int)std::max(pos.x - dist, minpos.x), x2 = (int)std::min(pos.x + dist, maxpos.x);
-	int y1 = (int)std::max(pos.y - dist, minpos.y), y2 = (int)std::min(pos.y + dist, maxpos.y);
-	int z1 = (int)std::max(pos.z - dist, minpos.z), z2 = (int)std::min(pos.z + dist, maxpos.z);*/
-
-
-	//Actualitzam els blocs dins els limits definits
-	/*for (int x = x1; x <= x2; x++) {
-		for (int y = y1; y <= y2; y++) {
-			for (int z = z1; z <= z2; z++) {
-				if (blocs[x + this->sizey * (y + this->sizez * z)] != 0) {
-					blocs[x + this->sizey * (y + this->sizez * z)]->update(delta);
-				}
-			}
-		}
-	}*/
+	updTimer -= delta;
+	if (updTimer > 0) {
+		return;
+	}
+	updTimer = 1000; //10 tps
+	//Ordenació llums
+	std::list<Light*>::iterator it;
+	for (it = lights.begin(); (it != lights.end()); it++) {
+		(*it)->setDist(Vector3::module(pos - (*it)->getPosVec())); //Actualitzam la distància de les llums
+	}
+	lights.sort(compareLights); //Ordenam les llums per distància
 
 	//NOU CODI CHUNKS
 	pos = pos / 16;
@@ -411,9 +404,6 @@ bool World::setBlock(Bloc tipus, Vector3 pos, Block* parent, bool listUpdate) {
 
 	Block* bloc;
 	switch (tipus) {
-	case Bloc::PENDUL:
-		bloc = new Pendul(this, pos);
-		break;
 	case Bloc::LLUMSOTIL: case Bloc::LLUMTERRA: case Bloc::TORXA: case Bloc::FAROLA:
 		bloc = new LightBlock(this, tipus, pos);
 		break;

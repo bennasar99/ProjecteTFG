@@ -222,40 +222,6 @@ void Block::draw(bool wireframe, bool visible[6]) {
 		glEnd();
 		glEnable(GL_LIGHTING);
 		break;
-	case Bloc::PENDUL: //Pendul (icona)
-		glColor3f(0,0,0);
-
-		glTranslatef(-0.4f, 0, 0);
-
-		// dibuixar la base
-		glutSolidCube(0.1f);
-
-		// dibuixar la base del primer pèndul
-		glRotatef(0, 0, 0, 1);
-		glTranslatef(0.5f, 0, 0);
-		glutSolidCube(0.2f);
-
-		glPushMatrix();
-		// dibuixar el segon pèndul
-		glTranslatef(0.5f, 0, 0);
-		glutSolidCube(0.2f);
-
-
-		// dibuixar línia entre els dos pènduls
-		glColor3f(1, 0, 0);
-		glLineWidth(2.0f);
-		glBegin(GL_LINES);
-		glVertex3d(0, 0, 0);
-		glVertex3d(-0.5f, 0, 0);
-		glEnd();
-		glPopMatrix();
-
-		// dibuixar la línia entre la base i el pèndul
-		glBegin(GL_LINES);
-		glVertex3d(0, 0, 0);
-		glVertex3d(-0.5f, 0, 0);
-		glEnd();
-		break;
 	case Bloc::FAROLA: { //Farola (icona)
 		glScalef(0.46f, 0.46f, 0.46f);
 		glTranslatef(0, -0.5f, 0);

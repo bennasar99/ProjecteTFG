@@ -57,9 +57,6 @@
     <ClInclude Include="Blocks\LightBlock.h">
       <Filter>Header Files\Blocks</Filter>
     </ClInclude>
-    <ClInclude Include="Blocks\Pendul.h">
-      <Filter>Header Files\Blocks</Filter>
-    </ClInclude>
     <ClInclude Include="lib\stb_image.h">
       <Filter>Header Files\lib</Filter>
     </ClInclude>
@@ -138,9 +135,6 @@
       <Filter>Source Files\Blocks</Filter>
     </ClCompile>
     <ClCompile Include="Blocks\LightBlock.cpp">
-      <Filter>Source Files\Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="Blocks\Pendul.cpp">
       <Filter>Source Files\Blocks</Filter>
     </ClCompile>
     <ClCompile Include="lib\stb_image.cpp">
