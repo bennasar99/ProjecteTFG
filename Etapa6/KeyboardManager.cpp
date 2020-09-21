@@ -1,16 +1,16 @@
 #include "KeyboardManager.h"
 
-bool KeyboardManager::key[_UI8_MAX];
-bool KeyboardManager::invoked[_UI8_MAX]; //False
+bool KeyboardManager::key[512];
+bool KeyboardManager::invoked[512]; //False
 
-std::vector<void (*)()> KeyboardManager::keyHandlers[_UI8_MAX];
-std::vector<void (*)(unsigned char)> KeyboardManager::genericHandlers;
+std::vector<void (*)()> KeyboardManager::keyHandlers[512];
+std::vector<void (*)(int)> KeyboardManager::genericHandlers;
 
-bool KeyboardManager::isPressed(unsigned char key) {
-	return KeyboardManager::key[tolower(key)];
+bool KeyboardManager::isPressed(int key) {
+	return KeyboardManager::key[key];
 }
 
-void KeyboardManager::onKeyDown(unsigned char key) {
+void KeyboardManager::onKeyDown(int key) {
 	// invocar tots els escoltadors d'aquesta tecla (si no s'han invocat)
 	if (!KeyboardManager::invoked[key]) {
 		for (size_t i = 0; i < KeyboardManager::keyHandlers[key].size(); ++i) {
@@ -27,7 +27,7 @@ void KeyboardManager::onKeyDown(unsigned char key) {
 	KeyboardManager::key[key] = true;
 }
 
-void KeyboardManager::onKeyUp(unsigned char key) {
+void KeyboardManager::onKeyUp(int key) {
 	// marcar que es pot tornar a cridar l'esdeveniment de la tecla
 	KeyboardManager::invoked[key] = false;
 	KeyboardManager::key[key] = false;
@@ -36,11 +36,11 @@ void KeyboardManager::onKeyUp(unsigned char key) {
 /**
   * Afegeix un escoltador a una determinada tecla
   */
-void KeyboardManager::addKeyHandler(unsigned char key, void (*fn)()) {
+void KeyboardManager::addKeyHandler(int key, void (*fn)()) {
 	KeyboardManager::keyHandlers[key].push_back(fn);
 }
 
 
-void KeyboardManager::addKeyHandler(void (*fn)(unsigned char k)) {
+void KeyboardManager::addKeyHandler(void (*fn)(int key)) {
 	KeyboardManager::genericHandlers.push_back(fn);
 }

@@ -4,7 +4,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <GL/glew.h>
-#include <GL/freeglut.h>
+#include <GLFW/glfw3.h>
+//#include <GL/freeglut.h>
 #include "Utils.h"
 #include "Vector3.h"
 #include "TextureManager.h"
@@ -15,6 +16,7 @@
 
 int w_width = 500; // Tamano incial de la ventana
 int w_height = 500;
+GLFWwindow* window;
 
 //Clipping planes
 const float zNear = 0.001f;
@@ -36,7 +38,7 @@ World* world;
 
 int darrerIdle = 0, darrerDisplay = 0; //Control del temps
 
-int lastX = 0, lastY = 0; //Darreres posicions del ratolí
+double lastX = 250, lastY = 250; //Darreres posicions del ratolí
 
 //luces
 bool llanterna = false;
@@ -56,26 +58,34 @@ int numScene = 0; //Escena per defecte
 std::string wname;
 int updTimer = 500; //500 ms = 20tps
 
-void onWindowResize(int width, int height);
+void onWindowResize(GLFWwindow* window, int width, int height);
 void onKeyboardUp(unsigned char key, int x, int y);
 void onKeyboardDown(unsigned char key, int x, int y);
 void toggleAxis();
 void changeScene(unsigned char sceneNumber);
-void scaleListener(int wheel, int direction, int x, int y);
-void mouseListener(int button, int state, int x, int y);
-void lookAround(int x, int y);
-void movement(unsigned char key);
+void scaleListener(GLFWwindow* window, double xoffset, double yoffset);
+void mouseListener(GLFWwindow* window, int button, int action, int mods);
+void lookAround(GLFWwindow* window, double x, double y);
+void movement(int key);
 void centerPointer();
 void updatePlayerBlock();
+void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
 
+int fpsc = 0;
 
 // Funcion que visualiza la escena OpenGL
-void Display(void)
+void Display(GLFWwindow* window)
 { 
-	int temps = glutGet(GLUT_ELAPSED_TIME);
+	int temps = glfwGetTime() * 1000;
+	//printf("%d\n", temps);
 	int delta = temps - darrerDisplay;
 	float fps = 1.0f / ((float)delta / 1000.0f);
-	//printf("%f\n", fps);
+
+	fpsc++;
+	if (fpsc > 20) { //Contador fps
+		//printf("%f\n", fps);
+		fpsc = 0;
+	}
 	//if (fps < 26) {
 	//	zFar--;
 	//}
@@ -126,12 +136,40 @@ void Display(void)
 
 	//Dibuixam el bloc seleccionat
 	glDisable(GL_LIGHTING); //El volem veure sempre
+	glPushMatrix();
 	glLineWidth(5.0f);
-	world->drawBloc(ba, Bloc::CUB, true);
+	glColor3f(1, 0, 0);
+	ba.floor();
+	glTranslatef(ba.x, ba.y, ba.z);
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(0, 0, 0); //Part d'abaix
+	glVertex3f(0, 0, 1);
+	glVertex3f(1, 0, 1);
+	glVertex3f(1, 0, 0);
+	glVertex3f(0, 0, 0);
+	glEnd();
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(0, 1, 0); //Part d'adalt
+	glVertex3f(0, 1, 1);
+	glVertex3f(1, 1, 1);
+	glVertex3f(1, 1, 0);
+	glVertex3f(0, 1, 0);
+	glEnd();
+	glBegin(GL_LINES);
+	glVertex3f(0, 0, 0); //Part d'adalt
+	glVertex3f(0, 1, 0);
+	glVertex3f(1, 0, 0);
+	glVertex3f(1, 1, 0);
+	glVertex3f(0, 0, 1);
+	glVertex3f(0, 1, 1);
+	glVertex3f(1, 0, 1);
+	glVertex3f(1, 1, 1);
+	glEnd();
 	glLineWidth(1.0f);
+	glPopMatrix();
 	glEnable(GL_LIGHTING); //El volem veure sempre
 
-	world->drawSol(camera.getPos(), zFar); //Dibuixam el sol
+	world->drawSol(camera.getPos(), zFar-1); //Dibuixam el sol
 
 	// dibuixar els 3 eixos
 	if (axisVisible) {
@@ -162,6 +200,7 @@ void Display(void)
 	glTranslatef(0.9f * camera.getAspect(), 0.1f, -2);
 	glScalef(0.1f, 0.1f, 0.1f);
 	bsel.draw();
+
 	glPopMatrix();
 
 	if (inv) { //Dibuixam inventari
@@ -236,9 +275,6 @@ void Display(void)
 	glPopMatrix();
 
 	glFlush();
-
-	// intercanviar els buffers
-	glutSwapBuffers();
 }
 
 // Funcion que se ejecuta cuando el sistema no esta ocupado
@@ -259,7 +295,8 @@ void Idle(void)
 	}
 
 	//Gestió del temps
-	int temps = glutGet(GLUT_ELAPSED_TIME);
+	//int temps = glutGet(GLUT_ELAPSED_TIME);
+	int temps = glfwGetTime() * 1000;
 	int delta = temps - darrerIdle;
 	darrerIdle = temps;
 
@@ -279,10 +316,6 @@ void Idle(void)
 		Vector3 pos = ent->getPos();
 		alListener3f(AL_POSITION, pos.x, pos.y, pos.z); //Actualitzam la posició de l'escoltador a l'entitat
 	}
-
-
-	// Indicamos que es necesario repintar la pantalla
-	glutPostRedisplay();
 }
 
 // Funcion principal
@@ -318,22 +351,32 @@ int main(int argc, char** argv)
 		ent = new Player(world, world->getSpawn() + Vector3(0, 10, 0));
 		world->save(wname);
 	}
-
 	// Inicializamos la libreria GLUT
-	glutInit(&argc, argv);
+	//glutInit(&argc, argv);
+	glfwInit();
 
 	// Indicamos como ha de ser la nueva ventana
-	glutInitWindowPosition(100, 100);
-	glutInitWindowSize(w_width, w_height);
-	glutSetOption(GLUT_MULTISAMPLE, 8);
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
+	//glutInitWindowPosition(100, 100);
+	//glutInitWindowSize(w_width, w_height);
+	//glutSetOption(GLUT_MULTISAMPLE, 8);
+	//glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
 
 	// Creamos la nueva ventana
-	glutCreateWindow("Etapa 6");
-	glutSetCursor(GLUT_CURSOR_NONE);
-	//glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
+	//glutInitContextVersion(3, 1);
+	//glutInitContextFlags(GLUT_FORWARD_COMPATIBLE | GLUT_DEBUG);
+	//glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+	//glutCreateWindow("Etapa 6");
+	//glutSetCursor(GLUT_CURSOR_NONE);
 
-	//glutIgnoreKeyRepeat(1);
+	window = glfwCreateWindow(w_width, w_height, "AlphaCraft", NULL, NULL);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
+	glfwSetWindowSizeCallback(window, onWindowResize);
+
+	glfwMakeContextCurrent(window);
+
+	glfwSetKeyCallback(window, onKey);
 
 	//Inicialització Glew
 	GLenum err = glewInit();
@@ -344,21 +387,24 @@ int main(int argc, char** argv)
 
 	// indicar l'escoltador del canvi de mida
 	// és important cridar aquesta funció després de crear la finestra
-	glutReshapeFunc(&onWindowResize);
+	//glutReshapeFunc(&onWindowResize);
 
 	// processar les entrades per reclat
-	glutKeyboardFunc(&onKeyboardDown);
-	glutKeyboardUpFunc(&onKeyboardUp);
+	//glutKeyboardFunc(&onKeyboardDown);
+	//glutKeyboardUpFunc(&onKeyboardUp);
 
 	//I per ratoli
-	glutPassiveMotionFunc(&lookAround);
-	glutMouseWheelFunc(&scaleListener);
-	glutMouseFunc(&mouseListener);
+	//glutPassiveMotionFunc(&lookAround);
+	//glutMouseWheelFunc(&scaleListener);
+	//glutMouseFunc(&mouseListener);
+	glfwSetScrollCallback(window, scaleListener);
+	glfwSetCursorPosCallback(window, lookAround);
+	glfwSetMouseButtonCallback(window, mouseListener);
 
 
 	// Indicamos cuales son las funciones de redibujado e idle
-	glutDisplayFunc(Display);
-	glutIdleFunc(Idle);
+	//glutDisplayFunc(Display);
+	//glutIdleFunc(Idle);
 
 	glEnable(GL_DEPTH_TEST); //Activam la profunditat
 
@@ -397,7 +443,6 @@ int main(int argc, char** argv)
 	//Blocs món per defecte:
 	world->setBlock(Bloc::CUB, Vector3(64, 65, 64));
 	world->setBlock(Bloc::CUB, Vector3(65, 65, 64));
-	world->setBlock(Bloc::CONO, Vector3(66, 65, 64));
 
 	//Entitats
 	//world->addEntity(Entitat::COTXE, Vector3(70, 65, 66));
@@ -429,8 +474,8 @@ int main(int argc, char** argv)
 	ModelManager::initialize();
 
 	//Antialising
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	glEnable(GL_MULTISAMPLE);
-	glHint(GL_MULTISAMPLE_FILTER_HINT_NV, GL_NICEST);
 
 	//Framebuffer
 	glEnable(GL_FRAMEBUFFER);
@@ -439,21 +484,33 @@ int main(int argc, char** argv)
 	changeScene('1');
 
 	// Comienza la ejecucion del core de GLUT
-	glutMainLoop();
+	while (!glfwWindowShouldClose(window))
+	{
+		Display(window);
+		Idle();
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+	glfwTerminate();
 	return 0;
 }
 
 //Control amb botons del ratolí
-void mouseListener(int button, int state, int x, int y) {
+void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 	if (inv) { //Interacció amb l'inventari
-		if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) { 
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) { 
 			float maxy = (float)w_height * 0.85f;
 			float miny = (float)w_height * 0.15f;
 			float maxx = (float)w_width / 2.0f + ((float)w_height/2.5f)*0.90f;
 			float minx = (float)w_width / 2.0f - ((float)w_height / 2.5f) * 0.90f;
 
+			double x;
+			double y;
+			glfwGetCursorPos(window, &x, &y);
+
 			float yi = ((float)y - miny) / (maxy-miny) * 6;// *7.02f;
 			float xi = ((float)x - minx) / (maxx - minx) * 6;// *7.1f;
+			printf("%f %f\n", xi, yi);
 
 			btipus = (int)floor(yi) * 6 +  (int)floor(xi) + 2; //+2 per botar aire i res
 			if (btipus > 27) { //Si no se selecciona cap objecte, no n'hi haurà cap de seleccionat
@@ -462,15 +519,15 @@ void mouseListener(int button, int state, int x, int y) {
 		}
 	}
 	else {
-		if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) { //Botó dret, eliminar blocs
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) { //Botó dret, eliminar blocs
 			if (world->deleteBlock(ba, true)) {
 				SoundManager::playSound(So::DESTRUEIX, ba, true);
 			}
 		}
-		else if (button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN) { //Botó de la rodeta, canviar d'objecte
+		else if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) { //Botó de la rodeta, canviar d'objecte
 			btipus = (btipus + 1) % 22;
 		}
-		else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) { //Botó dret, col·locar bloc / interactuar
+		else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) { //Botó dret, col·locar bloc / interactuar
 			Vector3 front = camera.getFront();
 			Bloc tipusbloc = static_cast<Bloc>(btipus);
 			if (world->getBlock(ba - front * 0.1f) == Bloc::RES && tipusbloc != Bloc::RES) { //Només deixam posar un bloc si no n'hi ha un ja
@@ -494,11 +551,11 @@ void mouseListener(int button, int state, int x, int y) {
 }
 
 //Control amb teclat
-void movement(unsigned char key) {
+void movement(int key) {
 	if (ent != 0) {
 		ent->control(key);
 	}
-	if (key == 'f' || key == 'F') {
+	if (key == GLFW_KEY_F) {
 		llanterna = !llanterna;
 		if (llanterna) {
 			glEnable(GL_LIGHT0);
@@ -507,17 +564,17 @@ void movement(unsigned char key) {
 			glDisable(GL_LIGHT0);
 		}
 	}
-	if (key == '\t') { //Tab: obrir inventari
+	if (key == GLFW_KEY_TAB) { //Tab: obrir inventari
 		inv = !inv;
 		if (inv) {
-			glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 		else {
-			glutSetCursor(GLUT_CURSOR_NONE);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		}
 	}
 
-	if (key == 'E' || key == 'e') { //Attach a una entitat propera
+	if (key == GLFW_KEY_E) { //Attach a una entitat propera
 		if (ent != NULL) { //Si controlam una entitat, la deixam
 			ent->onDeattach();
 			ent = NULL;
@@ -534,21 +591,21 @@ void movement(unsigned char key) {
 		}
 	}
 
-	if (key == 'T' || key == 't') {
+	if (key == GLFW_KEY_T) {
 		world->save(wname);
 	}
 }
 
 //Control amb la rodeta del ratolí
-void scaleListener(int wheel, int direction, int x, int y) {
+void scaleListener(GLFWwindow* window, double xoffset, double yoffset) {
 	if (KeyboardManager::isPressed('q')) { //Permetem fer la llanterna més grossa o petita
 		float cutoff;
 		glGetLightfv(GL_LIGHT0, GL_SPOT_CUTOFF, &cutoff);
-		cutoff += direction;
+		cutoff += yoffset;
 		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, cutoff);
 	}
 	else { //Feim zoom
-		camera.zoom(direction * 0.5f);
+		camera.zoom(yoffset * 0.5f);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		gluPerspective(camera.getFov(), (float)w_width / (float)w_height, zNear, zFar);
@@ -560,12 +617,13 @@ void scaleListener(int wheel, int direction, int x, int y) {
   * width és la nova amplada
   * height és la nova altura
   */
-void onWindowResize(int width, int height) {
+void onWindowResize(GLFWwindow* window, int width, int height) {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	float aspect = (float)width / (float)height;
 	camera.setAspect(aspect); //Actualització de l'aspecte
 	camera.updateCorners();
+
 
 	gluPerspective(camera.getFov(), aspect, zNear, zFar); 
 	w_width = width;
@@ -627,7 +685,7 @@ void changeScene(unsigned char sceneNumber) {
 }
 
 //Hook pel moviment del ratolí
-void lookAround(int x, int y) {
+void lookAround(GLFWwindow* window, double x, double y) {
 	if (!inv) {
 		camera.lookAround(x, y, lastX, lastY);
 
@@ -642,9 +700,10 @@ void lookAround(int x, int y) {
 
 //Centra el ratolí enmig de la finestra, per evitar que s'escapi
 void centerPointer() {
-	int posx = w_width / 2;
-	int posy = w_height / 2;
-	glutWarpPointer(posx, posy);
+	double posx = w_width / 2;
+	double posy = w_height / 2;
+	glfwGetCursorPos(window, &posx, &posy);
+	//glutWarpPointer(posx, posy);
 	lastX = posx;
 	lastY = posy;
 }
@@ -659,5 +718,18 @@ void updatePlayerBlock() {
 	}
 	if (i == 100) { //Si no hem trobat cap bloc, no es veurà la selecció
 		ba = Vector3(-1, -1, -1);
+	}
+}
+
+void onKey(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+	if (action == GLFW_PRESS) {
+		KeyboardManager::onKeyDown(key);
+	}
+	else if (action == GLFW_RELEASE) {
+		KeyboardManager::onKeyUp(key);
 	}
 }

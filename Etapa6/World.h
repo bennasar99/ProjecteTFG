@@ -12,7 +12,6 @@
 #include "Light.h"
 #include "Blocks/Block.h"
 #include "Blocks/LightBlock.h"
-#include "Blocks/SurfaceBlock.h"
 #include "Blocks/Pendul.h"
 #include "Blocks/Jukebox.h"
 #include "Blocks/Mirror.h"

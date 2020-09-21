@@ -16,7 +16,7 @@ Block::Block() {
 
 void Block::draw() {
 	bool visible[6] = { true, true, true, true, true, true };
-	this->draw(false, visible); //Dibuixam el bloc sense wireframe
+	this->draw(visible); //Dibuixam el bloc sense wireframe
 }
 
 void Block::update(int delta) {
@@ -27,82 +27,18 @@ void Block::update(int delta) {
 /*
 	Dibuixam el bloc segons el seu tipus
 */
-void Block::draw(bool wireframe, bool visible[6]) {
+void Block::draw(bool visible[6]) {
 	glBindTexture(GL_TEXTURE_2D, 0); //Ens asseguram que no hi ha cap textura assignada
 	float specularZero[4] = { 0,0,0,0 };
 	float specularDef[4] = { 1,1,1,1 };
 	switch (this->id) { //Dibuixam el que correspongui per cada bloc
 	case Bloc::AIGUA: //Aigua
 		glColor4f(0, 0, 1, 0.5f);
-		draw3dRect(1, 1, 1);
+		drawCub(visible);
 		break;
 	case Bloc::CUB: //Cub vermell
 		glColor3f(1, 0, 0);
-		if (wireframe) {
-			glutWireCube(1.0f);
-		}
-		else {
-			drawCub(visible);
-			//ModelManager::drawModel(Model::CUB);
-		}
-		break;
-	case Bloc::CONO: //Cono
-		glColor3f(0, 1, 0);
-		glTranslatef(0, -0.5f, 0);
-		glRotatef(-90.0f, 1, 0, 0);
-		if (wireframe) {
-			glutWireCone(0.5f, 1.0f, 200, 100);
-		}
-		else {
-			glutSolidCone(0.5f, 1.0f, 200, 100);
-		}
-		break;
-	case Bloc::ESFERA: //Esfera
-		glColor3f(0, 0, 1);
-		if (wireframe) {
-			glutWireSphere(0.5f, 200, 200);
-		}
-		else {
-			glutSolidSphere(0.5f, 200, 200);
-		}
-		break;
-	case Bloc::TASSA: //Tassa
-		glColor3f(1, 1, 0);
-		if (wireframe) {
-			glutWireTeapot(0.4);
-		}
-		else {
-			glutSolidTeapot(0.4);
-		}
-		break;
-	case Bloc::CONO4C: //Cono 4 costats
-		glTranslatef(0, -0.5f, 0);
-		glRotatef(-90.0f, 1.0f, 0.0f, 0);
-		glColor3f(1, 0, 1);
-		if (wireframe) {
-			glutWireCone(0.5f, 1.0f, 4, 1);
-		}
-		else {
-			glutSolidCone(0.5f, 1.0f, 4, 1);
-		}
-		break;
-	case Bloc::ESFERA4C: //Esfera "quadrada"
-		glColor3f(0, 1, 1);
-		if (wireframe) {
-			glutWireSphere(0.5f, 4, 4);
-		}
-		else {
-			glutSolidSphere(0.5f, 4, 4);
-		}
-		break;
-	case Bloc::DONUT: //Donut
-		glColor3f(0, 0, 0);
-		if (wireframe) {
-			glutWireTorus(0.2, 0.4, 10, 50);
-		}
-		else {
-			glutSolidTorus(0.2, 0.4, 10, 50);
-		}
+		drawCub(visible);
 		break;
 	case Bloc::HERBA: //Herba
 		glColor3f(0, 1, 0);
@@ -159,27 +95,17 @@ void Block::draw(bool wireframe, bool visible[6]) {
 	case Bloc::TERRA: //Cub marró
 		glColor3f(0.5f, 0.35f, 0.05f);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specularZero); //No volem que brilli
-		if (wireframe) {
-			glutWireCube(1.0f);
-		}
-		else {
-			glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::TERRA));
-			drawCub(visible);
-			//ModelManager::drawModel(Model::CUB);
-		}
+		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::TERRA));
+		drawCub(visible);
+		//ModelManager::drawModel(Model::CUB);
 		break;
 	case Bloc::VIDRE: //cub transparent/opac (vidre?)
 		glColor4f(0, 0, 0, 1.0f);
-		glutWireCube(1.0f);
-		glutSolidCube(0.1f);
+		//glutWireCube(1.0f);
+		//glutSolidCube(0.1f);
 		glDepthMask(GL_FALSE);
 		glColor4f(0.0f, 0.0f, 1.0f, 0.05f);
-		if (wireframe) {
-			glutWireCube(1.0f);
-		}
-		else {
-			glutSolidCube(1.0f);
-		}
+		drawCub(visible);
 		glDepthMask(GL_TRUE);
 		break;
 	case Bloc::TORXA: //torxa
@@ -222,31 +148,6 @@ void Block::draw(bool wireframe, bool visible[6]) {
 		glEnd();
 		glEnable(GL_LIGHTING);
 		break;
-	case Bloc::FAROLA: { //Farola (icona)
-		glScalef(0.46f, 0.46f, 0.46f);
-		glTranslatef(0, -0.5f, 0);
-
-		//Tronc
-		glLineWidth(4.0f);
-		glColor3f(0.1f, 0.1f, 0.1f);
-		glBegin(GL_LINES);
-		glVertex3f(-0, 1.75, 0);
-		glVertex3f(-0, -0.5, 0);
-		glEnd();
-
-		//Base
-		glColor3f(0.1f, 0.1f, 0.1f);
-		glTranslatef(0, -0.5f, 0);
-		glRotatef(-90.0f, 1.0f, 0.0f, 0);
-		glutSolidCone(0.25f, 0.5f, 4, 1);
-		glRotatef(90.0f, 1.0f, 0.0f, 0);
-
-		//LLum
-		glTranslatef(0, 2, 0);
-		glColor3f(1, 1, 0);
-		glutSolidSphere(0.25, 100, 100);
-		break;
-	}
 	case Bloc::MULTICOLOR: { //Cub multicolor
 		float lado = 1.0f;
 
@@ -370,25 +271,6 @@ void Block::draw(bool wireframe, bool visible[6]) {
 		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::ALTAVEU));
 		drawCub(visible);
 		//ModelManager::drawModel(Model::CUB);
-		break;
-	case Bloc::ESTALAGMITA: //Només icona, sense textura ni NURBS
-		glColor3f(0.5f, 0.35f, 0.05f);
-		glScalef(0.5f, 0.5f, 0.5f);
-		glTranslatef(0, -0.4f, 0);
-		glBegin(GL_LINE_LOOP);
-		glVertex3f(-0.5f, -0.5f, 0);
-		glVertex3f(0.5f, -0.5f, 0);
-		glVertex3f(0.5f, 0.5f, 0);
-		glVertex3f(0.4f, 1.0f, 0);
-		glVertex3f(0.3f, 1.2f, 0);
-		glVertex3f(0.2f, 1.4f, 0);
-		glVertex3f(0.1f, 1.5f, 0);
-		glVertex3f(-0.1f, 1.5f, 0);
-		glVertex3f(-0.2f, 1.4f, 0);
-		glVertex3f(-0.3f, 1.2f, 0);
-		glVertex3f(-0.4f, 1.0f, 0);
-		glVertex3f(-0.5f, 0.5f, 0);
-		glEnd();
 		break;
 	case Bloc::MIRALL: //Només icona, sense textura, quadrat
 		glLineWidth(2.0f);

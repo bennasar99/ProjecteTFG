@@ -404,14 +404,11 @@ bool World::setBlock(Bloc tipus, Vector3 pos, Block* parent, bool listUpdate) {
 
 	Block* bloc;
 	switch (tipus) {
-	case Bloc::LLUMSOTIL: case Bloc::LLUMTERRA: case Bloc::TORXA: case Bloc::FAROLA:
+	case Bloc::LLUMSOTIL: case Bloc::LLUMTERRA: case Bloc::TORXA:
 		bloc = new LightBlock(this, tipus, pos);
 		break;
 	case Bloc::ALTAVEU:
 		bloc = new Jukebox(this, pos);
-		break;
-	case Bloc::ESTALAGMITA:
-		bloc = new SurfaceBlock(this, tipus);
 		break;
 	case Bloc::MIRALL:
 		bloc = new Mirror(this, pos);
@@ -568,7 +565,7 @@ void World::drawBloc(Vector3 pos, Bloc tipus, bool wireframe) {
 	glTranslatef(pos.x+0.5f, pos.y+0.5f, pos.z+0.5f);
 	Block bloc = Block(this, tipus, 0);
 	bool visible[6] = { true, true, true, true, true, true };
-	bloc.draw(wireframe, visible);
+	bloc.draw(visible);
 	bloc.destroy();
 	glPopMatrix();
 }
@@ -613,7 +610,7 @@ void World::drawSol(Vector3 pos, float dist) {
 		glTranslatef(pos.x, pos.y, pos.z);
 		glTranslatef(solpos.x * dist, solpos.y * dist, solpos.z);
 		glColor3f(1, 1, 0);
-		glutSolidSphere(0.5f, 4, 4);
+		drawSphere(1, 5, 5);
 		glEnable(GL_LIGHTING);
 		glEnable(GL_FOG);
 		

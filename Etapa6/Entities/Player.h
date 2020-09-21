@@ -31,7 +31,7 @@ public:
 	Player(World* world, Vector3 pos);
 
 	void update(int delta);
-	void control(unsigned char key);
+	void control(int key);
 	void control(int delta, Camera *cam);
 
 	void draw();

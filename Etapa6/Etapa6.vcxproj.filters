@@ -87,9 +87,6 @@
     <ClInclude Include="Blocks\Jukebox.h">
       <Filter>Header Files\Blocks</Filter>
     </ClInclude>
-    <ClInclude Include="Blocks\SurfaceBlock.h">
-      <Filter>Header Files\Blocks</Filter>
-    </ClInclude>
     <ClInclude Include="Entities\Grua.h">
       <Filter>Header Files\Entities</Filter>
     </ClInclude>
@@ -159,9 +156,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Blocks\Mirror.cpp">
-      <Filter>Source Files\Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="Blocks\SurfaceBlock.cpp">
       <Filter>Source Files\Blocks</Filter>
     </ClCompile>
     <ClCompile Include="Blocks\Jukebox.cpp">

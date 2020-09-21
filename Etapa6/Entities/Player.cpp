@@ -1,6 +1,6 @@
 #include "Player.h"
 
-#include <GL/glut.h>
+#include <GLFW/glfw3.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 
@@ -40,10 +40,9 @@ void Player::update(int delta) {
 }
 
 //Control per teclat
-void Player::control(unsigned char key) {
-	if (key == ' ' && Block::isSolid(world->getBlock(this->pos - Vector3(0, 2, 0))) && grav >= 1 && this->gamemode == 1) {
+void Player::control(int key) {
+	if (key == GLFW_KEY_SPACE && Block::isSolid(world->getBlock(this->pos - Vector3(0, 2, 0))) && grav >= 1 && this->gamemode == 1) {
 		grav = -1.0f;
-		printf("HEY");
 	}
 }
 
@@ -54,19 +53,19 @@ void Player::control(int delta, Camera *cam) {
 	//Actualitzam la posició del jugador
 	Vector3 add = Vector3(0, 0, 0);
 	Vector3 forward = Vector3::normalize(Vector3(cam->getFront().x, 0, cam->getFront().z));
-	if (KeyboardManager::isPressed('w')) {
+	if (KeyboardManager::isPressed(GLFW_KEY_W)) {
 		add = add + forward;
 	}
-	else if (KeyboardManager::isPressed('s')) {
+	else if (KeyboardManager::isPressed(GLFW_KEY_S)) {
 		add = add - forward;
 	}
-	if (KeyboardManager::isPressed('d')) {
+	if (KeyboardManager::isPressed(GLFW_KEY_D)) {
 		add = add - cam->getRight();
 	}
-	else if (KeyboardManager::isPressed('a')) {
+	else if (KeyboardManager::isPressed(GLFW_KEY_A)) {
 		add = add + cam->getRight();
 	}
-	if ((KeyboardManager::isPressed(' ') && this->gamemode==0) || (grav < 0)) { //Creatiu o acabam de botar
+	if ((KeyboardManager::isPressed(GLFW_KEY_SPACE) && this->gamemode==0) || (grav < 0)) { //Creatiu o acabam de botar
 		add = add + Vector3(0, 1, 0);
 	}
 	else if (KeyboardManager::isPressed('{') && this->gamemode == 0) {

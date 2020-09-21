@@ -92,7 +92,7 @@ public:
 	float pitch = 0.0f; //Adalt o abaix
 	float yaw = -90.0f; //Esquerra o dreta, en aquest valor mira de primeres cap a Z -
 
-	void lookAround(int x, int y, int lastX, int lastY);
+	void lookAround(double x, double y, double lastX, double lastY);
 	void move(Camera::direction dir, int delta);
 	void setAngle(Camera::angle angle, Vector3 punt, float distancia);
 	void setPla(Camera::pla pla, Vector3 punt, float distancia);

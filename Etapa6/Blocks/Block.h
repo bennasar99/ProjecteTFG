@@ -7,12 +7,6 @@ enum class Bloc {
 	AIRE,
 	AIGUA,
 	CUB,
-	CONO,
-	ESFERA,
-	TASSA,
-	CONO4C,
-	ESFERA4C,
-	DONUT,
 	HERBA,
 	HERBAFULL,
 	TERRA,
@@ -20,7 +14,6 @@ enum class Bloc {
 	TORXA,
 	LLUMSOTIL,
 	LLUMTERRA,
-	FAROLA,
 	MULTICOLOR,
 	FULLAARBRE,
 	FUSTA,
@@ -28,7 +21,6 @@ enum class Bloc {
 	PEDRA,
 	NORIA,
 	ALTAVEU,
-	ESTALAGMITA,
 	MIRALL,
 	GRUA,
 };
@@ -44,7 +36,7 @@ protected:
 							espai (que no s'hi puguin col·locar blocs) i que en destruir-lo es destrueixi tota l'estructura */
 public:
 
-	virtual void draw(bool wireframe, bool visible[6]);
+	virtual void draw(bool visible[6]);
 	virtual void draw();
 	virtual void update(int delta);
 	virtual void destroy();

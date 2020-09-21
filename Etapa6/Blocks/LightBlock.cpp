@@ -30,24 +30,12 @@ LightBlock::LightBlock(World* world, Bloc id, Vector3 pos) : Block(world, id, 0)
         this->light->setSpreadAngle(135.0f);
         this->light->setLightConcentration(4.0f);
         break;
-    case Bloc::FAROLA:
-        this->light = world->addLight(pos + Vector3(0, 1.f, 0));
-        this->light->setLightConcentration(1.0f);
-        this->light->setAttenuation(Attenuation::QUADRATIC, 0.5f);
-        this->world->setBlock(Bloc::AIRE, pos + Vector3(0, 2, 0), this, false);
-        this->world->setBlock(Bloc::AIRE, pos + Vector3(0, 1, 0), this, false);
-        break;
     }
 }
 
 void LightBlock::destroy() { 
     this->world->delLight(this->light);
     this->light = 0;
-    if (this->id == Bloc::FAROLA) {
-        world->deleteBlock(pos + Vector3(0, 1, 0), false);
-        world->deleteBlock(pos + Vector3(0, 2, 0), false);
-        world->deleteBlock(pos, false);
-    }
 }
 
 //Llum encesa ON/OFF
@@ -99,32 +87,5 @@ void LightBlock::draw() {
         glEnd();
         glEnable(GL_LIGHTING);
         break;
-    case Bloc::FAROLA: {
-        glLineWidth(4.0f);
-
-        //Tronc
-        glColor3f(0.1f, 0.1f, 0.1f);
-        glNormal3f(0, 1, 0);
-        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 10.f);
-        glBegin(GL_LINES);
-        glVertex3f(-0, 1.75, 0);
-        glVertex3f(-0, -0.5, 0);
-        glEnd();
-
-        //Base
-        glColor3f(0.1f, 0.1f, 0.1f);
-        glTranslatef(0, -0.5f, 0);
-        glRotatef(-90.0f, 1.0f, 0.0f, 0);
-        glutSolidCone(0.25f, 0.5f, 4, 1);
-        glRotatef(90.0f, 1.0f, 0.0f, 0);
-
-        //LLum
-        glTranslatef(0, 2, 0);
-        glDisable(GL_LIGHTING);
-        glColor3f(1, 1, 0);
-        glutSolidSphere(0.25, 100, 100);
-        glEnable(GL_LIGHTING);
-        break;
-        }
     }
 }

@@ -132,7 +132,7 @@ void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc
 					if (qualcun) {
 						glPushMatrix();
 						glTranslatef(x, y, z);
-						blocs[x][y][z]->draw(false, visible);
+						blocs[x][y][z]->draw(visible);
 						glPopMatrix();
 					}
 					/*if (this->isVisible(Vector3(x,y,z))) {

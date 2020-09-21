@@ -23,3 +23,5 @@ void drawCar(float rotRodes);
 
 float toRad(float degrees);
 float toDegree(float rads);
+
+void drawSphere(double r, int lats, int longs);

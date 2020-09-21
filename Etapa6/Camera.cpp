@@ -48,7 +48,7 @@ void Camera::setRight(Vector3 right) {
 /*
 	Estableix l'orientació de la càmera segons els moviments del ratolí
 */
-void Camera::lookAround(int x, int y, int lastX, int lastY) {
+void Camera::lookAround(double x, double y, double lastX, double lastY) {
 	if (this->freeLook) {
 
 		float xoffset = float(x - lastX);
