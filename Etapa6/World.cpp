@@ -3,6 +3,8 @@
 
 World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
 {
+	this->noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+
 	this->seed = seed;
 	this->camera = camera;
 	this->minpos = Vector3((float)sizex - 1, (float)sizey - 1, (float)sizez - 1);
@@ -38,6 +40,8 @@ World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
 }
 
 World::World(std::string name, Camera* camera) {
+	this->noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+
 	this->camera = camera;
 	this->minpos = Vector3((float)sizex - 1, (float)sizey - 1, (float)sizez - 1);
 
@@ -142,12 +146,14 @@ void World::generate(int seed) { //TODO: guardar spawn a world
 	//Generador del món
 	srand(seed); //Seed? xD
 	Vector3 pos = Vector3(0, 0, 0);
-	float lasty = (this->sizey * 16.0f) / 2.0f;
+	float lasty; // = (this->sizey * 16.0f) / 2.0f;
 	for (pos.x = 0; pos.x < (this->sizex * 16.0f); pos.x++) {
 		for (pos.z = 0; pos.z < (this->sizez * 16.0f); pos.z++) {
+			lasty = abs(noise.GetNoise(pos.x, pos.z)) * this->sizey;
+			printf("last: %f\n", lasty);
 			for (pos.y = 0; pos.y <= lasty; pos.y++) {
 				this->setBlock(Bloc::TERRA, pos, nullptr, false);
-				if (pos.y == lasty) {
+				if (pos.y == (int)lasty) {
 					int random = rand() % 128;
 					if (random == 1 || random == 5) {
 						this->setBlock(Bloc::HERBA, pos + Vector3(0, 1, 0), 0, false);

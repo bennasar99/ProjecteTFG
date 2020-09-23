@@ -25,6 +25,7 @@
 #include "Entities/Noria.h"
 #include "Chunk.h"
 
+#include "lib/FastNoiseLite.h"
 
 class Block;
 class LightBlock;
@@ -49,6 +50,8 @@ private:
 
 	int seed;
 	int updTimer = 1000;
+
+	FastNoiseLite noise;
 
 public:
 	//Han de ser nombres parells
