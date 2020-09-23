@@ -23,6 +23,7 @@ enum class Bloc {
 	ALTAVEU,
 	MIRALL,
 	GRUA,
+	LIMIT //SEMPRE DARRER
 };
 
 class World;

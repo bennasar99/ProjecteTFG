@@ -143,8 +143,8 @@ void World::generate(int seed) { //TODO: guardar spawn a world
 	srand(seed); //Seed? xD
 	Vector3 pos = Vector3(0, 0, 0);
 	float lasty = (this->sizey * 16.0f) / 2.0f;
-	for (pos.x = 0; pos.x < this->sizex * 16; pos.x++) {
-		for (pos.z = 0; pos.z < this->sizez * 16; pos.z++) {
+	for (pos.x = 0; pos.x < (this->sizex * 16.0f); pos.x++) {
+		for (pos.z = 0; pos.z < (this->sizez * 16.0f); pos.z++) {
 			for (pos.y = 0; pos.y <= lasty; pos.y++) {
 				this->setBlock(Bloc::TERRA, pos, nullptr, false);
 				if (pos.y == lasty) {
@@ -464,7 +464,10 @@ Bloc World::getBlock(Vector3 pos) {
 	cpos.floor();
 	Vector3 bpos = Vector3((int)pos.x % 16, (int)pos.y % 16, (int)pos.z % 16);
 	int desp = getDesp(cpos);
-	if (desp == -1 || chunks[desp] == 0) {
+	if (desp == -1) {
+		return Bloc::LIMIT;
+	}
+	if (chunks[desp] == 0) {
 		return Bloc::RES;
 	}
 	return chunks[desp]->getBlock(bpos); 
@@ -637,7 +640,7 @@ void World::interact(Vector3 pos) {
 //Comprova que una posició valida i retorna el desplaçament corresponent a la posició
 int World::getDesp(Vector3 pos) {
 	int desp = (int)pos.x + this->sizey * ((int)pos.y + this->sizez * (int)pos.z);
-	if ((desp >= (this->sizex * this->sizey * this->sizez))||(desp < 0) || pos.x < 0 || pos.y < 0 || pos.z < 0) {
+	if ((desp >= (this->sizex * this->sizey * this->sizez))||(desp < 0) || pos.x < 0 || pos.y < 0 || pos.z < 0 || pos.x >= this->sizex || pos.y >= this->sizey || pos.z >= this->sizez) {
 		return -1;
 	}
 	return desp;

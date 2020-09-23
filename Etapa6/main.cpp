@@ -564,6 +564,9 @@ void movement(int key) {
 			glDisable(GL_LIGHT0);
 		}
 	}
+	if (key == GLFW_KEY_P) {
+		printf("%f %f %f \n", ent->getPos().x, ent->getPos().y, ent->getPos().z);
+	}
 	if (key == GLFW_KEY_TAB) { //Tab: obrir inventari
 		inv = !inv;
 		if (inv) {
