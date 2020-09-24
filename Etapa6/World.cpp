@@ -3,7 +3,9 @@
 
 World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
 {
-	this->noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+	this->noise.SetNoiseType(FastNoiseLite::NoiseType_ValueCubic);
+	this->noise.SetFrequency(0.01f);
+	this->noise.SetFractalGain(0.8f);
 
 	this->seed = seed;
 	this->camera = camera;
@@ -40,7 +42,8 @@ World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
 }
 
 World::World(std::string name, Camera* camera) {
-	this->noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+	this->noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	this->noise.SetFrequency(0.005f);
 
 	this->camera = camera;
 	this->minpos = Vector3((float)sizex - 1, (float)sizey - 1, (float)sizez - 1);
@@ -145,11 +148,12 @@ void World::save(std::string name) {
 void World::generate(int seed) { //TODO: guardar spawn a world
 	//Generador del món
 	srand(seed); //Seed? xD
+	noise.SetSeed(seed);
 	Vector3 pos = Vector3(0, 0, 0);
 	float lasty; // = (this->sizey * 16.0f) / 2.0f;
 	for (pos.x = 0; pos.x < (this->sizex * 16.0f); pos.x++) {
 		for (pos.z = 0; pos.z < (this->sizez * 16.0f); pos.z++) {
-			lasty = abs(noise.GetNoise(pos.x, pos.z)) * this->sizey;
+			lasty = (this->sizey*16)/2 + noise.GetNoise(pos.x, pos.z) * 80;
 			printf("last: %f\n", lasty);
 			for (pos.y = 0; pos.y <= lasty; pos.y++) {
 				this->setBlock(Bloc::TERRA, pos, nullptr, false);
@@ -165,7 +169,7 @@ void World::generate(int seed) { //TODO: guardar spawn a world
 					else if (random == 3) {
 						this->setBlock(Bloc::AIGUA, pos, 0, false);
 					}
-					else if (random == 4) {
+					else if (random == 4 && lasty > ((this->sizey*16)/2)) {
 						//Tronc
 						this->setBlock(Bloc::FUSTAARBRE, pos, 0, false);
 						int rand2 = rand() % 5 + 1;
@@ -185,6 +189,10 @@ void World::generate(int seed) { //TODO: guardar spawn a world
 						}
 					}
 				}
+			}
+			//Oceans
+			for (pos.y = lasty; pos.y <= ((this->sizey*16)/2); pos.y++) {
+				this->setBlock(Bloc::AIGUA, pos, nullptr, false);
 			}
 		}
 		int random = rand() % 4;
@@ -535,7 +543,33 @@ void World::draw(Vector3 pos, float dist) {
 	//printf("%f %f %f, %f %f %f\n", cMin.x, cMin.y, cMin.z, cMax.x, cMax.y, cMax.z);
 
 	int nchunks = 0;
-	for (float x = cMin.x; x <= cMax.x; x++) {
+	for (float x = cMin.x; x <= cMax.x; x++) { //Optimització possible: si els chunks circumdants no son visibles, aquest no ho és
+		for (float y = cMin.y; y <= cMax.y; y++) {
+			for (float z = cMin.z; z <= cMax.z; z++) {
+				int desp = getDesp(Vector3(x, y, z));
+				if (chunks[desp] == nullptr) {
+					continue;
+				}
+				float dist = Vector3::module(camera->getPos() - Vector3(x * 16.0f, y * 16.0f, z * 16.0f));
+				if ((dist < 32) || (camera->isVisible(Vector3(x * 16.0f, y * 16.0f, z * 16.0f), 100) ||
+					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f, z * 16.0f), 100) ||
+					camera->isVisible(Vector3(x * 16.0f, y * 16.0f, z * 16.0f + 16.0f), 100) ||
+					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f, z * 16.0f + 16.0f), 100) ||
+					camera->isVisible(Vector3(x * 16.0f, y * 16.0f + 16.0f, z * 16.0f), 100) ||
+					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f + 16.0f, z * 16.0f), 100) ||
+					camera->isVisible(Vector3(x * 16.0f, y * 16.0f + 16.0f, z * 16.0f + 16.0f), 100) ||
+					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f + 16.0f, z * 16.0f + 16.0f), 100))){
+					
+					glPushMatrix();
+					glTranslatef(x * 16.0f, y * 16.0f, z * 16.0f);
+					chunks[desp]->drawO();
+					glPopMatrix();
+					nchunks++;
+				}
+			}
+		}
+	}
+	for (float x = cMin.x; x <= cMax.x; x++) { //Optimització possible: si els chunks circumdants no son visibles, aquest no ho és
 		for (float y = cMin.y; y <= cMax.y; y++) {
 			for (float z = cMin.z; z <= cMax.z; z++) {
 				int desp = getDesp(Vector3(x, y, z));
@@ -550,11 +584,11 @@ void World::draw(Vector3 pos, float dist) {
 					camera->isVisible(Vector3(x * 16.0f, y * 16.0f + 16.0f, z * 16.0f), 100) ||
 					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f + 16.0f, z * 16.0f), 100) ||
 					camera->isVisible(Vector3(x * 16.0f, y * 16.0f + 16.0f, z * 16.0f + 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f + 16.0f, z * 16.0f + 16.0f), 100))){
-					
+					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f + 16.0f, z * 16.0f + 16.0f), 100))) {
+
 					glPushMatrix();
 					glTranslatef(x * 16.0f, y * 16.0f, z * 16.0f);
-					chunks[desp]->draw();
+					chunks[desp]->drawT();
 					glPopMatrix();
 					nchunks++;
 				}

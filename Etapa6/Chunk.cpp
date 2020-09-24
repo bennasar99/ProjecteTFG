@@ -13,12 +13,13 @@ Chunk::Chunk(World* world, Vector3 pos) {
 	this->world = world;
 	this->cpos = pos;
 	this->nblocs = 0;
-	this->dlist = glGenLists(1);
+	this->olist= glGenLists(1);
+	this->tlist = glGenLists(1);
 
 	this->firstdraw = false;
 }
 
-void Chunk::draw() {
+void Chunk::drawO() {
 	if (nblocs == 0) {
 		return;
 	}
@@ -26,7 +27,18 @@ void Chunk::draw() {
 		firstdraw = true;
 		this->updateDL();
 	}
-	glCallList(dlist);
+	glCallList(olist);
+}
+
+void Chunk::drawT() {
+	if (nblocs == 0) {
+		return;
+	}
+	if (firstdraw == false) {
+		firstdraw = true;
+		this->updateDL();
+	}
+	glCallList(tlist);
 }
 
 Vector3 Chunk::getPos() {
@@ -78,7 +90,8 @@ void Chunk::destroy() {
 			}
 		}
 	}
-	glDeleteLists(dlist, 1);
+	glDeleteLists(olist, 1);
+	glDeleteLists(tlist, 1);
 }
 
 //TODO actualitzar display list
@@ -105,13 +118,13 @@ void Chunk::interact(Vector3 bpos) {
 }
 
 void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc res i se dibuixarà, no cal
-	glDeleteLists(dlist, 1);
-	dlist = glGenLists(1);
-	glNewList(dlist, GL_COMPILE);
+	glDeleteLists(olist, 1);
+	olist = glGenLists(1);
+	glNewList(olist, GL_COMPILE);
 
 	glTranslatef(0.5f, 0.5f, 0.5f);
 	int nb = 0;
-	for (int x = 0; x < 16; x++) {
+	for (int x = 0; x < 16; x++) { //1a Passada: OPACS
 		for (int z = 0; z < 16; z++) { 
 			for (int y = 0; y < 16; y++) { 
 				if (blocs[x][y][z] != 0) {
@@ -121,14 +134,18 @@ void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc
 					Vector3 pos = cpos * 16.0f + bpos;
 					Vector3 toCheck[6] = { pos - Vector3(1,0,0), pos + Vector3(0,1,0), pos + Vector3(1,0,0), pos - Vector3(0,1,0),
 						pos + Vector3(0,0,1), pos - Vector3(0,0,1) };
-					bool visible[6] = { false, false, false };
+					bool visible[6] = { false, false, false, false, false, false };
 					bool qualcun = false;
-					for (int i = 0; i < 6; i++) {
-						if (Block::isTransparent(getBlockWorld(toCheck[i]))) {
-							visible[i] = true;
-							qualcun = true;
+					if (!Block::isTransparent(blocs[x][y][z]->getId())) {
+						for (int i = 0; i < 6; i++) {
+							if (Block::isTransparent(getBlockWorld(toCheck[i]))) {
+								visible[i] = true;
+								qualcun = true;
+							}
 						}
+						nb++;
 					}
+
 					if (qualcun) {
 						glPushMatrix();
 						glTranslatef(x, y, z);
@@ -141,7 +158,6 @@ void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc
 						blocs[x][y][z]->draw();
 						glPopMatrix();
 					}*/
-					nb++;
 					if (nb >= nblocs) { //No cal dibuixar més blocs
 						y = 16; z = 16; x = 16;
 					}
@@ -149,7 +165,58 @@ void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc
 			}
 		}
 	}
-	glEndList();
+	glEndList(); //FI llista opacs
+
+	glDeleteLists(tlist, 1);
+	tlist = glGenLists(1);
+	glNewList(tlist, GL_COMPILE);
+
+	glTranslatef(0.5f, 0.5f, 0.5f);
+	for (int x = 0; x < 16; x++) { //2a Passada: TRANSPARENTS
+		for (int z = 0; z < 16; z++) {
+			for (int y = 0; y < 16; y++) {
+				if (blocs[x][y][z] != 0) {
+					Vector3 bpos = Vector3(x, y, z);
+					//VERSIÓ ALTERNATIVA
+					//Ordre: Esquerra, Damunt, Dreta, Abaix, Davant, Darrera
+					Vector3 pos = cpos * 16.0f + bpos;
+					Vector3 toCheck[6] = { pos - Vector3(1,0,0), pos + Vector3(0,1,0), pos + Vector3(1,0,0), pos - Vector3(0,1,0),
+						pos + Vector3(0,0,1), pos - Vector3(0,0,1) };
+					bool visible[6] = { false, false, false, false, false, false };
+					bool qualcun = false;
+					if (Block::isTransparent(blocs[x][y][z]->getId())) { //Si és aigua, només s'ha de dibuixar si està en contacte amb aire o null
+						Bloc btipus = blocs[x][y][z]->getId();
+						for (int i = 0; i < 6; i++) {
+							Bloc bl = getBlockWorld(toCheck[i]);
+							if (Block::isTransparent(bl) && btipus != bl) {
+								visible[i] = true;
+								qualcun = true;
+							}
+						}
+						nb++;
+					}
+
+					if (qualcun) {
+						glPushMatrix();
+						glTranslatef(x, y, z);
+						blocs[x][y][z]->draw(visible);
+						glPopMatrix();
+					}
+
+					if (nb >= nblocs) { //No cal dibuixar més blocs
+						y = 16; z = 16; x = 16;
+					}
+					/*if (this->isVisible(Vector3(x,y,z))) {
+						glPushMatrix();
+						glTranslatef(x, y, z);
+						blocs[x][y][z]->draw();
+						glPopMatrix();
+					}*/
+				}
+			}
+		}
+	}
+	glEndList(); //Fi llista transparent
 }
 
 bool Chunk::isVisible(Vector3 bpos) {

@@ -25,7 +25,7 @@ private:
 
 	//Inventari *inv;
 
-	int gamemode = 1; //0 = creative, 1 = survival
+	int gamemode = 0; //0 = creative, 1 = survival
 
 public:
 	Player(World* world, Vector3 pos);

@@ -7,7 +7,8 @@ private:
 	Block* blocs[16][16][16];
 	Vector3 cpos;
 
-	GLuint dlist;
+	GLuint tlist;
+	GLuint olist;
 
 	World* world;
 
@@ -15,7 +16,9 @@ private:
 
 	//GLuint vbo;
 public:
-	void draw();
+	void drawO();
+	void drawT();
+
 	Vector3 getPos();
 
 	bool setBlock(Block* bloc, Vector3 bpos);

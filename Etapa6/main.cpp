@@ -20,7 +20,7 @@ GLFWwindow* window;
 
 //Clipping planes
 const float zNear = 0.001f;
-float zFar = 64.0f;
+float zFar = 64;
 
 const float axisSize = zFar;
 
@@ -83,7 +83,7 @@ void Display(GLFWwindow* window)
 
 	fpsc++;
 	if (fpsc > 20) { //Contador fps
-		//printf("%f\n", fps);
+		printf("%f\n", fps);
 		fpsc = 0;
 	}
 	//if (fps < 26) {
