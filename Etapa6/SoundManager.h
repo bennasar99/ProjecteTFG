@@ -12,7 +12,8 @@ enum class So { //IDs dels sons
 	DESTRUEIX,
 	MUSICA,
 	COLOCA,
-	ONOFF
+	ONOFF,
+	CAMINA
 };
 
 class SoundManager {

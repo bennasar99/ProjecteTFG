@@ -20,7 +20,7 @@ GLFWwindow* window;
 
 //Clipping planes
 const float zNear = 0.001f;
-float zFar = 64;
+float zFar = 64.0f;
 
 const float axisSize = zFar;
 
@@ -135,39 +135,41 @@ void Display(GLFWwindow* window)
 	world->updateLights(camera.getPos(), Vector3::normalize(camera.getFront()), camera.getFov(), camera.getAspect());
 
 	//Dibuixam el bloc seleccionat
-	glDisable(GL_LIGHTING); //El volem veure sempre
-	glPushMatrix();
-	glLineWidth(5.0f);
-	glColor3f(1, 0, 0);
-	ba.floor();
-	glTranslatef(ba.x, ba.y, ba.z);
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(0, 0, 0); //Part d'abaix
-	glVertex3f(0, 0, 1);
-	glVertex3f(1, 0, 1);
-	glVertex3f(1, 0, 0);
-	glVertex3f(0, 0, 0);
-	glEnd();
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(0, 1, 0); //Part d'adalt
-	glVertex3f(0, 1, 1);
-	glVertex3f(1, 1, 1);
-	glVertex3f(1, 1, 0);
-	glVertex3f(0, 1, 0);
-	glEnd();
-	glBegin(GL_LINES);
-	glVertex3f(0, 0, 0); //Part d'adalt
-	glVertex3f(0, 1, 0);
-	glVertex3f(1, 0, 0);
-	glVertex3f(1, 1, 0);
-	glVertex3f(0, 0, 1);
-	glVertex3f(0, 1, 1);
-	glVertex3f(1, 0, 1);
-	glVertex3f(1, 1, 1);
-	glEnd();
-	glLineWidth(1.0f);
-	glPopMatrix();
-	glEnable(GL_LIGHTING); //El volem veure sempre
+	if (Block::isSolid(world->getBlock(ba))) {
+		glDisable(GL_LIGHTING); //El volem veure sempre
+		glPushMatrix();
+		glLineWidth(5.0f);
+		glColor3f(1, 0, 0);
+		ba.floor();
+		glTranslatef(ba.x, ba.y, ba.z);
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(0, 0, 0); //Part d'abaix
+		glVertex3f(0, 0, 1);
+		glVertex3f(1, 0, 1);
+		glVertex3f(1, 0, 0);
+		glVertex3f(0, 0, 0);
+		glEnd();
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(0, 1, 0); //Part d'adalt
+		glVertex3f(0, 1, 1);
+		glVertex3f(1, 1, 1);
+		glVertex3f(1, 1, 0);
+		glVertex3f(0, 1, 0);
+		glEnd();
+		glBegin(GL_LINES);
+		glVertex3f(0, 0, 0); //Part d'adalt
+		glVertex3f(0, 1, 0);
+		glVertex3f(1, 0, 0);
+		glVertex3f(1, 1, 0);
+		glVertex3f(0, 0, 1);
+		glVertex3f(0, 1, 1);
+		glVertex3f(1, 0, 1);
+		glVertex3f(1, 1, 1);
+		glEnd();
+		glLineWidth(1.0f);
+		glPopMatrix();
+		glEnable(GL_LIGHTING); //El volem veure sempre
+	}
 
 	world->drawSol(camera.getPos(), zFar-1); //Dibuixam el sol
 
@@ -459,7 +461,7 @@ int main(int argc, char** argv)
 	TextureManager::LoadTexture("Textures/pedra.png", Textura::PEDRA);
 	TextureManager::LoadTexture("Textures/altaveu.jpg", Textura::ALTAVEU);
 	TextureManager::LoadTexture("Textures/estalagmita.jfif", Textura::ESTALAGMITA);
-	TextureManager::LoadTexture("Textures/fustaarbre.png", Textura::FUSTAARBRE);
+	TextureManager::LoadTexture("Textures/fustaarbre.jpg", Textura::FUSTAARBRE);
 	TextureManager::LoadTexture("Textures/fullaarbre.png", Textura::FULLAARBRE);
 
 	//Sons
@@ -469,6 +471,7 @@ int main(int argc, char** argv)
 	SoundManager::loadSound("Sons/switch.wav", So::ONOFF);
 	SoundManager::loadSound("Sons/break.wav", So::DESTRUEIX);
 	SoundManager::loadSound("Sons/place.wav", So::COLOCA);
+	SoundManager::loadSound("Sons/passes/mud02.wav", So::CAMINA);
 
 	//Models
 	ModelManager::initialize();

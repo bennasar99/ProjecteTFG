@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Blocks/Block.h"
+#define CHUNKSIZE 16
 
 class Chunk {
 private:
-	Block* blocs[16][16][16];
+	Block* blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE];
 	Vector3 cpos;
 
 	GLuint tlist;

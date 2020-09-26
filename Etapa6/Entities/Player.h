@@ -16,7 +16,7 @@ class World;
 class Player : public Entity {
 private:
 	float grav = 1;
-	Vector3 vel; //Velocitat
+	float speed = 1; 
 
 	int health;
 	float rot = 0;

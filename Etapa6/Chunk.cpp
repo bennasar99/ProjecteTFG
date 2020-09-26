@@ -3,9 +3,9 @@
 #include "World.h"
 
 Chunk::Chunk(World* world, Vector3 pos) {
-	for (int x = 0; x < 16; x++) {
-		for (int y = 0; y < 16; y++) {
-			for (int z = 0; z < 16; z++) {
+	for (int x = 0; x < CHUNKSIZE; x++) {
+		for (int y = 0; y < CHUNKSIZE; y++) {
+			for (int z = 0; z < CHUNKSIZE; z++) {
 				blocs[x][y][z] = nullptr;
 			}
 		}
@@ -68,9 +68,9 @@ Bloc Chunk::getBlock(Vector3 pos) {
 }
 
 void Chunk::update(int delta) {
-	for (int x = 0; x < 16; x++) {
-		for (int y = 0; y < 16; y++) {
-			for (int z = 0; z < 16; z++) {
+	for (int x = 0; x < CHUNKSIZE; x++) {
+		for (int y = 0; y < CHUNKSIZE; y++) {
+			for (int z = 0; z < CHUNKSIZE; z++) {
 				if (blocs[x][y][z] != 0) {
 					blocs[x][y][z]->update(delta);
 				}
@@ -80,9 +80,9 @@ void Chunk::update(int delta) {
 }
 
 void Chunk::destroy() {
-	for (int x = 0; x < 16; x++) {
-		for (int y = 0; y < 16; y++) {
-			for (int z = 0; z < 16; z++) {
+	for (int x = 0; x < CHUNKSIZE; x++) {
+		for (int y = 0; y < CHUNKSIZE; y++) {
+			for (int z = 0; z < CHUNKSIZE; z++) {
 				if (blocs[x][y][z] != 0) {
 					blocs[x][y][z]->destroy();
 					delete blocs[x][y][z];
@@ -124,14 +124,14 @@ void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc
 
 	glTranslatef(0.5f, 0.5f, 0.5f);
 	int nb = 0;
-	for (int x = 0; x < 16; x++) { //1a Passada: OPACS
-		for (int z = 0; z < 16; z++) { 
-			for (int y = 0; y < 16; y++) { 
+	for (int x = 0; x < CHUNKSIZE; x++) { //1a Passada: OPACS
+		for (int z = 0; z < CHUNKSIZE; z++) {
+			for (int y = 0; y < CHUNKSIZE; y++) {
 				if (blocs[x][y][z] != 0) {
 					Vector3 bpos = Vector3(x, y, z);
 					//VERSIÓ ALTERNATIVA
 					//Ordre: Esquerra, Damunt, Dreta, Abaix, Davant, Darrera
-					Vector3 pos = cpos * 16.0f + bpos;
+					Vector3 pos = cpos * CHUNKSIZE + bpos;
 					Vector3 toCheck[6] = { pos - Vector3(1,0,0), pos + Vector3(0,1,0), pos + Vector3(1,0,0), pos - Vector3(0,1,0),
 						pos + Vector3(0,0,1), pos - Vector3(0,0,1) };
 					bool visible[6] = { false, false, false, false, false, false };
@@ -159,7 +159,7 @@ void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc
 						glPopMatrix();
 					}*/
 					if (nb >= nblocs) { //No cal dibuixar més blocs
-						y = 16; z = 16; x = 16;
+						y = CHUNKSIZE; z = CHUNKSIZE; x = CHUNKSIZE;
 					}
 				}
 			}
@@ -172,14 +172,14 @@ void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc
 	glNewList(tlist, GL_COMPILE);
 
 	glTranslatef(0.5f, 0.5f, 0.5f);
-	for (int x = 0; x < 16; x++) { //2a Passada: TRANSPARENTS
-		for (int z = 0; z < 16; z++) {
-			for (int y = 0; y < 16; y++) {
+	for (int x = 0; x < CHUNKSIZE; x++) { //2a Passada: TRANSPARENTS
+		for (int z = 0; z < CHUNKSIZE; z++) {
+			for (int y = 0; y < CHUNKSIZE; y++) {
 				if (blocs[x][y][z] != 0) {
 					Vector3 bpos = Vector3(x, y, z);
 					//VERSIÓ ALTERNATIVA
 					//Ordre: Esquerra, Damunt, Dreta, Abaix, Davant, Darrera
-					Vector3 pos = cpos * 16.0f + bpos;
+					Vector3 pos = cpos * CHUNKSIZE + bpos;
 					Vector3 toCheck[6] = { pos - Vector3(1,0,0), pos + Vector3(0,1,0), pos + Vector3(1,0,0), pos - Vector3(0,1,0),
 						pos + Vector3(0,0,1), pos - Vector3(0,0,1) };
 					bool visible[6] = { false, false, false, false, false, false };
@@ -204,7 +204,7 @@ void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc
 					}
 
 					if (nb >= nblocs) { //No cal dibuixar més blocs
-						y = 16; z = 16; x = 16;
+						y = CHUNKSIZE; z = CHUNKSIZE; x = CHUNKSIZE;
 					}
 					/*if (this->isVisible(Vector3(x,y,z))) {
 						glPushMatrix();
@@ -220,7 +220,7 @@ void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc
 }
 
 bool Chunk::isVisible(Vector3 bpos) {
-	Vector3 pos = cpos * 16.0f + bpos;
+	Vector3 pos = cpos * CHUNKSIZE + bpos;
 	Vector3 toCheck[6] = { pos + Vector3(1,0,0), pos - Vector3(1,0,0), pos + Vector3(0,1,0), pos - Vector3(0,1,0),
 						pos + Vector3(0,0,1), pos - Vector3(0,0,1) };
 	for (int i = 0; i < 6; i++) {
@@ -233,16 +233,16 @@ bool Chunk::isVisible(Vector3 bpos) {
 }
 
 Bloc Chunk::getBlockWorld(Vector3 bpos) {
-	if (bpos.x >= world->sizex * 16.0f || bpos.y >= world->sizey * 16.0f || bpos.z >= world->sizez * 16.0f ||
+	if (bpos.x >= world->sizex * CHUNKSIZE || bpos.y >= world->sizey * CHUNKSIZE || bpos.z >= world->sizez * CHUNKSIZE ||
 		bpos.x < 0 || bpos.y < 0 || bpos.z < 0) {
 		return Bloc::TERRA; //Optimització no dibuixar bloc border
 	}
-	if (bpos.x >= cpos.x * 16.0f && bpos.x < (cpos.x + 1) * 16.0f && bpos.y >= cpos.y * 16.0f &&
-		bpos.y < (cpos.y + 1) * 16.0f && bpos.z >= cpos.z * 16.0f && bpos.z < (cpos.z + 1) * 16.0f) {
-		if (this->blocs[(int)bpos.x % 16][(int)bpos.y % 16][(int)bpos.z % 16] == 0) {
+	if (bpos.x >= cpos.x * CHUNKSIZE && bpos.x < (cpos.x + 1) * CHUNKSIZE && bpos.y >= cpos.y * CHUNKSIZE &&
+		bpos.y < (cpos.y + 1) * CHUNKSIZE && bpos.z >= cpos.z * CHUNKSIZE && bpos.z < (cpos.z + 1) * CHUNKSIZE) {
+		if (this->blocs[(int)bpos.x % CHUNKSIZE][(int)bpos.y % CHUNKSIZE][(int)bpos.z % CHUNKSIZE] == 0) {
 			return Bloc::RES;
 		}
-		return this->blocs[(int)bpos.x % 16][(int)bpos.y % 16][(int)bpos.z % 16]->getId();
+		return this->blocs[(int)bpos.x % CHUNKSIZE][(int)bpos.y % CHUNKSIZE][(int)bpos.z % CHUNKSIZE]->getId();
 	}
 	else {
 		return this->world->getBlock(bpos);
@@ -251,9 +251,9 @@ Bloc Chunk::getBlockWorld(Vector3 bpos) {
 
 bool Chunk::getByteData(char* arr) {
 	int desp = 0;
-	for (int x = 0; x < 16; x++) {
-		for (int y = 0; y < 16; y++) {
-			for (int z = 0; z < 16; z++) {
+	for (int x = 0; x < CHUNKSIZE; x++) {
+		for (int y = 0; y < CHUNKSIZE; y++) {
+			for (int z = 0; z < CHUNKSIZE; z++) {
 				arr[desp++] = static_cast<unsigned char>(this->getBlock(Vector3((float)x, (float)y, (float)z)));
 			}
 		}
@@ -263,12 +263,12 @@ bool Chunk::getByteData(char* arr) {
 
 bool Chunk::readFromByteData(char* arr) {
 	int desp = 0;
-	for (int x = 0; x < 16; x++) {
-		for (int y = 0; y < 16; y++) {
-			for (int z = 0; z < 16; z++) {
+	for (int x = 0; x < CHUNKSIZE; x++) {
+		for (int y = 0; y < CHUNKSIZE; y++) {
+			for (int z = 0; z < CHUNKSIZE; z++) {
 				//printf("%d ", arr[desp]);
 				Bloc tipus = static_cast<Bloc>(arr[desp++]);
-				world->setBlock(tipus, (this->cpos * 16.0f) + Vector3(x, y, z), nullptr, false);
+				world->setBlock(tipus, (this->cpos * CHUNKSIZE) + Vector3(x, y, z), nullptr, false);
 			}
 		}
 	}

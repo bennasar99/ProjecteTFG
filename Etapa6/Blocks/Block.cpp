@@ -34,9 +34,9 @@ void Block::draw(bool visible[6]) {
 	switch (this->id) { //Dibuixam el que correspongui per cada bloc
 	case Bloc::AIGUA: //Aigua
 		glColor4f(0, 0, 1, 0.5f);
-		//glDisable(GL_CULL_FACE);
+		glDisable(GL_CULL_FACE);
 		drawCub(visible);
-		//glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 		break;
 	case Bloc::CUB: //Cub vermell
 		glColor3f(1, 0, 0);

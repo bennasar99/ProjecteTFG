@@ -6,6 +6,7 @@ World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
 	this->noise.SetNoiseType(FastNoiseLite::NoiseType_ValueCubic);
 	this->noise.SetFrequency(0.01f);
 	this->noise.SetFractalGain(0.8f);
+	this->noise.SetSeed(seed);
 
 	this->seed = seed;
 	this->camera = camera;
@@ -24,9 +25,9 @@ World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
 	this->generate(seed);
 
 	//Col·locam càmera
-	int x = rand() % (sizex * 16);
-	int z = rand() % (sizez * 16);
-	for (int y = 0; y < this->sizey * 16.0f; y++) {
+	int x = rand() % (sizex * CHUNKSIZE);
+	int z = rand() % (sizez * CHUNKSIZE);
+	for (int y = 0; y < this->sizey * CHUNKSIZE; y++) {
 		if (getBlock(Vector3(x, y, z)) == Bloc::RES) {
 			spawn = Vector3(x, y + 1, z);
 			break;
@@ -67,7 +68,7 @@ World::World(std::string name, Camera* camera) {
 
 	printf("Mides del mon: %d %d %d, spawn a: %d %d %d\n", this->sizex, this->sizey, this->sizez, sX, sY, sZ);
 
-	const int chunkSize = 16 * 16 * 16;
+	const int chunkSize = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
 	char buffer[chunkSize];
 	for (int x = 0; x < this->sizex; x++) {
 		for (int y = 0; y < this->sizey; y++) {
@@ -112,7 +113,7 @@ void World::save(std::string name) {
 	file.write(&sY, 1);
 	file.write(&sZ, 1);
 
-	const int chunkSize = 16 * 16 * 16;
+	const int chunkSize = CHUNKSIZE* CHUNKSIZE* CHUNKSIZE;
 	char buffer[chunkSize];
 
 	for (int x = 0; x < this->sizex; x++) {
@@ -150,40 +151,42 @@ void World::generate(int seed) { //TODO: guardar spawn a world
 	srand(seed); //Seed? xD
 	noise.SetSeed(seed);
 	Vector3 pos = Vector3(0, 0, 0);
-	float lasty; // = (this->sizey * 16.0f) / 2.0f;
-	for (pos.x = 0; pos.x < (this->sizex * 16.0f); pos.x++) {
-		for (pos.z = 0; pos.z < (this->sizez * 16.0f); pos.z++) {
-			lasty = (this->sizey*16)/2 + noise.GetNoise(pos.x, pos.z) * 80;
+	float lasty = 0; // = (this->sizey * CHUNKSIZE) / 2.0f;
+	for (pos.x = 0; pos.x < (this->sizex * CHUNKSIZE); pos.x++) {
+		for (pos.z = 0; pos.z < (this->sizez * CHUNKSIZE); pos.z++) {
+			lasty = (this->sizey* CHUNKSIZE)/2 + noise.GetNoise(pos.x, pos.z) * 80;
 			printf("last: %f\n", lasty);
-			for (pos.y = 0; pos.y <= lasty; pos.y++) {
+			for (pos.y = 0; pos.y < lasty; pos.y++) {
 				this->setBlock(Bloc::TERRA, pos, nullptr, false);
 				if (pos.y == (int)lasty) {
-					int random = rand() % 128;
-					if (random == 1 || random == 5) {
-						this->setBlock(Bloc::HERBA, pos + Vector3(0, 1, 0), 0, false);
-					}
-					else if (random == 2 || random == 6) {
-						this->setBlock(Bloc::HERBAFULL, pos + Vector3(0, 1, 0), 0, false);
-						this->setBlock(Bloc::HERBA, pos + Vector3(0, 2, 0), 0, false);
-					}
-					else if (random == 3) {
-						this->setBlock(Bloc::AIGUA, pos, 0, false);
-					}
-					else if (random == 4 && lasty > ((this->sizey*16)/2)) {
-						//Tronc
-						this->setBlock(Bloc::FUSTAARBRE, pos, 0, false);
-						int rand2 = rand() % 5 + 1;
-						for (int i = 1; i <= rand2; i++) {
-							this->setBlock(Bloc::FUSTAARBRE, pos + Vector3(0, i, 0), 0, false);
+					if (lasty > (this->sizey * CHUNKSIZE) / 2) { //Elements superfície
+						int random = rand() % 128;
+						if (random == 1 || random == 5) {
+							this->setBlock(Bloc::HERBA, pos + Vector3(0, 1, 0), 0, false);
 						}
-						//Fulles
-						int altura = rand() % 3 + 1;
-						int amplada = (rand() % rand2) * 2 + 1;
-						for (int y = 0; y < altura; y++) {
-							for (int x = -amplada; x <= amplada; x++) {
-								for (int z = -amplada; z <= amplada; z++) {
-									this->setBlock(Bloc::FULLAARBRE, pos + Vector3(0, rand2 + y, 0)
-										+ Vector3(x, 0, 0) + Vector3(0, 0, z), 0, false);
+						else if (random == 2 || random == 6) {
+							this->setBlock(Bloc::HERBAFULL, pos + Vector3(0, 1, 0), 0, false);
+							this->setBlock(Bloc::HERBA, pos + Vector3(0, 2, 0), 0, false);
+						}
+						else if (random == 3) {
+							this->setBlock(Bloc::AIGUA, pos, 0, false);
+						}
+						else if (random == 4) {
+							//Tronc
+							this->setBlock(Bloc::FUSTAARBRE, pos, 0, false);
+							int rand2 = rand() % 5 + 1;
+							for (int i = 1; i <= rand2; i++) {
+								this->setBlock(Bloc::FUSTAARBRE, pos + Vector3(0, i, 0), 0, false);
+							}
+							//Fulles
+							int altura = rand() % 3 + 1;
+							int amplada = (rand() % (rand2)) + 1;
+							for (int y = 0; y < altura; y++) {
+								for (int x = -amplada; x <= amplada; x++) {
+									for (int z = -amplada; z <= amplada; z++) {
+										this->setBlock(Bloc::FULLAARBRE, pos + Vector3(0, rand2 + y, 0)
+											+ Vector3(x, 0, 0) + Vector3(0, 0, z), 0, false);
+									}
 								}
 							}
 						}
@@ -191,22 +194,9 @@ void World::generate(int seed) { //TODO: guardar spawn a world
 				}
 			}
 			//Oceans
-			for (pos.y = lasty; pos.y <= ((this->sizey*16)/2); pos.y++) {
+			for (pos.y = lasty; pos.y <= (this->sizey* CHUNKSIZE)/2; pos.y++) {
 				this->setBlock(Bloc::AIGUA, pos, nullptr, false);
 			}
-		}
-		int random = rand() % 4;
-		if (random == 2) {
-			lasty++;
-		}
-		else if (random == 1) {
-			lasty--;
-		}
-		if (lasty > this->sizey * 16 - 4) {
-			lasty = this->sizey * 16 - 4;
-		}
-		if (lasty < 1) {
-			lasty = 1;
 		}
 	}
 
@@ -310,9 +300,9 @@ void World::update(int delta, Vector3 pos) {
 	lights.sort(compareLights); //Ordenam les llums per distància
 
 	//NOU CODI CHUNKS
-	pos = pos / 16;
+	pos = pos / CHUNKSIZE;
 	pos.floor();
-	float dist = floor(camera->getViewDist() / 16.0f);
+	float dist = floor(camera->getViewDist() / CHUNKSIZE);
 	for (int x = pos.x - dist; x < pos.x + dist; x++) {
 		for (int y = pos.y - dist; y < pos.y + dist; y++) {
 			for (int z = pos.z - dist; z < pos.z + dist; z++) {
@@ -389,9 +379,9 @@ bool World::deleteBlock(Vector3 pos, bool destroy) { //Eliminar Bloc::RES?
 	//return true;
 
 	pos.floor();
-	Vector3 cpos = pos / 16.0f;
+	Vector3 cpos = pos / CHUNKSIZE;
 	cpos.floor();
-	Vector3 bpos = Vector3((int)pos.x % 16, (int)pos.y % 16, (int)pos.z % 16);
+	Vector3 bpos = Vector3((int)pos.x % CHUNKSIZE, (int)pos.y % CHUNKSIZE, (int)pos.z % CHUNKSIZE);
 	int desp = getDesp(cpos);
 	if (desp == -1) {
 		return false;
@@ -404,9 +394,9 @@ bool World::setBlock(Bloc tipus, Vector3 pos, Block* parent, bool listUpdate) {
 
 	//NOU CODI CHUNKS:
 	pos.floor();
-	Vector3 cpos = pos / 16.0f;
+	Vector3 cpos = pos / CHUNKSIZE;
 	cpos.floor();
-	Vector3 bpos = Vector3((int)pos.x % 16, (int)pos.y % 16, (int)pos.z % 16);
+	Vector3 bpos = Vector3((int)pos.x % CHUNKSIZE, (int)pos.y % CHUNKSIZE, (int)pos.z % CHUNKSIZE);
 	int desp = getDesp(cpos);
 	if (desp == -1) {
 		return false;
@@ -450,9 +440,9 @@ bool World::setBlock(Bloc tipus, Vector3 pos, Block* parent, bool listUpdate) {
 //Assignam un bloc (per punter) a la posició indicada
 bool World::setBlock(Block* bloc, Vector3 pos, bool listUpdate) {
 	pos.floor();
-	Vector3 cpos = pos / 16.0f;
+	Vector3 cpos = pos / CHUNKSIZE;
 	cpos.floor();
-	Vector3 bpos = Vector3((int)pos.x % 16, (int)pos.y % 16, (int)pos.z % 16);
+	Vector3 bpos = Vector3((int)pos.x % CHUNKSIZE, (int)pos.y % CHUNKSIZE, (int)pos.z % CHUNKSIZE);
 	int desp = getDesp(cpos);
 	if (desp == -1) {
 		return false;
@@ -474,9 +464,9 @@ bool World::setBlock(Block* bloc, Vector3 pos, bool listUpdate) {
 //Obtenim el bloc a la posició indicada
 Bloc World::getBlock(Vector3 pos) {
 	pos.floor();
-	Vector3 cpos = pos / 16.0f;
+	Vector3 cpos = pos / CHUNKSIZE;
 	cpos.floor();
-	Vector3 bpos = Vector3((int)pos.x % 16, (int)pos.y % 16, (int)pos.z % 16);
+	Vector3 bpos = Vector3((int)pos.x % CHUNKSIZE, (int)pos.y % CHUNKSIZE, (int)pos.z % CHUNKSIZE);
 	int desp = getDesp(cpos);
 	if (desp == -1) {
 		return Bloc::LIMIT;
@@ -529,15 +519,15 @@ void World::draw(Vector3 pos, float dist) {
 	xmax = std::min(xmax, (int)maxpos.x);	ymax = std::min(ymax, (int)maxpos.y);	zmax = std::min(zmax, (int)maxpos.z);
 
 	xmin = std::max(xmin, 0);				ymin = std::max(ymin, 0);				zmin = std::max(zmin, 0);
-	xmax = std::min(xmax, this->sizex*16);		ymax = std::min(ymax, this->sizey*16);		zmax = std::min(zmax, this->sizez*16);
+	xmax = std::min(xmax, this->sizex* CHUNKSIZE);		ymax = std::min(ymax, this->sizey* CHUNKSIZE);		zmax = std::min(zmax, this->sizez* CHUNKSIZE);
 
 	//NOU CODI CHUNKS
 	Vector3 cMin = Vector3(xmin, ymin, zmin);
-	cMin = cMin / 16.0f;
+	cMin = cMin / CHUNKSIZE;
 	cMin.floor();
 
 	Vector3 cMax = Vector3(xmax, ymax, zmax);
-	cMax = cMax / 16.0f;
+	cMax = cMax / CHUNKSIZE;
 	cMax.floor();
 
 	//printf("%f %f %f, %f %f %f\n", cMin.x, cMin.y, cMin.z, cMax.x, cMax.y, cMax.z);
@@ -550,18 +540,18 @@ void World::draw(Vector3 pos, float dist) {
 				if (chunks[desp] == nullptr) {
 					continue;
 				}
-				float dist = Vector3::module(camera->getPos() - Vector3(x * 16.0f, y * 16.0f, z * 16.0f));
-				if ((dist < 32) || (camera->isVisible(Vector3(x * 16.0f, y * 16.0f, z * 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f, z * 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f, y * 16.0f, z * 16.0f + 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f, z * 16.0f + 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f, y * 16.0f + 16.0f, z * 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f + 16.0f, z * 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f, y * 16.0f + 16.0f, z * 16.0f + 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f + 16.0f, z * 16.0f + 16.0f), 100))){
+				float dist = Vector3::module(camera->getPos() - Vector3(x * CHUNKSIZE + CHUNKSIZE/2, y * CHUNKSIZE + CHUNKSIZE/2, z * CHUNKSIZE + CHUNKSIZE/2));
+				if ((dist < CHUNKSIZE) || (camera->isVisible(Vector3(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE), 100) ||
+					camera->isVisible(Vector3(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE), 100) ||
+					camera->isVisible(Vector3(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
+					camera->isVisible(Vector3(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
+					camera->isVisible(Vector3(x * CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE), 100) ||
+					camera->isVisible(Vector3(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE), 100) ||
+					camera->isVisible(Vector3(x * CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
+					camera->isVisible(Vector3(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100))){
 					
 					glPushMatrix();
-					glTranslatef(x * 16.0f, y * 16.0f, z * 16.0f);
+					glTranslatef(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE);
 					chunks[desp]->drawO();
 					glPopMatrix();
 					nchunks++;
@@ -576,18 +566,18 @@ void World::draw(Vector3 pos, float dist) {
 				if (chunks[desp] == nullptr) {
 					continue;
 				}
-				float dist = Vector3::module(camera->getPos() - Vector3(x * 16.0f, y * 16.0f, z * 16.0f));
-				if ((dist < 24) || (camera->isVisible(Vector3(x * 16.0f, y * 16.0f, z * 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f, z * 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f, y * 16.0f, z * 16.0f + 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f, z * 16.0f + 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f, y * 16.0f + 16.0f, z * 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f + 16.0f, z * 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f, y * 16.0f + 16.0f, z * 16.0f + 16.0f), 100) ||
-					camera->isVisible(Vector3(x * 16.0f + 16.0f, y * 16.0f + 16.0f, z * 16.0f + 16.0f), 100))) {
+				float dist = Vector3::module(camera->getPos() - Vector3(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE));
+				if ((dist < 24) || (camera->isVisible(Vector3(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE), 100) ||
+					camera->isVisible(Vector3(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE), 100) ||
+					camera->isVisible(Vector3(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
+					camera->isVisible(Vector3(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
+					camera->isVisible(Vector3(x * CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE), 100) ||
+					camera->isVisible(Vector3(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE), 100) ||
+					camera->isVisible(Vector3(x * CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
+					camera->isVisible(Vector3(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100))) {
 
 					glPushMatrix();
-					glTranslatef(x * 16.0f, y * 16.0f, z * 16.0f);
+					glTranslatef(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE);
 					chunks[desp]->drawT();
 					glPopMatrix();
 					nchunks++;
@@ -667,9 +657,9 @@ void World::drawSol(Vector3 pos, float dist) {
 //Interacció amb un bloc
 void World::interact(Vector3 pos) {
 	pos.floor();
-	Vector3 cpos = pos / 16.0f;
+	Vector3 cpos = pos / CHUNKSIZE;
 	cpos.floor();
-	Vector3 bpos = Vector3((int)pos.x % 16, (int)pos.y % 16, (int)pos.z % 16);
+	Vector3 bpos = Vector3((int)pos.x % CHUNKSIZE, (int)pos.y % CHUNKSIZE, (int)pos.z % CHUNKSIZE);
 	int desp = getDesp(cpos);
 	if (desp == -1) {
 		return;
