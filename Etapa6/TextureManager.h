@@ -2,7 +2,7 @@
 #include <list>
 #include "Utils.h"
 
-#define NTEXT 5 //Nombre de textures
+#define NTEXT 7 //Nombre de textures
 
 enum class Textura {
 	TERRA,
@@ -11,7 +11,8 @@ enum class Textura {
 	ALTAVEU,
 	ESTALAGMITA,
 	FUSTAARBRE,
-	FULLAARBRE
+	FULLAARBRE,
+	BLOC
 };
 
 /*

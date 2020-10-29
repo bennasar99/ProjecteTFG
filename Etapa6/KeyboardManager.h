@@ -3,14 +3,16 @@
 #include <vector>
 #include <ctype.h>
 
+#define KEYNUM 512
+
 //Classe que s'encarrega dels esdeveniments de teclat
 class KeyboardManager {
 private:
-	static bool key[512]; //True si la tecla està pitjada
+	static bool key[KEYNUM]; //True si la tecla està pitjada
 
 	// per controlar la invocació dels escoltadors de cada tecla
-	static bool invoked[512];
-	static std::vector<void (*)()> keyHandlers[512];
+	static bool invoked[KEYNUM];
+	static std::vector<void (*)()> keyHandlers[KEYNUM];
 	static std::vector<void (*)(int)> genericHandlers;
 
 	KeyboardManager() {}

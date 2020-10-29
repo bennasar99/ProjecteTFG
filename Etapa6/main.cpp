@@ -83,7 +83,7 @@ void Display(GLFWwindow* window)
 
 	fpsc++;
 	if (fpsc > 20) { //Contador fps
-		printf("%f\n", fps);
+		//printf("%f\n", fps);
 		fpsc = 0;
 	}
 	//if (fps < 26) {
@@ -175,7 +175,7 @@ void Display(GLFWwindow* window)
 
 	// dibuixar els 3 eixos
 	if (axisVisible) {
-		world->drawAxis(Vector3((float)(world->sizex*16)/2, (float)(world->sizey*16) / 2 + 1, (float)(world->sizez*16) / 2), 50.0f);
+		world->drawAxis(Vector3((float)(world->sizex*CHUNKSIZE)/2, (float)(world->sizey*CHUNKSIZE) / 2 + 1, (float)(world->sizez*CHUNKSIZE) / 2), 50.0f);
 	}
 
 	glPopMatrix(); 
@@ -348,8 +348,13 @@ int main(int argc, char** argv)
 		printf("Seed: ");
 		std::string sseed;
 		std::cin >> sseed;
-		int seed = std::atoi(sseed.c_str());
-		world = new World(seed, 16, 16, 16, &camera);
+		int seed = 0;
+		for (int i = 0; i < sseed.length(); i++) {
+			seed += sseed[i];
+		}
+		//int seed = std::atoi(sseed.c_str());
+		printf("Seed: %d\n", seed);
+		world = new World(seed, 24, 16, 24, &camera);
 		ent = new Player(world, world->getSpawn() + Vector3(0, 10, 0));
 		world->save(wname);
 	}
@@ -456,13 +461,14 @@ int main(int argc, char** argv)
 
 	//Textures
 	glEnable(GL_TEXTURE_2D); //Activació
-	TextureManager::LoadTexture("Textures/terra.png", Textura::TERRA); //Càrrega
-	TextureManager::LoadTexture("Textures/fusta.jpg", Textura::FUSTA);
-	TextureManager::LoadTexture("Textures/pedra.png", Textura::PEDRA);
-	TextureManager::LoadTexture("Textures/altaveu.jpg", Textura::ALTAVEU);
-	TextureManager::LoadTexture("Textures/estalagmita.jfif", Textura::ESTALAGMITA);
-	TextureManager::LoadTexture("Textures/fustaarbre.jpg", Textura::FUSTAARBRE);
-	TextureManager::LoadTexture("Textures/fullaarbre.png", Textura::FULLAARBRE);
+	//TextureManager::LoadTexture("Textures/64pTest/terra.png", Textura::TERRA); //Càrrega
+	//TextureManager::LoadTexture("Textures/64pTest/fusta.jpg", Textura::FUSTA);
+	//TextureManager::LoadTexture("Textures/64pTest/pedra.png", Textura::PEDRA);
+	//TextureManager::LoadTexture("Textures/64pTest/altaveu.jpg", Textura::ALTAVEU);
+	//TextureManager::LoadTexture("Textures/64pTest/estalagmita.jfif", Textura::ESTALAGMITA);
+	//TextureManager::LoadTexture("Textures/64pTest/fustaarbre.jpg", Textura::FUSTAARBRE);
+	//TextureManager::LoadTexture("Textures/64pTest/fullaarbre.png", Textura::FULLAARBRE);
+	TextureManager::LoadTexture("Textures/texture.jpg", Textura::BLOC);
 
 	//Sons
 	SoundManager::initialize();

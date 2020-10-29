@@ -1,9 +1,9 @@
 #include "KeyboardManager.h"
 
-bool KeyboardManager::key[512];
-bool KeyboardManager::invoked[512]; //False
+bool KeyboardManager::key[KEYNUM];
+bool KeyboardManager::invoked[KEYNUM]; //False
 
-std::vector<void (*)()> KeyboardManager::keyHandlers[512];
+std::vector<void (*)()> KeyboardManager::keyHandlers[KEYNUM];
 std::vector<void (*)(int)> KeyboardManager::genericHandlers;
 
 bool KeyboardManager::isPressed(int key) {
@@ -11,6 +11,9 @@ bool KeyboardManager::isPressed(int key) {
 }
 
 void KeyboardManager::onKeyDown(int key) {
+	if (key >= KEYNUM) {
+		return;
+	}
 	// invocar tots els escoltadors d'aquesta tecla (si no s'han invocat)
 	if (!KeyboardManager::invoked[key]) {
 		for (size_t i = 0; i < KeyboardManager::keyHandlers[key].size(); ++i) {
@@ -28,6 +31,9 @@ void KeyboardManager::onKeyDown(int key) {
 }
 
 void KeyboardManager::onKeyUp(int key) {
+	if (key >= KEYNUM) {
+		return;
+	}
 	// marcar que es pot tornar a cridar l'esdeveniment de la tecla
 	KeyboardManager::invoked[key] = false;
 	KeyboardManager::key[key] = false;

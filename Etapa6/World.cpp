@@ -43,8 +43,10 @@ World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
 }
 
 World::World(std::string name, Camera* camera) {
-	this->noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-	this->noise.SetFrequency(0.005f);
+	this->noise.SetNoiseType(FastNoiseLite::NoiseType_ValueCubic);
+	this->noise.SetFrequency(0.01f);
+	this->noise.SetFractalGain(0.8f);
+	this->noise.SetSeed(seed);
 
 	this->camera = camera;
 	this->minpos = Vector3((float)sizex - 1, (float)sizey - 1, (float)sizez - 1);
@@ -53,7 +55,7 @@ World::World(std::string name, Camera* camera) {
 	file.open("worlds/" + name, std::ios::in | std::ios::binary);
 
 	//Mida del món
-	char buff[3];
+	char buff[sizeof(int)];
 	file.read(buff, 3);
 	this->sizex = int(buff[0]);
 	this->sizey = int(buff[1]);
@@ -63,10 +65,12 @@ World::World(std::string name, Camera* camera) {
 	int sY = unsigned char(buff[1]);
 	int sZ = unsigned char(buff[2]);
 	this->spawn = Vector3((float)sX, (float)sY, (float)sZ);
+	//file.read(buff, sizeof(int));
+	//this->seed = int(buff);
 
 	this->chunks = new Chunk * [(size_t)sizex * (size_t)sizey * (size_t)sizez];
 
-	printf("Mides del mon: %d %d %d, spawn a: %d %d %d\n", this->sizex, this->sizey, this->sizez, sX, sY, sZ);
+	printf("Mides del mon: %d %d %d, spawn a: %d %d %d. Seed %d\n", this->sizex, this->sizey, this->sizez, sX, sY, sZ, this->seed);
 
 	const int chunkSize = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
 	char buffer[chunkSize];
@@ -112,6 +116,8 @@ void World::save(std::string name) {
 	file.write(&sX, 1);
 	file.write(&sY, 1);
 	file.write(&sZ, 1);
+	//char seed = this->seed;
+	//file.write(&seed, 1);
 
 	const int chunkSize = CHUNKSIZE* CHUNKSIZE* CHUNKSIZE;
 	char buffer[chunkSize];
@@ -155,7 +161,7 @@ void World::generate(int seed) { //TODO: guardar spawn a world
 	for (pos.x = 0; pos.x < (this->sizex * CHUNKSIZE); pos.x++) {
 		for (pos.z = 0; pos.z < (this->sizez * CHUNKSIZE); pos.z++) {
 			lasty = (this->sizey* CHUNKSIZE)/2 + noise.GetNoise(pos.x, pos.z) * 80;
-			printf("last: %f\n", lasty);
+			//printf("last: %f\n", lasty);
 			for (pos.y = 0; pos.y < lasty; pos.y++) {
 				this->setBlock(Bloc::TERRA, pos, nullptr, false);
 				if (pos.y == (int)lasty) {

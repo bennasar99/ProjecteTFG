@@ -58,9 +58,12 @@ char* loadWAV(const char* fn, int& chan, int& samplerate, int& bps, int& size)
 }
 
 //Dibuixa cub parcial
-void drawCub(bool cares[6]) {
-
-	static GLfloat n[6][3] =
+void drawCub(bool cares[6], int texNum) {
+	texNum = texNum;
+	float yt = (1.0f / 7.0f) * float(texNum+1);
+	float yb = (1.0f / 7.0f) * float(texNum);
+	printf("%d, %f %f\n", texNum, yt, yb);
+	GLfloat n[6][3] =
 	{
 	  {-1.0, 0.0, 0.0}, //Esquerra
 	  {0.0, 1.0, 0.0}, //Amunt
@@ -69,16 +72,20 @@ void drawCub(bool cares[6]) {
 	  {0.0, 0.0, 1.0}, //Davant
 	  {0.0, 0.0, -1.0} //Darrera
 	};
-	static GLfloat text[6][4][2] =
+	GLfloat text[6][4][2] = //Try top right bottom right bottom left top left
 	{
-		{{-1,1}, {0,1}, {0,0}, {-1, 0}}, //Esquerra
-		{{-1,-1}, {-1,0}, {0,0}, {0,-1}}, //Damunt
-		{{1,-1}, {0,-1}, {0,0}, {1, 0}}, //Dreta
-		{{1,1}, {1,0}, {0,0}, {0,1}}, //Abaix
-		{{1,1}, {1,0}, {0,0}, {0,1}}, //Davant
-		{{-1,-1}, {-1,0}, {0,0}, {0,-1}} //Darrera
+		{{-1,yt}, {0,yt}, {0,yb}, {-1, yb}}, //Esquerra OK
+		{{-1,1-yt}, {-1,yb}, {0,yb}, {0,1-yt}}, //Damunt
+		{{1,1-yt}, {0,1-yt}, {0,yb}, {1, yb}}, //Dreta
+		{{1,yt}, {1,yb}, {0,yb}, {0,yt}}, //Abaix OK
+		{{1, yt}, {1,yb}, {0,yb}, {0,yt}}, //Davant OK
+		{{-1,1-yt}, {-1,yb}, {0,yb}, {0,1-yt}} //Darrera
 	};
-	static GLint faces[6][4] =
+	if (texNum == 1) {
+		//printf("%f\n", y);
+	}
+	//printf("%f\n", (1.0f / 7.0f) * 1);
+	GLint faces[6][4] =
 	{
 	  {0, 1, 2, 3}, //Esquerra
 	  {3, 2, 6, 7}, //Damunt
@@ -112,6 +119,10 @@ void drawCub(bool cares[6]) {
 			glEnd();
 		}
 	}
+}
+
+void drawCub(bool cares[6]) {
+	drawCub(cares, 0);
 }
 
 //Dibuixa un paralepipede d'una mida determinada. generant les coordenades de textures corresponents

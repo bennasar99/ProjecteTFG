@@ -15,6 +15,7 @@
 # define M_PI           3.14159265358979323846
 
 void draw3dRect(float midaX, float midaY, float midaZ);
+void drawCub(bool cares[6], int texNum);
 void drawCub(bool cares[6]);
 
 char* loadWAV(const char* fn, int& chan, int& samplerate, int& bps, int& size);
