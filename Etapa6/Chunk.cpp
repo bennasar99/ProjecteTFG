@@ -27,7 +27,9 @@ void Chunk::drawO() {
 		firstdraw = true;
 		this->updateDL();
 	}
+	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	glCallList(olist);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Chunk::drawT() {
@@ -38,7 +40,9 @@ void Chunk::drawT() {
 		firstdraw = true;
 		this->updateDL();
 	}
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glCallList(tlist);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Vector3 Chunk::getPos() {

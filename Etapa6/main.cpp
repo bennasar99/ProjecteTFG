@@ -20,7 +20,7 @@ GLFWwindow* window;
 
 //Clipping planes
 const float zNear = 0.001f;
-float zFar = 64.0f;
+float zFar = 128.0f;
 
 const float axisSize = zFar;
 
@@ -83,7 +83,7 @@ void Display(GLFWwindow* window)
 
 	fpsc++;
 	if (fpsc > 20) { //Contador fps
-		//printf("%f\n", fps);
+		printf("%f\n", fps);
 		fpsc = 0;
 	}
 	//if (fps < 26) {
@@ -236,12 +236,14 @@ void Display(GLFWwindow* window)
 		glEnd();
 
 		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 		glTranslatef(0.5f * aspect - 0.3f, 0.8f, -1);
 		for (int i = 0; i < 27; i++) { //Objectes de l'inventari
 			glPushMatrix();
 			glScalef(0.1f, 0.1f, 0.1f);
 			Block bsel = Block(NULL, static_cast<Bloc>(i+2), NULL); //+2 perque botam aire i null
 			glDisable(GL_LIGHTING);
+			glEnable(GL_TEXTURE_2D);
 			bsel.draw();
 			glPopMatrix();
 
@@ -251,6 +253,7 @@ void Display(GLFWwindow* window)
 				glTranslatef(-0.12f*6, 0, 0);
 			}
 		}
+		glDisable(GL_TEXTURE_2D);
 		glPopMatrix();
 	}
 	else {
@@ -673,8 +676,8 @@ void changeScene(unsigned char sceneNumber) {
 		numScene = scene;
 		if (numScene == 0) {
 			//Establim la boira
-			glFogf(GL_FOG_DENSITY, 0.02f);
-			glFogf(GL_FOG_MODE, GL_EXP2);
+			glFogf(GL_FOG_DENSITY, 0.01f);
+			glFogf(GL_FOG_MODE, GL_EXP);
 			glFogf(GL_FOG_END, zFar);
 			glFogf(GL_FOG_START, zFar-4);
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Blocks/Block.h"
+#include "TextureManager.h"
 #define CHUNKSIZE 16
 
 class Chunk {

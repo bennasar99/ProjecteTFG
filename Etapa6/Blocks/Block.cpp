@@ -28,7 +28,7 @@ void Block::update(int delta) {
 	Dibuixam el bloc segons el seu tipus
 */
 void Block::draw(bool visible[6]) {
-	glBindTexture(GL_TEXTURE_2D, 0); //Ens asseguram que no hi ha cap textura assignada
+	//glBindTexture(GL_TEXTURE_2D, 0); //Ens asseguram que no hi ha cap textura assignada
 	float specularZero[4] = { 0,0,0,0 };
 	float specularDef[4] = { 1,1,1,1 };
 	switch (this->id) { //Dibuixam el que correspongui per cada bloc
@@ -98,7 +98,7 @@ void Block::draw(bool visible[6]) {
 		glColor3f(0.5f, 0.35f, 0.05f);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specularZero); //No volem que brilli
 		//glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::TERRA));
-		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
+		//glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 		drawCub(visible, 6);
 		//ModelManager::drawModel(Model::CUB);
 		break;
@@ -214,14 +214,14 @@ void Block::draw(bool visible[6]) {
 		glColor3f(0.76f, 0.60f, 0.42f);
 		//Aplicam la textura corresponent
 		//glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::FUSTA));
-		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
+		//glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 		drawCub(visible, 3);
 		//ModelManager::drawModel(Model::CUB);
 		break;
 	case Bloc::PEDRA:
 		glColor3f(0.5f, 0.5f, 0.5f);
 		//glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::PEDRA));
-		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
+		//glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 		drawCub(visible, 5);
 		//ModelManager::drawModel(Model::CUB);
 		break;
@@ -274,7 +274,7 @@ void Block::draw(bool visible[6]) {
 	case Bloc::ALTAVEU:
 		glColor3f(0.5f, 0.5f, 0.5f);
 		//glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::ALTAVEU));
-		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
+		//glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 		drawCub(visible, 0);
 		//ModelManager::drawModel(Model::CUB);
 		break;
@@ -314,19 +314,19 @@ void Block::draw(bool visible[6]) {
 	case Bloc::FUSTAARBRE:
 		glColor3f(0.76f, 0.60f, 0.42f);
 		//glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::FUSTAARBRE));
-		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
+		//glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 		drawCub(visible,4);
 		//ModelManager::drawModel(Model::CUB);
 		break;
 	case Bloc::FULLAARBRE:
 		glColor3f(0, 0.5f, 0);
 		//glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::FULLAARBRE));
-		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
+		//glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 		drawCub(visible,2);
 		//ModelManager::drawModel(Model::CUB);
 		break;
 	}
-	glBindTexture(GL_TEXTURE_2D, 0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specularDef); //Restauram la llum specular
 
 }
