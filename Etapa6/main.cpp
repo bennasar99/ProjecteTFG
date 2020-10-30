@@ -201,6 +201,8 @@ void Display(GLFWwindow* window)
 	Block bsel = Block(NULL, static_cast<Bloc>(btipus), NULL);
 	glTranslatef(0.9f * camera.getAspect(), 0.1f, -2);
 	glScalef(0.1f, 0.1f, 0.1f);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	bsel.draw();
 
 	glPopMatrix();
@@ -208,8 +210,8 @@ void Display(GLFWwindow* window)
 	if (inv) { //Dibuixam inventari
 		glPushMatrix();
 		float aspect = camera.getAspect();
-		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
 
 		glColor3f(1,1,1);
 		glBegin(GL_QUADS); //Quadrat blanc exterior
@@ -236,14 +238,12 @@ void Display(GLFWwindow* window)
 		glEnd();
 
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 		glTranslatef(0.5f * aspect - 0.3f, 0.8f, -1);
 		for (int i = 0; i < 27; i++) { //Objectes de l'inventari
 			glPushMatrix();
 			glScalef(0.1f, 0.1f, 0.1f);
 			Block bsel = Block(NULL, static_cast<Bloc>(i+2), NULL); //+2 perque botam aire i null
 			glDisable(GL_LIGHTING);
-			glEnable(GL_TEXTURE_2D);
 			bsel.draw();
 			glPopMatrix();
 
@@ -253,7 +253,6 @@ void Display(GLFWwindow* window)
 				glTranslatef(-0.12f*6, 0, 0);
 			}
 		}
-		glDisable(GL_TEXTURE_2D);
 		glPopMatrix();
 	}
 	else {
@@ -357,7 +356,7 @@ int main(int argc, char** argv)
 		}
 		//int seed = std::atoi(sseed.c_str());
 		printf("Seed: %d\n", seed);
-		world = new World(seed, 24, 16, 24, &camera);
+		world = new World(seed, 16, 16, 16, &camera);
 		ent = new Player(world, world->getSpawn() + Vector3(0, 10, 0));
 		world->save(wname);
 	}

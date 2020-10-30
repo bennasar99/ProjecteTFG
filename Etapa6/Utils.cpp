@@ -59,7 +59,7 @@ char* loadWAV(const char* fn, int& chan, int& samplerate, int& bps, int& size)
 
 //Dibuixa cub parcial
 void drawCub(bool cares[6], int texNum) {
-	float xt, xb, yt, yb;
+	float xt = 0, xb = 0, yt = 0, yb = 0;
 
 	if (texNum != -1) {
 		yt = (1.0f / 7.0f) * float(texNum + 1);
@@ -107,9 +107,9 @@ void drawCub(bool cares[6], int texNum) {
 	v[0][2] = v[3][2] = v[4][2] = v[7][2] = -0.5f;
 	v[1][2] = v[2][2] = v[5][2] = v[6][2] = 0.5f;
 
+	glBegin(GL_QUADS);
 	for (i = 5; i >= 0; i--) { //6 cares
 		if (cares[i]) {
-			glBegin(GL_QUADS);
 			glNormal3fv(&n[i][0]);
 			glTexCoord2fv(text[i][0]);
 			glVertex3fv(&v[faces[i][0]][0]); //Top left
@@ -119,9 +119,9 @@ void drawCub(bool cares[6], int texNum) {
 			glVertex3fv(&v[faces[i][2]][0]); //Bottom right
 			glTexCoord2fv(text[i][3]);
 			glVertex3fv(&v[faces[i][3]][0]); //Top right
-			glEnd();
 		}
 	}
+	glEnd();
 }
 
 void drawCub(bool cares[6]) {

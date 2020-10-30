@@ -169,6 +169,7 @@ void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc
 			}
 		}
 	}
+
 	glEndList(); //FI llista opacs
 
 	glDeleteLists(tlist, 1);

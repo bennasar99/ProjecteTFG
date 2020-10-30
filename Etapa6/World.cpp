@@ -160,7 +160,8 @@ void World::generate(int seed) { //TODO: guardar spawn a world
 	float lasty = 0; // = (this->sizey * CHUNKSIZE) / 2.0f;
 	for (pos.x = 0; pos.x < (this->sizex * CHUNKSIZE); pos.x++) {
 		for (pos.z = 0; pos.z < (this->sizez * CHUNKSIZE); pos.z++) {
-			lasty = (this->sizey* CHUNKSIZE)/2 + noise.GetNoise(pos.x, pos.z) * 80;
+			lasty = (this->sizey*CHUNKSIZE)/2 + noise.GetNoise(pos.x, pos.z) * 80;
+			lasty = std::min(lasty, (float)this->sizey * CHUNKSIZE);
 			//printf("last: %f\n", lasty);
 			for (pos.y = 0; pos.y < lasty; pos.y++) {
 				this->setBlock(Bloc::TERRA, pos, nullptr, false);
@@ -200,7 +201,7 @@ void World::generate(int seed) { //TODO: guardar spawn a world
 				}
 			}
 			//Oceans
-			for (pos.y = lasty; pos.y <= (this->sizey* CHUNKSIZE)/2; pos.y++) {
+			for (pos.y = lasty; pos.y <= (this->sizey * CHUNKSIZE)/2; pos.y++) {
 				this->setBlock(Bloc::AIGUA, pos, nullptr, false);
 			}
 		}
