@@ -1,8 +1,11 @@
 #include "World.h"
 #include "Object3D.h"
 
+
 World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
 {
+	this->br = new BlockRenderer();
+
 	this->noise.SetNoiseType(FastNoiseLite::NoiseType_ValueCubic);
 	this->noise.SetFrequency(0.01f);
 	this->noise.SetFractalGain(0.8f);
@@ -43,6 +46,9 @@ World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
 }
 
 World::World(std::string name, Camera* camera) {
+	this->br = new BlockRenderer();
+	this->seed = 0;
+
 	this->noise.SetNoiseType(FastNoiseLite::NoiseType_ValueCubic);
 	this->noise.SetFrequency(0.01f);
 	this->noise.SetFractalGain(0.8f);
@@ -330,17 +336,6 @@ void World::update(int delta, Vector3 pos) {
 
 //Alliberam la memòria de tots els blocs i entitats
 void World::destroy() {
-	//for (int x = 0; x < this->sizex; x++) {
-	//	for (int y = 0; y < this->sizey; y++) {
-	//		for (int z = 0; z < this->sizez; z++) {
-	//			blocs[x + this->sizey * (y + this->sizez * z)]->destroy();
-	//			delete blocs[x + this->sizey * (y + this->sizez * z)];
-	//			blocs[x + this->sizey * (y + this->sizez * z)] = 0;
-	//		}
-	//	}
-	//}
- //   delete(this->blocs);
- //   this->blocs = NULL;
 
 	//NOU CODI CHUNKS
 	for (int i = 0; i < this->sizex * this->sizey * this->sizez; i++) {
@@ -371,19 +366,6 @@ bool World::setBlock(Bloc tipus, Vector3 pos) {
 
 //Eliminam el bloc de la posició indicada
 bool World::deleteBlock(Vector3 pos, bool destroy) { //Eliminar Bloc::RES?
-	//pos.noDecimals();
-	//int desp = getDesp(pos);
-	//if (desp == -1) {
-	//	return false;
-	//}
-	//if (blocs[desp] != 0) {
-	//	if (destroy) {
-	//		blocs[desp]->destroy();
-	//	}
-	//	delete (blocs[desp]);
-	//	blocs[desp] = 0;
-	//}
-	//return true;
 
 	pos.floor();
 	Vector3 cpos = pos / CHUNKSIZE;
@@ -596,18 +578,8 @@ void World::draw(Vector3 pos, float dist) {
 }
 
 //Dibuixa un bloc a una posició determinada (Sense guardar-lo al món)
-void World::drawBloc(Vector3 pos, Bloc tipus, bool wireframe) {
-	glPushMatrix();
-	pos.floor();
-	Vector3 oldpos = pos;
-	pos.floor();
-	Vector3 front = camera->getFront();
-	glTranslatef(pos.x+0.5f, pos.y+0.5f, pos.z+0.5f);
-	Block bloc = Block(this, tipus, 0);
-	bool visible[6] = { true, true, true, true, true, true };
-	bloc.draw(visible);
-	bloc.destroy();
-	glPopMatrix();
+void World::drawBloc(Bloc tipus) {
+	br->drawBloc(tipus);
 }
 
 //Dibuixa l'eix de coordenades a la posició indicada

@@ -105,6 +105,12 @@
     <ClInclude Include="Entities\Player.h">
       <Filter>Header Files\Entities</Filter>
     </ClInclude>
+    <ClInclude Include="TextureAtlas.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Blocks\BlockRenderer.h">
+      <Filter>Header Files\Blocks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -178,6 +184,12 @@
     </ClCompile>
     <ClCompile Include="Entities\Player.cpp">
       <Filter>Source Files\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureAtlas.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Blocks\BlockRenderer.cpp">
+      <Filter>Source Files\Blocks</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

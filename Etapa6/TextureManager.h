@@ -15,6 +15,15 @@ enum class Textura {
 	BLOC
 };
 
+enum class Cara {
+	ABAIX,
+	ADALT,
+	DAVANT,
+	DARRERA,
+	DRETA,
+	ESQUERRA
+};
+
 /*
 	S'encarrega de gestionar les textures
 */

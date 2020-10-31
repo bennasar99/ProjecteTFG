@@ -151,6 +151,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Blocks\Block.h" />
+    <ClInclude Include="Blocks\BlockRenderer.h" />
     <ClInclude Include="Blocks\EntityBlock.h" />
     <ClInclude Include="Blocks\Jukebox.h" />
     <ClInclude Include="Blocks\LightBlock.h" />
@@ -169,6 +170,7 @@
     <ClInclude Include="ModelManager.h" />
     <ClInclude Include="Object3D.h" />
     <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="TextureAtlas.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Vector2.h" />
@@ -177,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Blocks\Block.cpp" />
+    <ClCompile Include="Blocks\BlockRenderer.cpp" />
     <ClCompile Include="Blocks\EntityBlock.cpp" />
     <ClCompile Include="Blocks\Jukebox.cpp" />
     <ClCompile Include="Blocks\LightBlock.cpp" />
@@ -196,6 +199,7 @@
     <ClCompile Include="ModelManager.cpp" />
     <ClCompile Include="Object3D.cpp" />
     <ClCompile Include="SoundManager.cpp" />
+    <ClCompile Include="TextureAtlas.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Vector3.cpp" />

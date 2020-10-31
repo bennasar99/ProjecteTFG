@@ -1,6 +1,4 @@
 #pragma once
-#include "../TextureManager.h"
-#include "../ModelManager.h"
 
 enum class Bloc {
 	RES,
@@ -37,8 +35,6 @@ protected:
 							espai (que no s'hi puguin col·locar blocs) i que en destruir-lo es destrueixi tota l'estructura */
 public:
 
-	virtual void draw(bool visible[6]);
-	virtual void draw();
 	virtual void update(int delta);
 	virtual void destroy();
 	virtual void interact();

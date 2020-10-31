@@ -58,75 +58,68 @@ char* loadWAV(const char* fn, int& chan, int& samplerate, int& bps, int& size)
 }
 
 //Dibuixa cub parcial
-void drawCub(bool cares[6], int texNum) {
-	float xt = 0, xb = 0, yt = 0, yb = 0;
-
-	if (texNum != -1) {
-		yt = (1.0f / 7.0f) * float(texNum + 1);
-		yb = (1.0f / 7.0f) * float(texNum);
-		xt = 1.0f;
-		xb = 0.0f;
-	}
-
-	GLfloat n[6][3] =
-	{
-	  {-1.0, 0.0, 0.0}, //Esquerra
-	  {0.0, 1.0, 0.0}, //Amunt
-	  {1.0, 0.0, 0.0}, //Dreta
-	  {0.0, -1.0, 0.0}, //Abaix
-	  {0.0, 0.0, 1.0}, //Davant
-	  {0.0, 0.0, -1.0} //Darrera
-	};
-	GLfloat text[6][4][2] =
-	{
-		{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra OK
-		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt OK
-		{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Dreta OK
-		{{xt,yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Abaix OK
-		{{xt, yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Davant OK
-		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}} //Darrera OK
-	};
-
-
-	GLint faces[6][4] =
-	{
-	  {0, 1, 2, 3}, //Esquerra
-	  {3, 2, 6, 7}, //Damunt
-	  {7, 6, 5, 4}, //Dreta
-	  {4, 5, 1, 0}, //Abaix
-	  {5, 6, 2, 1}, //Davant
-	  {7, 4, 0, 3} //Darrera
-	};
-	GLfloat v[8][3];
-	GLint i;
-
-	v[0][0] = v[1][0] = v[2][0] = v[3][0] = -0.5f;
-	v[4][0] = v[5][0] = v[6][0] = v[7][0] = 0.5f;
-	v[0][1] = v[1][1] = v[4][1] = v[5][1] = -0.5f;
-	v[2][1] = v[3][1] = v[6][1] = v[7][1] = 0.5f;
-	v[0][2] = v[3][2] = v[4][2] = v[7][2] = -0.5f;
-	v[1][2] = v[2][2] = v[5][2] = v[6][2] = 0.5f;
-
-	glBegin(GL_QUADS);
-	for (i = 5; i >= 0; i--) { //6 cares
-		if (cares[i]) {
-			glNormal3fv(&n[i][0]);
-			glTexCoord2fv(text[i][0]);
-			glVertex3fv(&v[faces[i][0]][0]); //Top left
-			glTexCoord2fv(text[i][1]);
-			glVertex3fv(&v[faces[i][1]][0]); //Bottom left
-			glTexCoord2fv(text[i][2]);
-			glVertex3fv(&v[faces[i][2]][0]); //Bottom right
-			glTexCoord2fv(text[i][3]);
-			glVertex3fv(&v[faces[i][3]][0]); //Top right
-		}
-	}
-	glEnd();
-}
-
-void drawCub(bool cares[6]) {
-	drawCub(cares, -1);
-}
+//void drawCub(bool cares[6], int texNum) {
+//	float xt = 0, xb = 0, yt = 0, yb = 0;
+//
+//	GLfloat n[6][3] =
+//	{
+//	  {-1.0, 0.0, 0.0}, //Esquerra
+//	  {0.0, 1.0, 0.0}, //Amunt
+//	  {1.0, 0.0, 0.0}, //Dreta
+//	  {0.0, -1.0, 0.0}, //Abaix
+//	  {0.0, 0.0, 1.0}, //Davant
+//	  {0.0, 0.0, -1.0} //Darrera
+//	};
+//	GLfloat text[6][4][2] =
+//	{
+//		{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra OK
+//		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt OK
+//		{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Dreta OK
+//		{{xt,yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Abaix OK
+//		{{xt, yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Davant OK
+//		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}} //Darrera OK
+//	};
+//
+//
+//	GLint faces[6][4] =
+//	{
+//	  {0, 1, 2, 3}, //Esquerra
+//	  {3, 2, 6, 7}, //Damunt
+//	  {7, 6, 5, 4}, //Dreta
+//	  {4, 5, 1, 0}, //Abaix
+//	  {5, 6, 2, 1}, //Davant
+//	  {7, 4, 0, 3} //Darrera
+//	};
+//	GLfloat v[8][3];
+//	GLint i;
+//
+//	v[0][0] = v[1][0] = v[2][0] = v[3][0] = -0.5f;
+//	v[4][0] = v[5][0] = v[6][0] = v[7][0] = 0.5f;
+//	v[0][1] = v[1][1] = v[4][1] = v[5][1] = -0.5f;
+//	v[2][1] = v[3][1] = v[6][1] = v[7][1] = 0.5f;
+//	v[0][2] = v[3][2] = v[4][2] = v[7][2] = -0.5f;
+//	v[1][2] = v[2][2] = v[5][2] = v[6][2] = 0.5f;
+//
+//	glBegin(GL_QUADS);
+//	for (i = 5; i >= 0; i--) { //6 cares
+//		if (cares[i]) {
+//			glNormal3fv(&n[i][0]);
+//			glTexCoord2fv(text[i][0]);
+//			glVertex3fv(&v[faces[i][0]][0]); //Top left
+//			glTexCoord2fv(text[i][1]);
+//			glVertex3fv(&v[faces[i][1]][0]); //Bottom left
+//			glTexCoord2fv(text[i][2]);
+//			glVertex3fv(&v[faces[i][2]][0]); //Bottom right
+//			glTexCoord2fv(text[i][3]);
+//			glVertex3fv(&v[faces[i][3]][0]); //Top right
+//		}
+//	}
+//	glEnd();
+//}
+//
+//void drawCub(bool cares[6]) {
+//	drawCub(cares, -1);
+//}
 
 //Dibuixa un paralepipede d'una mida determinada. generant les coordenades de textures corresponents
 void draw3dRect(float midaX, float midaY, float midaZ) {

@@ -101,7 +101,7 @@ void Grua::draw() {
 		glPushMatrix();
 		Vector3 pos = Vector3((10 - hookX / 20) * sinf(toRad(rot - 45)), hookY / 20.0f + 7, (10 - hookX / 20) * cosf(toRad(rot - 45)));
 		glTranslatef(pos.x, pos.y, pos.z);
-		bloc->draw();
+		//world->br->drawBloc(bloc->getId());
 		glPopMatrix();
 	}
 

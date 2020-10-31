@@ -20,7 +20,7 @@ GLFWwindow* window;
 
 //Clipping planes
 const float zNear = 0.001f;
-float zFar = 128.0f;
+float zFar = 160.0f;
 
 const float axisSize = zFar;
 
@@ -203,8 +203,7 @@ void Display(GLFWwindow* window)
 	glScalef(0.1f, 0.1f, 0.1f);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
-	bsel.draw();
-
+	world->drawBloc(bsel.getId());
 	glPopMatrix();
 
 	if (inv) { //Dibuixam inventari
@@ -244,7 +243,7 @@ void Display(GLFWwindow* window)
 			glScalef(0.1f, 0.1f, 0.1f);
 			Block bsel = Block(NULL, static_cast<Bloc>(i+2), NULL); //+2 perque botam aire i null
 			glDisable(GL_LIGHTING);
-			bsel.draw();
+			world->drawBloc(bsel.getId());
 			glPopMatrix();
 
 			glTranslatef(0.12f, 0, 0); //Passam a la següent columna
@@ -463,13 +462,6 @@ int main(int argc, char** argv)
 
 	//Textures
 	glEnable(GL_TEXTURE_2D); //Activació
-	//TextureManager::LoadTexture("Textures/64pTest/terra.png", Textura::TERRA); //Càrrega
-	//TextureManager::LoadTexture("Textures/64pTest/fusta.jpg", Textura::FUSTA);
-	//TextureManager::LoadTexture("Textures/64pTest/pedra.png", Textura::PEDRA);
-	//TextureManager::LoadTexture("Textures/64pTest/altaveu.jpg", Textura::ALTAVEU);
-	//TextureManager::LoadTexture("Textures/64pTest/estalagmita.jfif", Textura::ESTALAGMITA);
-	//TextureManager::LoadTexture("Textures/64pTest/fustaarbre.jpg", Textura::FUSTAARBRE);
-	//TextureManager::LoadTexture("Textures/64pTest/fullaarbre.png", Textura::FULLAARBRE);
 	TextureManager::LoadTexture("Textures/texture.jpg", Textura::BLOC);
 
 	//Sons

@@ -24,6 +24,7 @@
 #include "Entities/Grua.h"
 #include "Entities/Noria.h"
 #include "Chunk.h"
+#include "Blocks//BlockRenderer.h"
 
 #include "lib/FastNoiseLite.h"
 
@@ -34,6 +35,7 @@ enum class Bloc;
 
 class World {
 private:
+
 	Chunk **chunks;
 	int sol = 0;
 	float daytime = 0;
@@ -60,7 +62,9 @@ public:
 	int sizez;
 
 	Camera* camera;
+	BlockRenderer *br;
 
+	void drawBloc(Bloc tipus);
 
 	bool setBlock(Bloc tipus, Vector3 pos);
 	bool setBlock(Bloc tipus, Vector3 pos, Block* parent, bool listUpdate);
@@ -76,7 +80,6 @@ public:
 	Vector3 getSpawn();
 
 	void drawAxis(Vector3 pos, float axisSize);
-	void drawBloc(Vector3 pos, Bloc tipus, bool wireframe);
 	void draw(Vector3 pos, float dist);
 
 	//Llums
@@ -104,4 +107,5 @@ public:
 
 	World(int seed, int sizex, int sizey, int sizez, Camera* camera);
 	World(std::string file, Camera* camera);
+	World();
 };
