@@ -414,7 +414,8 @@ bool World::setBlock(Bloc tipus, Vector3 pos, Block* parent, bool listUpdate) {
 	}
 	chunks[desp]->setBlock(bloc, bpos);
 	if (listUpdate) {
-		chunks[desp]->updateDL();
+		//chunks[desp]->updateDL();
+		chunks[desp]->updateMesh();
 		updateNeighborChunks(cpos, bpos);
 	}
 
@@ -715,7 +716,8 @@ void World::updateNeighborChunks(Vector3 cpos, Vector3 bpos) {
 		if (chunks[desp] == nullptr) {
 			chunks[desp] = new Chunk(this, ncpos);
 		}
-		chunks[desp]->updateDL();
+		//chunks[desp]->updateDL();
+		chunks[desp]->updateMesh();
 	}
 	if (bpos.y == 15) {
 		ncpos = cpos + Vector3(0, 1, 0);
@@ -728,7 +730,8 @@ void World::updateNeighborChunks(Vector3 cpos, Vector3 bpos) {
 		if (chunks[desp] == nullptr) {
 			chunks[desp] = new Chunk(this, ncpos);
 		}
-		chunks[desp]->updateDL();
+		//chunks[desp]->updateDL();
+		chunks[desp]->updateMesh();
 	}
 	if (bpos.z == 15) {
 		ncpos = cpos + Vector3(0, 0, 1);
@@ -741,7 +744,8 @@ void World::updateNeighborChunks(Vector3 cpos, Vector3 bpos) {
 		if (chunks[desp] == nullptr) {
 			chunks[desp] = new Chunk(this, ncpos);
 		}
-		chunks[desp]->updateDL();
+		//chunks[desp]->updateDL();
+		chunks[desp]->updateMesh();
 	}
 }
 
