@@ -313,6 +313,31 @@ void BlockRenderer::drawBloc(Bloc id, bool visible[6]) {
 
 }
 
+float* BlockRenderer::getTexCoords(Bloc tipus) {
+	int texNum = -1;
+	switch (tipus) {
+	case Bloc::TERRA: //Cub marró
+		texNum = 6;
+		break;
+	case Bloc::FUSTA:
+		texNum = 3;
+		break;
+	case Bloc::PEDRA:
+		texNum = 5;
+		break;
+	case Bloc::ALTAVEU:
+		texNum = 0;
+		break;
+	case Bloc::FUSTAARBRE:
+		texNum = 4;
+		break;
+	case Bloc::FULLAARBRE:
+		texNum = 2;
+		break;
+	}
+	return blockAtlas->getCoords(texNum);
+}
+
 void BlockRenderer::drawCub(bool cares[6], int texNum) {
 	float xt = 0, xb = 0, yt = 0, yb = 0;
 
@@ -379,6 +404,66 @@ void BlockRenderer::drawCub(bool cares[6], int texNum) {
 		}
 	}
 	glEnd();
+}
+
+float* BlockRenderer::getColor(Bloc tipus) {
+	float color[4] = { 0, 0, 0, 1 };
+	switch (tipus) { //Dibuixam el que correspongui per cada bloc
+	case Bloc::AIGUA: //Aigua
+		color[0] = 0; color[1] = 0; color[2] = 1; color[3] = 0.5f;
+		break;
+	case Bloc::CUB: //Cub vermell
+		color[0] = 1; color[1] = 0; color[2] = 0; color[3] = 1;
+		break;
+	case Bloc::HERBA: //Herba
+		color[0] = 0; color[1] = 1; color[2] = 0; color[3] = 1;
+		break;
+	case Bloc::HERBAFULL: //Herba
+		color[0] = 0; color[1] = 1; color[2] = 0; color[3] = 1;
+		break;
+	case Bloc::TERRA: //Cub marró
+		color[0] = 0.5f; color[1] = 0.35f; color[2] = 0.05f; color[3] = 1;
+		break;
+	case Bloc::VIDRE: //cub transparent/opac (vidre?)
+		color[0] = 0; color[1] = 0; color[2] = 0; color[3] = 1;
+		break;
+	case Bloc::TORXA: //torxa
+		color[0] = 0.5f; color[1] = 0.35f; color[2] = 0.05f; color[3] = 1;
+		break;
+	case Bloc::LLUMSOTIL: //Llum de sòtil
+		color[0] = 0; color[1] = 0; color[2] = 0; color[3] = 1;
+		break;
+	case Bloc::LLUMTERRA: //Foco (llum de sòtil però de baix cap adalt)
+		color[0] = 0; color[1] = 0; color[2] = 0; color[3] = 1;
+		break;
+	case Bloc::MULTICOLOR: { //Cub multicolor
+		break;
+	}
+	case Bloc::FUSTA:
+		color[0] = 0.76f; color[1] = 0.6f; color[2] = 0.42f; color[3] = 1;
+		break;
+	case Bloc::PEDRA:
+		color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
+		break;
+	case Bloc::NORIA: { //Noria (icona)
+		break;
+	}
+	case Bloc::ALTAVEU:
+		color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
+		break;
+	case Bloc::MIRALL: //Només icona, sense textura, quadrat
+		color[0] = 0; color[1] = 0; color[2] = 0; color[3] = 1;
+		break;
+	case Bloc::GRUA: //Només icona, sense textura, quadrat
+		break;
+	case Bloc::FUSTAARBRE:
+		color[0] = 0.76f; color[1] = 0.6f; color[2] = 0.42f; color[3] = 1;
+		break;
+	case Bloc::FULLAARBRE:
+		color[0] = 0; color[1] = 0.5f; color[2] = 0; color[3] = 1;
+		break;
+	}
+	return color;
 }
 
 void BlockRenderer::drawCub(bool cares[6]) {

@@ -16,6 +16,10 @@ Chunk::Chunk(World* world, Vector3 pos) {
 	this->olist= glGenLists(1);
 	this->tlist = glGenLists(1);
 
+	bMesh = new Mesh(Primitiva::QUAD);
+	tMesh = new Mesh(Primitiva::QUAD);
+	lMesh = new Mesh(Primitiva::LINIA);
+
 	this->firstdraw = false;
 }
 
@@ -30,8 +34,9 @@ void Chunk::drawO() {
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	//glCallList(olist);
+	glTranslatef(0.5f, 0.5f, 0.5f);
 	glFrontFace(GL_CCW);
-	cMesh.draw();
+	bMesh->draw();
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -47,7 +52,10 @@ void Chunk::drawT() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//glCallList(tlist);
 	glFrontFace(GL_CCW);
-	cMesh.draw();
+	//glDisable(GL_CULL_FACE);
+	glTranslatef(0.5f, 0.5f, 0.5f);
+	tMesh->draw();
+	//glEnable(GL_CULL_FACE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -277,9 +285,10 @@ bool Chunk::readFromByteData(char* arr) {
 }
 
 void Chunk::updateMesh() {
-	cMesh.erase();
+	bMesh->erase();
+	tMesh->erase();
 
-	GLfloat vert[6][12][3] = {
+	GLfloat vert[6][4][3] = {
 		{{-.5f, .5f, .5f},  {-.5f, .5f,-.5f},  {-.5f,-.5f,-.5f}, {-.5f,-.5f, .5f}}, // v1,v6,v7,v2 (left)
 		{{.5f, .5f, .5f},   {.5f, .5f,-.5f},  {-.5f, .5f,-.5f}, {-.5f, .5f, .5f}}, // v0,v5,v6,v1 (top)
 		{{.5f, .5f, .5f},   {.5f,-.5f, .5f},   {.5f,-.5f,-.5f},  {.5f, .5f,-.5f}}, // v0,v3,v4,v5 (right)
@@ -289,7 +298,7 @@ void Chunk::updateMesh() {
 	};
 
 	// normal array
-	GLfloat normals[6][12][3] = {
+	GLfloat normals[6][4][3] = {
 		{{-1, 0, 0},  {-1, 0, 0},  {-1, 0, 0},  {-1, 0, 0}},  // v1,v6,v7,v2 (left)
 		{{0, 1, 0},   {0, 1, 0},   {0, 1, 0},   {0, 1, 0}},  // v0,v5,v6,v1 (top)
 		{{1, 0, 0},   {1, 0, 0},   {1, 0, 0},   {1, 0, 0}},  // v0,v3,v4,v5 (right)
@@ -299,13 +308,22 @@ void Chunk::updateMesh() {
 	};
 
 	// texture coord array
-	GLfloat texCoords[6][8][2] = {
+	GLfloat texCoords[6][4][2] = {
 		{{1, 0},   {0, 0},   {0, 1},   {1, 1}},               // v1,v6,v7,v2 (left)
 		{{1, 1},   {1, 0},   {0, 0},   {0, 1}},               // v0,v5,v6,v1 (top)
 		{{0, 0},   {0, 1},   {1, 1},   {1, 0}},               // v0,v3,v4,v5 (right)
 		{{0, 1},   {1, 1},   {1, 0},   {0, 0}},               // v7,v4,v3,v2 (bottom)
 		{{1, 0},   {0, 0},   {0, 1},   {1, 1}},               // v0,v1,v2,v3 (front)
 		{{0, 1},   {1, 1},   {1, 0},   {0, 0}}                // v4,v7,v6,v5 (back)
+	};
+
+	GLuint indices[6][2][3] = {
+		{ {12,13,14},  {14,15,12} },    // v1-v6-v7, v7-v2-v1 (left)
+		{ {8, 9,10},  {10,11, 8} },    // v0-v5-v6, v6-v1-v0 (top)
+		{ {4, 5, 6},   {6, 7, 4} },    // v0-v3-v4, v4-v5-v0 (right)
+		{ {16,17,18},  {18,19,16} },    // v7-v4-v3, v3-v2-v7 (bottom)
+		{ {0, 1, 2},   {2, 3, 0} },    // v0-v1-v2, v2-v3-v0 (front)
+		{ {20,21,22},  {22,23,20} }     // v4-v7-v6, v6-v5-v4 (back)
 	};
 
 	int nb = 0;
@@ -329,15 +347,27 @@ void Chunk::updateMesh() {
 						}
 						nb++;
 					}
-
+					float *texCoords = this->world->br->getTexCoords(blocs[x][y][z]->getId());
+					float* color = this->world->br->getColor(blocs[x][y][z]->getId());
+					float xb = 0, yb = 0, xt = 0, yt = 0;
+					xb = texCoords[0]; yb = texCoords[1]; xt = texCoords[2]; yt = texCoords[3];
 					if (qualcun) {
+						GLfloat text[6][4][2] =
+						{
+							{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra OK
+							{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt OK
+							{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Dreta OK
+							{{xt,yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Abaix OK
+							{{xt, yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Davant OK
+							{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}} //Darrera OK
+						};
 						for (int i = 0; i < 6; i++) { //Afegim els vèrtexos
 							if (visible[i]) {
+
 								for (int j = 0; j < 4; j++) {
-									float color[3] = { 0.5f, 0.5f, 0.5f };
 									float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
 									vPos[0] += x; vPos[1] += y; vPos[2] += z;
-									cMesh.addVertex(vPos, normals[i][j], color, texCoords[i][j]);
+									bMesh->addVertex(vPos, normals[i][j], color, text[i][j]);
 								}
 							}
 						}
@@ -350,5 +380,62 @@ void Chunk::updateMesh() {
 			}
 		}
 	}
-	cMesh.buildVBO();
+	bMesh->buildVBO();
+
+	//2a TRANSPARENTS
+	nb = 0;
+	for (int x = 0; x < CHUNKSIZE; x++) { //1a Passada: OPACS
+		for (int z = 0; z < CHUNKSIZE; z++) {
+			for (int y = 0; y < CHUNKSIZE; y++) {
+				if (blocs[x][y][z] != 0) {
+					Vector3 bpos = Vector3(x, y, z);
+					//Ordre: Esquerra, Damunt, Dreta, Abaix, Davant, Darrera
+					Vector3 pos = cpos * CHUNKSIZE + bpos;
+					Vector3 toCheck[6] = { pos - Vector3(1,0,0), pos + Vector3(0,1,0), pos + Vector3(1,0,0), pos - Vector3(0,1,0),
+						pos + Vector3(0,0,1), pos - Vector3(0,0,1) };
+					bool visible[6] = { false, false, false, false, false, false };
+					bool qualcun = false;
+					if (Block::isTransparent(blocs[x][y][z]->getId())) {
+						for (int i = 0; i < 6; i++) {
+							if (Block::isTransparent(getBlockWorld(toCheck[i])) && getBlockWorld(toCheck[i]) != blocs[x][y][z]->getId()) {
+								visible[i] = true;
+								qualcun = true;
+							}
+						}
+						nb++;
+					}
+					float* texCoords = this->world->br->getTexCoords(blocs[x][y][z]->getId());
+					float* color = this->world->br->getColor(blocs[x][y][z]->getId());
+					float xb = 0, yb = 0, xt = 0, yt = 0;
+					xb = texCoords[0]; yb = texCoords[1]; xt = texCoords[2]; yt = texCoords[3];
+					if (qualcun) {
+						GLfloat text[6][4][2] =
+						{
+							{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra OK
+							{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt OK
+							{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Dreta OK
+							{{xt,yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Abaix OK
+							{{xt, yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Davant OK
+							{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}} //Darrera OK
+						};
+						for (int i = 0; i < 6; i++) { //Afegim els vèrtexos
+							if (visible[i]) {
+
+								for (int j = 0; j < 4; j++) {
+									float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
+									vPos[0] += x; vPos[1] += y; vPos[2] += z;
+									tMesh->addVertex(vPos, normals[i][j], color, text[i][j]);
+								}
+							}
+						}
+					}
+
+					if (nb >= nblocs) { //No cal dibuixar més blocs
+						y = CHUNKSIZE; z = CHUNKSIZE; x = CHUNKSIZE;
+					}
+				}
+			}
+		}
+	}
+	tMesh->buildVBO();
 }

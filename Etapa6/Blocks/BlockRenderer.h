@@ -11,5 +11,8 @@ class BlockRenderer {
 public:
 	void drawBloc(Bloc id);
 	void drawBloc(Bloc id, bool cares[6]);
+	float* getTexCoords(Bloc tipus);
+	float* getColor(Bloc tipus);
+
 	BlockRenderer();
 };

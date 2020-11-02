@@ -17,7 +17,9 @@ private:
 
 	bool firstdraw;
 
-	Mesh cMesh;
+	Mesh *bMesh; //Blocs sòlids normals
+	Mesh *tMesh; //Blocs transparents
+	Mesh *lMesh; //Mesh de línies
 
 public:
 	void drawO();

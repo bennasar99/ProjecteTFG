@@ -40,7 +40,8 @@ World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
 	//Fi generació món
 	for (int i = 0; i < this->sizex * this->sizey * this->sizez; i++) {
 		if (chunks[i] != nullptr) {
-			chunks[i]->updateDL();
+			//chunks[i]->updateDL();
+			//chunks[i]->updateMesh();
 		}
 	}
 }
@@ -100,7 +101,8 @@ World::World(std::string name, Camera* camera) {
 	//Fi generació món
 	for (int i = 0; i < this->sizex * this->sizey * this->sizez; i++) {
 		if (chunks[i] != nullptr) {
-			chunks[i]->updateDL();
+			//chunks[i]->updateDL();
+			//chunks[i]->updateMesh();
 		}
 	}
 }
@@ -446,7 +448,8 @@ bool World::setBlock(Block* bloc, Vector3 pos, bool listUpdate) {
 	return chunks[desp]->setBlock(bloc, bpos);
 
 	if (listUpdate) {
-		chunks[desp]->updateDL();
+		//chunks[desp]->updateDL();
+		chunks[desp]->updateMesh();
 		updateNeighborChunks(cpos, bpos);
 	}
 }
@@ -521,7 +524,6 @@ void World::draw(Vector3 pos, float dist) {
 	cMax.floor();
 
 	//printf("%f %f %f, %f %f %f\n", cMin.x, cMin.y, cMin.z, cMax.x, cMax.y, cMax.z);
-
 	int nchunks = 0;
 	for (float x = cMin.x; x <= cMax.x; x++) { //Optimització possible: si els chunks circumdants no son visibles, aquest no ho és
 		for (float y = cMin.y; y <= cMax.y; y++) {

@@ -1,43 +1,48 @@
 #include <GL/glew.h>
 #include "Mesh.h"
 
-Mesh::Mesh() {
-	
+Mesh::Mesh(Primitiva prim) {
+	this->prim = prim;
+	this->vbo = 0;
 }
 
+//Estructura vertex: x,y,z, nx,ny,nz, R,G,B,A, tx,ty (12 floats)
 void Mesh::addVertex(float* vert, float* norm, float* col, float* text) {
 	for (int i = 0; i < 3; i++) {
 		this->vert.push_back(vert[i]);
 	}
 	for (int i = 0; i < 3; i++) {
-		this->text.push_back(norm[i]);
+		this->vert.push_back(norm[i]);
 	}
 	for (int i = 0; i < 4; i++) {
-		this->text.push_back(col[i]);
+		this->vert.push_back(col[i]);
 	}
 	for (int i = 0; i < 2; i++) {
-		this->text.push_back(text[i]);
+		this->vert.push_back(text[i]);
 	}
 }
 
 void Mesh::buildVBO() {
 
 	// Generate 1 buffer, put the resulting identifier in vertexbuffer
+	glDeleteBuffers(1, &this->vbo);
 	glGenBuffers(1, &this->vbo);
 
 	//Mides array
 	size_t vS = this->vert.size() * sizeof(float);
-	size_t nS = this->norm.size() * sizeof(float);
-	size_t cS = this->col.size() * sizeof(float);
-	size_t tS = this->text.size() * sizeof(float);
+	//size_t nS = this->norm.size() * sizeof(float);
+	//size_t cS = this->col.size() * sizeof(float);
+	//size_t tS = this->text.size() * sizeof(float);
 
 	// copy vertex attribs data to VBO
 	glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
-	glBufferData(GL_ARRAY_BUFFER, vS + nS +  cS + tS, 0, GL_STATIC_DRAW); // reserve space
-	glBufferSubData(GL_ARRAY_BUFFER, 0, vS, this->vert.data());                  // copy verts at offset 0
-	glBufferSubData(GL_ARRAY_BUFFER, vS, this->norm.size() * sizeof(float), this->norm.data());               // copy norms after verts
-	glBufferSubData(GL_ARRAY_BUFFER, vS + nS, cS, this->col.data());          // copy cols after norms
-	glBufferSubData(GL_ARRAY_BUFFER, vS + nS + cS, tS, this->text.data()); // copy texs after cols
+	glBufferData(GL_ARRAY_BUFFER, vS /*+ nS +  cS + tS*/, 0, GL_STATIC_DRAW); // reserve space
+	glBufferSubData(GL_ARRAY_BUFFER, 0, vS, this->vert.data());
+	
+	//glBufferSubData(GL_ARRAY_BUFFER, 0, vS, this->vert.data());                  // copy verts at offset 0
+	//glBufferSubData(GL_ARRAY_BUFFER, vS, nS, this->norm.data());               // copy norms after verts
+	//glBufferSubData(GL_ARRAY_BUFFER, vS + nS, cS, this->col.data());          // copy cols after norms
+	//glBufferSubData(GL_ARRAY_BUFFER, vS + nS + cS, tS, this->text.data()); // copy texs after cols
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 }
@@ -51,26 +56,35 @@ void Mesh::draw() {
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-	size_t nOffset = sizeof(GLfloat) * 12 * 6;
-	size_t tOffset = nOffset + sizeof(GLfloat) * 12 * 6;
+	//Mides array
+	size_t vS = this->vert.size() * sizeof(float);
+	size_t nS = this->norm.size() * sizeof(float);
+	size_t cS = this->col.size() * sizeof(float);
+	size_t tS = this->text.size() * sizeof(float);
 
 	//Càlcul offsets:
-	void* nO = (void*)(this->vert.size() * sizeof(float));
-	void* cO = (void*)(this->norm.size() * sizeof(float) + this->vert.size() * sizeof(float));
-	void* tO = (void*)(this->col.size() * sizeof(float) + this->norm.size() * sizeof(float) + this->vert.size() * sizeof(float));
+	void* nO = (void*)(3 * sizeof(float));
+	void* cO = (void*)(6 * sizeof(float));
+	void* tO = (void*)(10 * sizeof(float));
 
 	// specify vertex arrays with their offsets
-	glVertexPointer(3, GL_FLOAT, 0, 0);
-	glNormalPointer(GL_FLOAT, 0, nO);
-	glColorPointer(3, GL_FLOAT, 0, cO);
-	glTexCoordPointer(2, GL_FLOAT, 0, tO);
+	glVertexPointer(3, GL_FLOAT, sizeof(float) * 12, 0);
+	glNormalPointer(GL_FLOAT, sizeof(float) * 12, nO); //MAY NEED A HOLE ARRAY :3
+	glColorPointer(4, GL_FLOAT, sizeof(float) * 12, cO);
+	glTexCoordPointer(2, GL_FLOAT, sizeof(float) * 12, tO);
 
-	//glFrontFace(GL_CCW);
-	// finally draw a cube with glDrawElements()
-	glDrawArrays(GL_TRIANGLES,            // primitive type
-		0,                      // # of indices
-		this->vert.size() / 3);         // data type
-
+	//Draw the mesh
+	switch (this->prim) {
+	case Primitiva::QUAD:
+		glDrawArrays(GL_QUADS, 0, this->vert.size() / 3);
+		break;
+	case Primitiva::LINIA:
+		glDrawArrays(GL_LINES, 0, this->vert.size() / 3);
+		break;
+	case Primitiva::TRIANGLE:
+		glDrawArrays(GL_TRIANGLES, 0, this->vert.size() / 3);
+		break;
+	}
 
 
 	// disable vertex arrays
@@ -84,10 +98,10 @@ void Mesh::draw() {
 }
 
 void Mesh::erase() {
-	this->vert.empty();
-	this->norm.empty();
-	this->col.empty();
-	this->text.empty();
+	this->vert.clear();
+	this->norm.clear();
+	this->col.clear();
+	this->text.clear();
 }
 
 //Retorna la mida (nº vèrtexos)

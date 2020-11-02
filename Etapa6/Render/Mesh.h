@@ -4,6 +4,12 @@
 #include <GL/glut.h>
 #include <GL/glu.h>
 
+enum class Primitiva {
+	LINIA,
+	QUAD,
+	TRIANGLE
+};
+
 class Mesh {
 private:
 	std::vector<float> vert;
@@ -12,6 +18,7 @@ private:
 	std::vector<float> norm;
 
 	unsigned int vbo;
+	Primitiva prim;
 
 public:
 	void addVertex(float* vert, float* norm, float* col, float* text);
@@ -27,5 +34,5 @@ public:
 	int getSize();
 	void erase();
 
-	Mesh();
+	Mesh(Primitiva prim);
 };
