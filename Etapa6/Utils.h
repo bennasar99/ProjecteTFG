@@ -6,7 +6,6 @@
 #include <GL/glut.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <GL/freeglut.h>
 #include <iostream>
 #include <fstream>
 #include <cstring>

@@ -156,12 +156,7 @@ void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc
 						world->br->drawBloc(blocs[x][y][z]->getId(), visible);
 						glPopMatrix();
 					}
-					/*if (this->isVisible(Vector3(x,y,z))) {
-						glPushMatrix();
-						glTranslatef(x, y, z);
-						blocs[x][y][z]->draw();
-						glPopMatrix();
-					}*/
+
 					if (nb >= nblocs) { //No cal dibuixar més blocs
 						y = CHUNKSIZE; z = CHUNKSIZE; x = CHUNKSIZE;
 					}
@@ -211,12 +206,6 @@ void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc
 					if (nb >= nblocs) { //No cal dibuixar més blocs
 						y = CHUNKSIZE; z = CHUNKSIZE; x = CHUNKSIZE;
 					}
-					/*if (this->isVisible(Vector3(x,y,z))) {
-						glPushMatrix();
-						glTranslatef(x, y, z);
-						blocs[x][y][z]->draw();
-						glPopMatrix();
-					}*/
 				}
 			}
 		}
@@ -278,4 +267,45 @@ bool Chunk::readFromByteData(char* arr) {
 		}
 	}
 	return true;
+}
+
+void Chunk::updateMesh() {
+	cMesh.erase();
+
+	int nb = 0;
+	for (int x = 0; x < CHUNKSIZE; x++) { //1a Passada: OPACS
+		for (int z = 0; z < CHUNKSIZE; z++) {
+			for (int y = 0; y < CHUNKSIZE; y++) {
+				if (blocs[x][y][z] != 0) {
+					Vector3 bpos = Vector3(x, y, z);
+					//Ordre: Esquerra, Damunt, Dreta, Abaix, Davant, Darrera
+					Vector3 pos = cpos * CHUNKSIZE + bpos;
+					Vector3 toCheck[6] = { pos - Vector3(1,0,0), pos + Vector3(0,1,0), pos + Vector3(1,0,0), pos - Vector3(0,1,0),
+						pos + Vector3(0,0,1), pos - Vector3(0,0,1) };
+					bool visible[6] = { false, false, false, false, false, false };
+					bool qualcun = false;
+					if (!Block::isTransparent(blocs[x][y][z]->getId())) {
+						for (int i = 0; i < 6; i++) {
+							if (Block::isTransparent(getBlockWorld(toCheck[i]))) {
+								visible[i] = true;
+								qualcun = true;
+							}
+						}
+						nb++;
+					}
+
+					if (qualcun) {
+						glPushMatrix();
+						glTranslatef(x, y, z);
+						world->br->drawBloc(blocs[x][y][z]->getId(), visible);
+						glPopMatrix();
+					}
+
+					if (nb >= nblocs) { //No cal dibuixar més blocs
+						y = CHUNKSIZE; z = CHUNKSIZE; x = CHUNKSIZE;
+					}
+				}
+			}
+		}
+	}
 }

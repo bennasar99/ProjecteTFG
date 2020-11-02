@@ -169,6 +169,7 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="ModelManager.h" />
     <ClInclude Include="Object3D.h" />
+    <ClInclude Include="Render\Mesh.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="TextureAtlas.h" />
     <ClInclude Include="TextureManager.h" />
@@ -198,6 +199,7 @@
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="ModelManager.cpp" />
     <ClCompile Include="Object3D.cpp" />
+    <ClCompile Include="Render\Mesh.cpp" />
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="TextureAtlas.cpp" />
     <ClCompile Include="TextureManager.cpp" />

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Blocks/Block.h"
+#include "Render/Mesh.h"
 #include "TextureManager.h"
 #define CHUNKSIZE 16
 
@@ -16,7 +17,8 @@ private:
 
 	bool firstdraw;
 
-	//GLuint vbo;
+	Mesh cMesh;
+
 public:
 	void drawO();
 	void drawT();
@@ -38,6 +40,7 @@ public:
 	bool readFromByteData(char* arr);
 
 	void updateDL();
+	void updateMesh();
 
 	int nblocs;
 
