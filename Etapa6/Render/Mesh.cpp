@@ -5,7 +5,7 @@ Mesh::Mesh() {
 	
 }
 
-void Mesh::addVertex(float* vert, float* text, float* col, float* norm) {
+void Mesh::addVertex(float* vert, float* norm, float* col, float* text) {
 	for (int i = 0; i < 3; i++) {
 		this->vert.push_back(vert[i]);
 	}
@@ -68,8 +68,8 @@ void Mesh::draw() {
 	//glFrontFace(GL_CCW);
 	// finally draw a cube with glDrawElements()
 	glDrawArrays(GL_TRIANGLES,            // primitive type
-		36,                      // # of indices
-		GL_UNSIGNED_INT);         // data type
+		0,                      // # of indices
+		this->vert.size() / 3);         // data type
 
 
 

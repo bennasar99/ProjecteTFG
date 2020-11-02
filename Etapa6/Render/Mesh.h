@@ -14,7 +14,7 @@ private:
 	unsigned int vbo;
 
 public:
-	void addVertex(float* vert, float* text, float* col, float* norm);
+	void addVertex(float* vert, float* norm, float* col, float* text);
 
 	void buildVBO();
 	void draw();

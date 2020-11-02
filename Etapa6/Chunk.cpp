@@ -25,10 +25,13 @@ void Chunk::drawO() {
 	}
 	if (firstdraw == false) {
 		firstdraw = true;
-		this->updateDL();
+		//this->updateDL();
+		this->updateMesh();
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
-	glCallList(olist);
+	//glCallList(olist);
+	glFrontFace(GL_CCW);
+	cMesh.draw();
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -38,10 +41,13 @@ void Chunk::drawT() {
 	}
 	if (firstdraw == false) {
 		firstdraw = true;
-		this->updateDL();
+		//this->updateDL();
+		this->updateMesh();
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glCallList(tlist);
+	//glCallList(tlist);
+	glFrontFace(GL_CCW);
+	cMesh.draw();
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -108,7 +114,8 @@ bool Chunk::delBlock(Vector3 bpos, bool destroy) {
 		this->blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z] = 0;
 		nblocs--;
 		printf("%f, %f %f %f \n", bpos.y, cpos.x, cpos.y, cpos.z);
-		this->updateDL();
+		//this->updateDL();
+		this->updateMesh();
 		world->updateNeighborChunks(this->cpos, bpos);
 	}
 	return true;
@@ -272,6 +279,35 @@ bool Chunk::readFromByteData(char* arr) {
 void Chunk::updateMesh() {
 	cMesh.erase();
 
+	GLfloat vert[6][12][3] = {
+		{{-.5f, .5f, .5f},  {-.5f, .5f,-.5f},  {-.5f,-.5f,-.5f}, {-.5f,-.5f, .5f}}, // v1,v6,v7,v2 (left)
+		{{.5f, .5f, .5f},   {.5f, .5f,-.5f},  {-.5f, .5f,-.5f}, {-.5f, .5f, .5f}}, // v0,v5,v6,v1 (top)
+		{{.5f, .5f, .5f},   {.5f,-.5f, .5f},   {.5f,-.5f,-.5f},  {.5f, .5f,-.5f}}, // v0,v3,v4,v5 (right)
+		{{-.5f,-.5f,-.5f},   {.5f,-.5f,-.5f},   {.5f,-.5f, .5f}, {-.5f,-.5f, .5f}}, // v7,v4,v3,v2 (bottom)
+		{{.5f, .5f, .5f},  {-.5f, .5f, .5f},  {-.5f,-.5f, .5f},  {.5f,-.5f, .5f}}, // v0,v1,v2,v3 (front)
+		{{.5f,-.5f,-.5f},  {-.5f,-.5f,-.5f},  {-.5f, .5f,-.5f},  {.5f, .5f,-.5f}}  // v4,v7,v6,v5 (back)
+	};
+
+	// normal array
+	GLfloat normals[6][12][3] = {
+		{{-1, 0, 0},  {-1, 0, 0},  {-1, 0, 0},  {-1, 0, 0}},  // v1,v6,v7,v2 (left)
+		{{0, 1, 0},   {0, 1, 0},   {0, 1, 0},   {0, 1, 0}},  // v0,v5,v6,v1 (top)
+		{{1, 0, 0},   {1, 0, 0},   {1, 0, 0},   {1, 0, 0}},  // v0,v3,v4,v5 (right)
+		{{0,-1, 0},   {0,-1, 0},   {0,-1, 0},   {0,-1, 0}},  // v7,v4,v3,v2 (bottom)
+		{{0, 0, 1},   {0, 0, 1},   {0, 0, 1},   {0, 0, 1}},  // v0,v1,v2,v3 (front)
+		{{0, 0,-1},   {0, 0,-1},  {0, 0,-1},   {0, 0,-1}}   // v4,v7,v6,v5 (back)
+	};
+
+	// texture coord array
+	GLfloat texCoords[6][8][2] = {
+		{{1, 0},   {0, 0},   {0, 1},   {1, 1}},               // v1,v6,v7,v2 (left)
+		{{1, 1},   {1, 0},   {0, 0},   {0, 1}},               // v0,v5,v6,v1 (top)
+		{{0, 0},   {0, 1},   {1, 1},   {1, 0}},               // v0,v3,v4,v5 (right)
+		{{0, 1},   {1, 1},   {1, 0},   {0, 0}},               // v7,v4,v3,v2 (bottom)
+		{{1, 0},   {0, 0},   {0, 1},   {1, 1}},               // v0,v1,v2,v3 (front)
+		{{0, 1},   {1, 1},   {1, 0},   {0, 0}}                // v4,v7,v6,v5 (back)
+	};
+
 	int nb = 0;
 	for (int x = 0; x < CHUNKSIZE; x++) { //1a Passada: OPACS
 		for (int z = 0; z < CHUNKSIZE; z++) {
@@ -295,10 +331,16 @@ void Chunk::updateMesh() {
 					}
 
 					if (qualcun) {
-						glPushMatrix();
-						glTranslatef(x, y, z);
-						world->br->drawBloc(blocs[x][y][z]->getId(), visible);
-						glPopMatrix();
+						for (int i = 0; i < 6; i++) { //Afegim els vèrtexos
+							if (visible[i]) {
+								for (int j = 0; j < 4; j++) {
+									float color[3] = { 0.5f, 0.5f, 0.5f };
+									float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
+									vPos[0] += x; vPos[1] += y; vPos[2] += z;
+									cMesh.addVertex(vPos, normals[i][j], color, texCoords[i][j]);
+								}
+							}
+						}
 					}
 
 					if (nb >= nblocs) { //No cal dibuixar més blocs
@@ -308,4 +350,5 @@ void Chunk::updateMesh() {
 			}
 		}
 	}
+	cMesh.buildVBO();
 }
