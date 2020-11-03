@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Blocks/Block.h"
-#include "Render/Mesh.h"
-#include "TextureManager.h"
+#include "Render/ChunkMesh.h"
+#include "Vector3.h"
 #define CHUNKSIZE 16
 
 class Chunk {
@@ -10,16 +10,11 @@ private:
 	Block* blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE];
 	Vector3 cpos;
 
-	GLuint tlist;
-	GLuint olist;
-
 	World* world;
 
 	bool firstdraw;
 
-	Mesh *bMesh; //Blocs sòlids normals
-	Mesh *tMesh; //Blocs transparents
-	Mesh *lMesh; //Mesh de línies
+	ChunkMesh *cMesh;
 
 public:
 	void drawO();
@@ -41,7 +36,6 @@ public:
 	bool getByteData(char* arr);
 	bool readFromByteData(char* arr);
 
-	void updateDL();
 	void updateMesh();
 
 	int nblocs;

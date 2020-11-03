@@ -1,8 +1,5 @@
 #pragma once
 #include <vector>
-#include <GL/gl.h>
-#include <GL/glut.h>
-#include <GL/glu.h>
 
 enum class Primitiva {
 	LINIA,
@@ -18,6 +15,7 @@ private:
 	std::vector<float> norm;
 
 	unsigned int vbo;
+
 	Primitiva prim;
 
 public:

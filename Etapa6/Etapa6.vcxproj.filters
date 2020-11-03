@@ -120,6 +120,9 @@
     <ClInclude Include="Render\Mesh.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Render\ChunkMesh.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -201,6 +204,9 @@
       <Filter>Source Files\Blocks</Filter>
     </ClCompile>
     <ClCompile Include="Render\Mesh.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ChunkMesh.cpp">
       <Filter>Source Files\Render</Filter>
     </ClCompile>
   </ItemGroup>

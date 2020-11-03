@@ -1,4 +1,3 @@
-#include <GL/glew.h>
 #include "Chunk.h"
 #include "World.h"
 
@@ -13,12 +12,8 @@ Chunk::Chunk(World* world, Vector3 pos) {
 	this->world = world;
 	this->cpos = pos;
 	this->nblocs = 0;
-	this->olist= glGenLists(1);
-	this->tlist = glGenLists(1);
 
-	bMesh = new Mesh(Primitiva::QUAD);
-	tMesh = new Mesh(Primitiva::QUAD);
-	lMesh = new Mesh(Primitiva::LINIA);
+	this->cMesh = new ChunkMesh();
 
 	this->firstdraw = false;
 }
@@ -29,14 +24,12 @@ void Chunk::drawO() {
 	}
 	if (firstdraw == false) {
 		firstdraw = true;
-		//this->updateDL();
 		this->updateMesh();
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
-	//glCallList(olist);
 	glTranslatef(0.5f, 0.5f, 0.5f);
 	glFrontFace(GL_CCW);
-	bMesh->draw();
+	this->cMesh->drawO();
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -46,16 +39,12 @@ void Chunk::drawT() {
 	}
 	if (firstdraw == false) {
 		firstdraw = true;
-		//this->updateDL();
 		this->updateMesh();
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
-	//glCallList(tlist);
 	glFrontFace(GL_CCW);
-	//glDisable(GL_CULL_FACE);
 	glTranslatef(0.5f, 0.5f, 0.5f);
-	tMesh->draw();
-	//glEnable(GL_CULL_FACE);
+	this->cMesh->drawT();
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -108,8 +97,7 @@ void Chunk::destroy() {
 			}
 		}
 	}
-	glDeleteLists(olist, 1);
-	glDeleteLists(tlist, 1);
+	cMesh->erase();
 }
 
 //TODO actualitzar display list
@@ -134,98 +122,6 @@ void Chunk::interact(Vector3 bpos) {
 		return;
 	}
 	blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z]->interact();
-}
-
-void Chunk::updateDL() { //TODO: cas d'optimització world border, detectarà bloc res i se dibuixarà, no cal
-	glDeleteLists(olist, 1);
-	olist = glGenLists(1);
-	glNewList(olist, GL_COMPILE);
-
-	glTranslatef(0.5f, 0.5f, 0.5f);
-	int nb = 0;
-	for (int x = 0; x < CHUNKSIZE; x++) { //1a Passada: OPACS
-		for (int z = 0; z < CHUNKSIZE; z++) {
-			for (int y = 0; y < CHUNKSIZE; y++) {
-				if (blocs[x][y][z] != 0) {
-					Vector3 bpos = Vector3(x, y, z);
-					//VERSIÓ ALTERNATIVA
-					//Ordre: Esquerra, Damunt, Dreta, Abaix, Davant, Darrera
-					Vector3 pos = cpos * CHUNKSIZE + bpos;
-					Vector3 toCheck[6] = { pos - Vector3(1,0,0), pos + Vector3(0,1,0), pos + Vector3(1,0,0), pos - Vector3(0,1,0),
-						pos + Vector3(0,0,1), pos - Vector3(0,0,1) };
-					bool visible[6] = { false, false, false, false, false, false };
-					bool qualcun = false;
-					if (!Block::isTransparent(blocs[x][y][z]->getId())) {
-						for (int i = 0; i < 6; i++) {
-							if (Block::isTransparent(getBlockWorld(toCheck[i]))) {
-								visible[i] = true;
-								qualcun = true;
-							}
-						}
-						nb++;
-					}
-
-					if (qualcun) {
-						glPushMatrix();
-						glTranslatef(x, y, z);
-						world->br->drawBloc(blocs[x][y][z]->getId(), visible);
-						glPopMatrix();
-					}
-
-					if (nb >= nblocs) { //No cal dibuixar més blocs
-						y = CHUNKSIZE; z = CHUNKSIZE; x = CHUNKSIZE;
-					}
-				}
-			}
-		}
-	}
-
-	glEndList(); //FI llista opacs
-
-	glDeleteLists(tlist, 1);
-	tlist = glGenLists(1);
-	glNewList(tlist, GL_COMPILE);
-
-	glTranslatef(0.5f, 0.5f, 0.5f);
-	for (int x = 0; x < CHUNKSIZE; x++) { //2a Passada: TRANSPARENTS
-		for (int z = 0; z < CHUNKSIZE; z++) {
-			for (int y = 0; y < CHUNKSIZE; y++) {
-				if (blocs[x][y][z] != 0) {
-					Vector3 bpos = Vector3(x, y, z);
-					//VERSIÓ ALTERNATIVA
-					//Ordre: Esquerra, Damunt, Dreta, Abaix, Davant, Darrera
-					Vector3 pos = cpos * CHUNKSIZE + bpos;
-					Vector3 toCheck[6] = { pos - Vector3(1,0,0), pos + Vector3(0,1,0), pos + Vector3(1,0,0), pos - Vector3(0,1,0),
-						pos + Vector3(0,0,1), pos - Vector3(0,0,1) };
-					bool visible[6] = { false, false, false, false, false, false };
-					bool qualcun = false;
-					if (Block::isTransparent(blocs[x][y][z]->getId())) { //Si és aigua, només s'ha de dibuixar si està en contacte amb aire o null
-						Bloc btipus = blocs[x][y][z]->getId();
-						for (int i = 0; i < 6; i++) {
-							Bloc bl = getBlockWorld(toCheck[i]);
-							if (Block::isTransparent(bl) && btipus != bl) {
-								visible[i] = true;
-								qualcun = true;
-							}
-						}
-						nb++;
-					}
-
-					if (qualcun) {
-						glPushMatrix();
-						glTranslatef(x, y, z);
-						world->br->drawBloc(blocs[x][y][z]->getId(), visible);
-						glPopMatrix();
-					}
-
-					if (nb >= nblocs) { //No cal dibuixar més blocs
-						y = CHUNKSIZE; z = CHUNKSIZE; x = CHUNKSIZE;
-					}
-				}
-			}
-		}
-	}
-	glEndList(); //Fi llista transparent
 }
 
 bool Chunk::isVisible(Vector3 bpos) {
@@ -285,8 +181,7 @@ bool Chunk::readFromByteData(char* arr) {
 }
 
 void Chunk::updateMesh() {
-	bMesh->erase();
-	tMesh->erase();
+	cMesh->erase();
 
 	GLfloat vert[6][4][3] = {
 		{{-.5f, .5f, .5f},  {-.5f, .5f,-.5f},  {-.5f,-.5f,-.5f}, {-.5f,-.5f, .5f}}, // v1,v6,v7,v2 (left)
@@ -336,99 +231,44 @@ void Chunk::updateMesh() {
 					Vector3 pos = cpos * CHUNKSIZE + bpos;
 					Vector3 toCheck[6] = { pos - Vector3(1,0,0), pos + Vector3(0,1,0), pos + Vector3(1,0,0), pos - Vector3(0,1,0),
 						pos + Vector3(0,0,1), pos - Vector3(0,0,1) };
-					bool visible[6] = { false, false, false, false, false, false };
-					bool qualcun = false;
-					if (!Block::isTransparent(blocs[x][y][z]->getId())) {
-						for (int i = 0; i < 6; i++) {
-							if (Block::isTransparent(getBlockWorld(toCheck[i]))) {
-								visible[i] = true;
-								qualcun = true;
-							}
-						}
-						nb++;
-					}
-					float *texCoords = this->world->br->getTexCoords(blocs[x][y][z]->getId());
-					float* color = this->world->br->getColor(blocs[x][y][z]->getId());
-					float xb = 0, yb = 0, xt = 0, yt = 0;
-					xb = texCoords[0]; yb = texCoords[1]; xt = texCoords[2]; yt = texCoords[3];
-					if (qualcun) {
-						GLfloat text[6][4][2] =
-						{
-							{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra OK
-							{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt OK
-							{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Dreta OK
-							{{xt,yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Abaix OK
-							{{xt, yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Davant OK
-							{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}} //Darrera OK
-						};
-						for (int i = 0; i < 6; i++) { //Afegim els vèrtexos
-							if (visible[i]) {
 
-								for (int j = 0; j < 4; j++) {
-									float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
-									vPos[0] += x; vPos[1] += y; vPos[2] += z;
-									bMesh->addVertex(vPos, normals[i][j], color, text[i][j]);
-								}
-							}
-						}
-					}
-
-					if (nb >= nblocs) { //No cal dibuixar més blocs
-						y = CHUNKSIZE; z = CHUNKSIZE; x = CHUNKSIZE;
-					}
-				}
-			}
-		}
-	}
-	bMesh->buildVBO();
-
-	//2a TRANSPARENTS
-	nb = 0;
-	for (int x = 0; x < CHUNKSIZE; x++) { //1a Passada: OPACS
-		for (int z = 0; z < CHUNKSIZE; z++) {
-			for (int y = 0; y < CHUNKSIZE; y++) {
-				if (blocs[x][y][z] != 0) {
-					Vector3 bpos = Vector3(x, y, z);
-					//Ordre: Esquerra, Damunt, Dreta, Abaix, Davant, Darrera
-					Vector3 pos = cpos * CHUNKSIZE + bpos;
-					Vector3 toCheck[6] = { pos - Vector3(1,0,0), pos + Vector3(0,1,0), pos + Vector3(1,0,0), pos - Vector3(0,1,0),
-						pos + Vector3(0,0,1), pos - Vector3(0,0,1) };
-					bool visible[6] = { false, false, false, false, false, false };
-					bool qualcun = false;
-					if (Block::isTransparent(blocs[x][y][z]->getId())) {
-						for (int i = 0; i < 6; i++) {
-							if (Block::isTransparent(getBlockWorld(toCheck[i])) && getBlockWorld(toCheck[i]) != blocs[x][y][z]->getId()) {
-								visible[i] = true;
-								qualcun = true;
-							}
-						}
-						nb++;
-					}
 					float* texCoords = this->world->br->getTexCoords(blocs[x][y][z]->getId());
 					float* color = this->world->br->getColor(blocs[x][y][z]->getId());
 					float xb = 0, yb = 0, xt = 0, yt = 0;
 					xb = texCoords[0]; yb = texCoords[1]; xt = texCoords[2]; yt = texCoords[3];
-					if (qualcun) {
-						GLfloat text[6][4][2] =
-						{
-							{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra OK
-							{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt OK
-							{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Dreta OK
-							{{xt,yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Abaix OK
-							{{xt, yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Davant OK
-							{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}} //Darrera OK
-						};
-						for (int i = 0; i < 6; i++) { //Afegim els vèrtexos
-							if (visible[i]) {
 
+					GLfloat text[6][4][2] =
+					{
+						{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra OK
+						{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt OK
+						{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Dreta OK
+						{{xt,yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Abaix OK
+						{{xt, yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Davant OK
+						{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}} //Darrera OK
+					};
+
+					if (Block::isTransparent(blocs[x][y][z]->getId())) {
+						for (int i = 0; i < 6; i++) {
+							if (Block::isTransparent(getBlockWorld(toCheck[i])) && getBlockWorld(toCheck[i]) != blocs[x][y][z]->getId()) {
 								for (int j = 0; j < 4; j++) {
 									float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
 									vPos[0] += x; vPos[1] += y; vPos[2] += z;
-									tMesh->addVertex(vPos, normals[i][j], color, text[i][j]);
+									cMesh->addVertexT(vPos, normals[i][j], color, text[i][j]);
+								}
+							}
+						}
+					} else {
+						for (int i = 0; i < 6; i++) {
+							if (Block::isTransparent(getBlockWorld(toCheck[i]))) {
+								for (int j = 0; j < 4; j++) {
+									float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
+									vPos[0] += x; vPos[1] += y; vPos[2] += z;
+									cMesh->addVertexO(vPos, normals[i][j], color, text[i][j], Primitiva::QUAD);
 								}
 							}
 						}
 					}
+					nb++;
 
 					if (nb >= nblocs) { //No cal dibuixar més blocs
 						y = CHUNKSIZE; z = CHUNKSIZE; x = CHUNKSIZE;
@@ -437,5 +277,5 @@ void Chunk::updateMesh() {
 			}
 		}
 	}
-	tMesh->buildVBO();
+	cMesh->update();
 }
