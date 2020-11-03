@@ -15,13 +15,14 @@ private:
 	std::vector<float> norm;
 
 	unsigned int vbo;
+	unsigned int vao;
 
 	Primitiva prim;
 
 public:
 	void addVertex(float* vert, float* norm, float* col, float* text);
 
-	void buildVBO();
+	void update();
 	void draw();
 
 	float* getVertexData();

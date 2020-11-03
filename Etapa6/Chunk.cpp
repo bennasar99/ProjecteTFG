@@ -110,7 +110,6 @@ bool Chunk::delBlock(Vector3 bpos, bool destroy) {
 		this->blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z] = 0;
 		nblocs--;
 		printf("%f, %f %f %f \n", bpos.y, cpos.x, cpos.y, cpos.z);
-		//this->updateDL();
 		this->updateMesh();
 		world->updateNeighborChunks(this->cpos, bpos);
 	}

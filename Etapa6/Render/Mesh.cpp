@@ -22,56 +22,69 @@ void Mesh::addVertex(float* vert, float* norm, float* col, float* text) {
 	}
 }
 
-void Mesh::buildVBO() {
+void Mesh::update() {
+	//Generam el VAO
+	glDeleteVertexArrays(1, &this->vao);
+	glGenVertexArrays(1, &this->vao);
 
-	// Generate 1 buffer, put the resulting identifier in vertexbuffer
+	//Generam el VBO
 	glDeleteBuffers(1, &this->vbo);
 	glGenBuffers(1, &this->vbo);
 
 	//Mides array
 	size_t vS = this->vert.size() * sizeof(float);
-	//size_t nS = this->norm.size() * sizeof(float);
-	//size_t cS = this->col.size() * sizeof(float);
-	//size_t tS = this->text.size() * sizeof(float);
 
-	// copy vertex attribs data to VBO
+	glBindVertexArray(this->vao); //Attach al VAO
+
+	//Preparació VBO
 	glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
-	glBufferData(GL_ARRAY_BUFFER, vS /*+ nS +  cS + tS*/, 0, GL_STATIC_DRAW); // reserve space
+	glBufferData(GL_ARRAY_BUFFER, vS, 0, GL_STATIC_DRAW); // reserve space
 	glBufferSubData(GL_ARRAY_BUFFER, 0, vS, this->vert.data());
 	
-	//glBufferSubData(GL_ARRAY_BUFFER, 0, vS, this->vert.data());                  // copy verts at offset 0
-	//glBufferSubData(GL_ARRAY_BUFFER, vS, nS, this->norm.data());               // copy norms after verts
-	//glBufferSubData(GL_ARRAY_BUFFER, vS + nS, cS, this->col.data());          // copy cols after norms
-	//glBufferSubData(GL_ARRAY_BUFFER, vS + nS + cS, tS, this->text.data()); // copy texs after cols
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-}
-
-void Mesh::draw() {
-	glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
-
-	// enable vertex arrays
+	//Punters VAO
+	void* nO = (void*)(3 * sizeof(float));
+	void* cO = (void*)(6 * sizeof(float));
+	void* tO = (void*)(10 * sizeof(float));
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	//Mides array
-	size_t vS = this->vert.size() * sizeof(float);
-	size_t nS = this->norm.size() * sizeof(float);
-	size_t cS = this->col.size() * sizeof(float);
-	size_t tS = this->text.size() * sizeof(float);
-
-	//Càlcul offsets:
-	void* nO = (void*)(3 * sizeof(float));
-	void* cO = (void*)(6 * sizeof(float));
-	void* tO = (void*)(10 * sizeof(float));
-
-	// specify vertex arrays with their offsets
 	glVertexPointer(3, GL_FLOAT, sizeof(float) * 12, 0);
 	glNormalPointer(GL_FLOAT, sizeof(float) * 12, nO); //MAY NEED A HOLE ARRAY :3
 	glColorPointer(4, GL_FLOAT, sizeof(float) * 12, cO);
 	glTexCoordPointer(2, GL_FLOAT, sizeof(float) * 12, tO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0); //Deattach VBO
+	glBindVertexArray(0); //Deattach VAO
+
+}
+
+void Mesh::draw() {
+	glBindVertexArray(this->vao);
+	//glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
+
+	//// enable vertex arrays
+	//glEnableClientState(GL_VERTEX_ARRAY);
+	//glEnableClientState(GL_NORMAL_ARRAY);
+	//glEnableClientState(GL_COLOR_ARRAY);
+	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	////Mides array
+	//size_t vS = this->vert.size() * sizeof(float);
+	//size_t nS = this->norm.size() * sizeof(float);
+	//size_t cS = this->col.size() * sizeof(float);
+	//size_t tS = this->text.size() * sizeof(float);
+
+	////Càlcul offsets:
+	//void* nO = (void*)(3 * sizeof(float));
+	//void* cO = (void*)(6 * sizeof(float));
+	//void* tO = (void*)(10 * sizeof(float));
+
+	//// specify vertex arrays with their offsets
+	//glVertexPointer(3, GL_FLOAT, sizeof(float) * 12, 0);
+	//glNormalPointer(GL_FLOAT, sizeof(float) * 12, nO); //MAY NEED A HOLE ARRAY :3
+	//glColorPointer(4, GL_FLOAT, sizeof(float) * 12, cO);
+	//glTexCoordPointer(2, GL_FLOAT, sizeof(float) * 12, tO);
 
 	//Draw the mesh
 	switch (this->prim) {
@@ -87,14 +100,16 @@ void Mesh::draw() {
 	}
 
 
-	// disable vertex arrays
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	//// disable vertex arrays
+	//glDisableClientState(GL_VERTEX_ARRAY);
+	//glDisableClientState(GL_NORMAL_ARRAY);
+	//glDisableClientState(GL_COLOR_ARRAY);
+	//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-	// unbind VBOs
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//// unbind VBOs
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindVertexArray(0);
 }
 
 void Mesh::erase() {

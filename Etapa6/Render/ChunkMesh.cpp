@@ -40,7 +40,7 @@ void ChunkMesh::erase() {
 }
 
 void ChunkMesh::update() {
-	oMesh->buildVBO();
-	tMesh->buildVBO();
-	lMesh->buildVBO();
+	oMesh->update();
+	tMesh->update();
+	lMesh->update();
 }
