@@ -5,10 +5,7 @@
 class World;
 
 enum class Entitat {
-	COTXE,
-	COTXE2,
-	GRUA,
-	NORIA
+	JUGADOR,
 };
 
 class Entity {

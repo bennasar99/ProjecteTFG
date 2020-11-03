@@ -1,7 +1,6 @@
 #pragma once
 #include "../Vector3.h"
 #include "Block.h"
-#include "../Light.h"
 #include "../SoundManager.h"
 
 /*

@@ -14,15 +14,11 @@
 #include "Blocks/LightBlock.h"
 #include "Blocks/Pendul.h"
 #include "Blocks/Jukebox.h"
-#include "Blocks/Mirror.h"
 #include "Blocks/EntityBlock.h"
 #include <algorithm>
 #include "Utils.h"
 #include "Camera.h"
 #include "Entities/Entity.h"
-#include "Entities/Car.h"
-#include "Entities/Grua.h"
-#include "Entities/Noria.h"
 #include "Chunk.h"
 #include "Blocks//BlockRenderer.h"
 

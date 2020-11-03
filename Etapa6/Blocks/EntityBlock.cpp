@@ -12,13 +12,10 @@
 EntityBlock::EntityBlock(World* world, Bloc id, Vector3 pos) : Block(world, id, 0) {
     this->ent = 0;
     this->pos = pos;
-    switch (id) { //Segons el bloc, inicialitzam el llum d'una manera o una altre
-    case Bloc::NORIA:
-        this->ent = world->addEntity(Entitat::NORIA, this->pos);
-        break;
-    case Bloc::GRUA:
-        this->ent = world->addEntity(Entitat::GRUA, this->pos);
-        break;
+    switch (id) {
+    //case Bloc::TIPUS:
+        //this->ent = world->addEntity(Entitat::TIPUS, this->pos);
+        //break;
     }
 }
 

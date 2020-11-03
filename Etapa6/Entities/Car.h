@@ -5,7 +5,6 @@
 #include "../KeyboardManager.h"
 #include "../SoundManager.h"
 #include "../Light.h"
-#include "../Object3D.h"
 
 class Block;
 class World;

@@ -207,91 +207,12 @@ void BlockRenderer::drawBloc(Bloc id, bool visible[6]) {
 		drawCub(visible, 5);
 		//ModelManager::drawModel(Model::CUB);
 		break;
-	case Bloc::NORIA: { //Noria (icona)
-		glPushMatrix();
-		float angle = toRad(0);
-		glLineWidth(1.0f);
-		glColor3f(0, 0, 0);
-		for (int i = 0; i < 5; i++) {
-
-			glPushMatrix();
-			glBegin(GL_LINES); //Linia del centre al vagó
-			glVertex3f(0, 0, 0);
-			glVertex3f(0.5f * cosf(angle), 0.5f * sinf(angle), 0);
-			glEnd();
-
-			glPopMatrix();
-
-			glPushMatrix();
-			glBegin(GL_LINES); //Connexió cap al pròxim vagó
-			glVertex3f(0.5f * cosf(angle), 0.5f * sinf(angle), 0);
-			angle += toRad(360 / 5);
-			glVertex3f(0.5f * cosf(angle), 0.5f * sinf(angle), 0);
-			glEnd();
-
-			glPopMatrix();
-
-			//Suport d'enterra
-			glColor3f(0, 0, 0);
-			glLineWidth(3.0f);
-			glBegin(GL_LINES); //Linia del centre al vagó
-			glVertex3f(0, 0, 0);
-			glVertex3f(1 / 5, -0.5f, 1 / 5);
-
-			glVertex3f(0, 0, 0);
-			glVertex3f(-1 / 5, -0.5f, 1 / 5);
-
-			glVertex3f(0, 0, 0);
-			glVertex3f(1 / 5, -0.5f, -1 / 5);
-
-			glVertex3f(0, 0, 0);
-			glVertex3f(-1 / 5, -0.5f, -1 / 5);
-			glEnd();
-			glLineWidth(1.0f);
-
-		}
-		glPopMatrix();
-		break;
-	}
 	case Bloc::ALTAVEU:
 		glColor3f(0.5f, 0.5f, 0.5f);
 		//glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::ALTAVEU));
 		//glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 		drawCub(visible, 0);
 		//ModelManager::drawModel(Model::CUB);
-		break;
-	case Bloc::MIRALL: //Només icona, sense textura, quadrat
-		glLineWidth(2.0f);
-		glColor3f(0, 0, 0);
-
-		glBegin(GL_LINES);
-		glVertex3f(-0.5f, 0.5f, 0);
-		glVertex3f(-0.5f, -0.5f, 0);
-
-		glVertex3f(-0.5f, -0.5f, 0);
-		glVertex3f(0.5f, -0.5f, 0);
-
-		glVertex3f(0.5f, -0.5f, 0);
-		glVertex3f(0.5f, 0.5f, 0);
-
-		glVertex3f(-0.5f, 0.5f, 0);
-		glVertex3f(0.5f, 0.5f, 0);
-		glEnd();
-		break;
-	case Bloc::GRUA: //Només icona, sense textura, quadrat
-		glLineWidth(2.0f);
-		glColor3f(0, 0, 0);
-
-		glBegin(GL_LINES);
-		glVertex3f(0.5f, 0.5f, 0);
-		glVertex3f(0.5f, -0.5f, 0);
-
-		glVertex3f(-0.3f, 0.4f, 0);
-		glVertex3f(-0.3f, 0, 0);
-
-		glVertex3f(-0.5f, 0.4f, 0);
-		glVertex3f(0.5f, 0.4f, 0);
-		glEnd();
 		break;
 	case Bloc::FUSTAARBRE:
 		glColor3f(0.76f, 0.60f, 0.42f);
@@ -445,16 +366,8 @@ float* BlockRenderer::getColor(Bloc tipus) {
 	case Bloc::PEDRA:
 		color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
 		break;
-	case Bloc::NORIA: { //Noria (icona)
-		break;
-	}
 	case Bloc::ALTAVEU:
 		color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
-		break;
-	case Bloc::MIRALL: //Només icona, sense textura, quadrat
-		color[0] = 0; color[1] = 0; color[2] = 0; color[3] = 1;
-		break;
-	case Bloc::GRUA: //Només icona, sense textura, quadrat
 		break;
 	case Bloc::FUSTAARBRE:
 		color[0] = 0.76f; color[1] = 0.6f; color[2] = 0.42f; color[3] = 1;

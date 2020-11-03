@@ -9,8 +9,6 @@
 #include <cmath>
 #include "../World.h"
 
-#include "../Material.h"
-
 class World;
 
 Player::Player(World* world, Vector3 pos): Entity(world, pos)

@@ -17,10 +17,7 @@ enum class Bloc {
 	FUSTA,
 	FUSTAARBRE,
 	PEDRA,
-	NORIA,
 	ALTAVEU,
-	MIRALL,
-	GRUA,
 	LIMIT //SEMPRE DARRER
 };
 

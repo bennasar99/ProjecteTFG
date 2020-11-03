@@ -1,5 +1,4 @@
 #include "World.h"
-#include "Object3D.h"
 
 
 World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
@@ -34,14 +33,6 @@ World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
 		if (getBlock(Vector3(x, y, z)) == Bloc::RES) {
 			spawn = Vector3(x, y + 1, z);
 			break;
-		}
-	}
-
-	//Fi generació món
-	for (int i = 0; i < this->sizex * this->sizey * this->sizez; i++) {
-		if (chunks[i] != nullptr) {
-			//chunks[i]->updateDL();
-			//chunks[i]->updateMesh();
 		}
 	}
 }
@@ -405,12 +396,6 @@ bool World::setBlock(Bloc tipus, Vector3 pos, Block* parent, bool listUpdate) {
 	case Bloc::ALTAVEU:
 		bloc = new Jukebox(this, pos);
 		break;
-	case Bloc::MIRALL:
-		bloc = new Mirror(this, pos);
-		break;
-	case Bloc::NORIA: case Bloc::GRUA:
-		bloc = new EntityBlock(this, tipus, pos);
-		break;
 	default:
 		bloc = new Block(this, tipus, parent);
 	}
@@ -662,18 +647,7 @@ int World::getDesp(Vector3 pos) {
 Entity* World::addEntity(Entitat ent, Vector3 pos) {
 	Entity* entitat = 0;
 	switch (ent) {
-	case Entitat::COTXE:
-		entitat = new Car(this, pos, 0);
-		break;
-	case Entitat::COTXE2:
-		entitat = new Car(this, pos, 1);
-		break;
-	case Entitat::GRUA:
-		entitat = new Grua(this, pos);
-		break;
-	case Entitat::NORIA:
-		entitat = new Noria(this, pos, 5, 0.1f, 8, 0.5f);
-		break;
+		//Ficar entitat amb new a *entitat
 	}
 	entities.push_front(entitat);
 	return entitat;
@@ -718,7 +692,6 @@ void World::updateNeighborChunks(Vector3 cpos, Vector3 bpos) {
 		if (chunks[desp] == nullptr) {
 			chunks[desp] = new Chunk(this, ncpos);
 		}
-		//chunks[desp]->updateDL();
 		chunks[desp]->updateMesh();
 	}
 	if (bpos.y == 15) {
@@ -732,7 +705,6 @@ void World::updateNeighborChunks(Vector3 cpos, Vector3 bpos) {
 		if (chunks[desp] == nullptr) {
 			chunks[desp] = new Chunk(this, ncpos);
 		}
-		//chunks[desp]->updateDL();
 		chunks[desp]->updateMesh();
 	}
 	if (bpos.z == 15) {
@@ -746,7 +718,6 @@ void World::updateNeighborChunks(Vector3 cpos, Vector3 bpos) {
 		if (chunks[desp] == nullptr) {
 			chunks[desp] = new Chunk(this, ncpos);
 		}
-		//chunks[desp]->updateDL();
 		chunks[desp]->updateMesh();
 	}
 }

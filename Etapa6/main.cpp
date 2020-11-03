@@ -10,7 +10,6 @@
 #include "Vector3.h"
 #include "TextureManager.h"
 #include "SoundManager.h"
-#include "ModelManager.h"
 #include "Entities/Player.h"
 #include <sys/stat.h>
 
@@ -62,7 +61,7 @@ void onWindowResize(GLFWwindow* window, int width, int height);
 void onKeyboardUp(unsigned char key, int x, int y);
 void onKeyboardDown(unsigned char key, int x, int y);
 void toggleAxis();
-void changeScene(unsigned char sceneNumber);
+void setLighting();
 void scaleListener(GLFWwindow* window, double xoffset, double yoffset);
 void mouseListener(GLFWwindow* window, int button, int action, int mods);
 void lookAround(GLFWwindow* window, double x, double y);
@@ -94,7 +93,6 @@ void Display(GLFWwindow* window)
 	//}
 	darrerDisplay = temps;
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); //Ens asseguram que no esteim dibuixant a cap framebuffer
 	glBindTexture(GL_TEXTURE_2D, 0); //I que no tenim cap textura seleccionada
 	glViewport(0, 0, w_width, w_height); //Establim el viewport
 
@@ -238,7 +236,7 @@ void Display(GLFWwindow* window)
 
 		glEnable(GL_TEXTURE_2D);
 		glTranslatef(0.5f * aspect - 0.3f, 0.8f, -1);
-		for (int i = 0; i < 27; i++) { //Objectes de l'inventari
+		for (int i = 0; i < 16; i++) { //Objectes de l'inventari
 			glPushMatrix();
 			glScalef(0.1f, 0.1f, 0.1f);
 			Block bsel = Block(NULL, static_cast<Bloc>(i+2), NULL); //+2 perque botam aire i null
@@ -325,19 +323,18 @@ void Idle(void)
 int main(int argc, char** argv)
 {
 
-	// necessari inicialitzar el món dins el main (físiques)
 	//Càmera
 	camera.setPos(Vector3(64, 66, 64));
 	camera.setFreeLook(true);
 	camera.setFreeMove(true);
 	camera.setDrawMove(true);
-	//world = new World(16,16,16, &camera);
+
 	printf("World name: ");
 	std::cin >> wname;
 	std::string path = "worlds/" + wname;
 	struct stat buffer;
 	if (stat(path.c_str(), &buffer) == 0) {
-		//Si existeix
+		//Si el món ja existeix, el carregam
 		printf("Loading world %s... \n", wname);
 		world = new World(wname, &camera);
 		ent = new Player(world, world->getSpawn() + Vector3(0, 2, 0));
@@ -345,6 +342,7 @@ int main(int argc, char** argv)
 		//cotxe = Car(world, Vector3(66, 65, 66));
 	}
 	else {
+		//Si no, el cream
 		printf("Creating world %s... \n", wname);
 		printf("Seed: ");
 		std::string sseed;
@@ -359,22 +357,8 @@ int main(int argc, char** argv)
 		ent = new Player(world, world->getSpawn() + Vector3(0, 10, 0));
 		world->save(wname);
 	}
-	// Inicializamos la libreria GLUT
-	//glutInit(&argc, argv);
+	// Inicialitzam el GLFW
 	glfwInit();
-
-	// Indicamos como ha de ser la nueva ventana
-	//glutInitWindowPosition(100, 100);
-	//glutInitWindowSize(w_width, w_height);
-	//glutSetOption(GLUT_MULTISAMPLE, 8);
-	//glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
-
-	// Creamos la nueva ventana
-	//glutInitContextVersion(3, 1);
-	//glutInitContextFlags(GLUT_FORWARD_COMPATIBLE | GLUT_DEBUG);
-	//glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
-	//glutCreateWindow("Etapa 6");
-	//glutSetCursor(GLUT_CURSOR_NONE);
 
 	window = glfwCreateWindow(w_width, w_height, "AlphaCraft", NULL, NULL);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -393,26 +377,10 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
-	// indicar l'escoltador del canvi de mida
-	// és important cridar aquesta funció després de crear la finestra
-	//glutReshapeFunc(&onWindowResize);
-
-	// processar les entrades per reclat
-	//glutKeyboardFunc(&onKeyboardDown);
-	//glutKeyboardUpFunc(&onKeyboardUp);
-
-	//I per ratoli
-	//glutPassiveMotionFunc(&lookAround);
-	//glutMouseWheelFunc(&scaleListener);
-	//glutMouseFunc(&mouseListener);
+	// Escoltadors de ratolí
 	glfwSetScrollCallback(window, scaleListener);
 	glfwSetCursorPosCallback(window, lookAround);
 	glfwSetMouseButtonCallback(window, mouseListener);
-
-
-	// Indicamos cuales son las funciones de redibujado e idle
-	//glutDisplayFunc(Display);
-	//glutIdleFunc(Idle);
 
 	glEnable(GL_DEPTH_TEST); //Activam la profunditat
 
@@ -427,7 +395,7 @@ int main(int argc, char** argv)
 	glEnable(GL_BLEND); //Activam transparència
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// El color de fondo sera el negro (RGBA, RGB + Alpha channel)
+	//Color de fons
 	glClearColor(0,0,0, 1.0f);
 
 	glMatrixMode(GL_PROJECTION);
@@ -448,15 +416,6 @@ int main(int argc, char** argv)
 	KeyboardManager::addKeyHandler('x', &toggleAxis);
 	KeyboardManager::addKeyHandler(&movement);
 
-	//Blocs món per defecte:
-	world->setBlock(Bloc::CUB, Vector3(64, 65, 64));
-	world->setBlock(Bloc::CUB, Vector3(65, 65, 64));
-
-	//Entitats
-	//world->addEntity(Entitat::COTXE, Vector3(70, 65, 66));
-	//world->addEntity(Entitat::COTXE2, Vector3(70, 65, 60));
-	//world->setBlock(Bloc::GRUA, Vector3(60, 65, 66));
-
 	glEnable(GL_CULL_FACE); //Cull face, no renderitza les cares no visibles
 	glCullFace(GL_BACK);
 
@@ -473,24 +432,17 @@ int main(int argc, char** argv)
 	SoundManager::loadSound("Sons/place.wav", So::COLOCA);
 	SoundManager::loadSound("Sons/passes/mud02.wav", So::CAMINA);
 
-	//Models
-	ModelManager::initialize();
-
 	//Antialising
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glEnable(GL_MULTISAMPLE);
 
-	//Framebuffer
-	glEnable(GL_FRAMEBUFFER);
-	glEnable(GL_FRAMEBUFFER_SRGB);
-
-	changeScene('1');
+	setLighting();
 
 	// Comienza la ejecucion del core de GLUT
 	while (!glfwWindowShouldClose(window))
 	{
 		Display(window);
-		Idle();
+		Idle(); //GLFW no té funcio Idle pròpia
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -653,41 +605,31 @@ void toggleAxis() { //Axis i trajectòria càmera ON/OFF
 }
 
 /**
-  * Canvia l'escena en funció de la tecla pitjada
+  * Estableix l'il·luminació i boira de l'escena
   */
-void changeScene(unsigned char sceneNumber) {
-	int scene = (int)(sceneNumber - '0');
-	scene = scene - 1;
-
-	if (scene >= 0) {
-		for (int i = GL_LIGHT0; i <= GL_LIGHT7; i++) {
-			glDisable(i); //Desactivam totes les llums
-		}
-
-		numScene = scene;
-		if (numScene == 0) {
-			//Establim la boira
-			glFogf(GL_FOG_DENSITY, 0.01f);
-			glFogf(GL_FOG_MODE, GL_EXP);
-			glFogf(GL_FOG_END, zFar);
-			glFogf(GL_FOG_START, zFar-4);
-
-			//LLum ambient
-			GLfloat lluma[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
-			glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lluma);
-
-			//Llanterna
-			glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 1.0f);
-			glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 30.0f);
-			glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.1f);
-			glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.1f);
-
-			//Sol
-			world->setSol(GL_LIGHT1); //Triam quina llum farà de sol (llum direccional)
-
-			std::cout << "Scene is " << scene << std::endl;
-		}
+void setLighting() {
+	for (int i = GL_LIGHT0; i <= GL_LIGHT7; i++) {
+		glDisable(i); //Desactivam totes les llums
 	}
+
+	//Establim la boira
+	glFogf(GL_FOG_DENSITY, 0.01f);
+	glFogf(GL_FOG_MODE, GL_EXP);
+	glFogf(GL_FOG_END, zFar);
+	glFogf(GL_FOG_START, zFar - 4);
+
+	//LLum ambient
+	GLfloat lluma[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lluma);
+
+	//Llanterna
+	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 1.0f);
+	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 30.0f);
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.1f);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.1f);
+
+	//Sol
+	world->setSol(GL_LIGHT1); //Triam quina llum farà de sol (llum direccional)
 }
 
 //Hook pel moviment del ratolí
