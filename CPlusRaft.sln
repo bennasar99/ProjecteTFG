@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29905.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Etapa6", "Etapa6\Etapa6.vcxproj", "{9EF07E07-4D5E-42D0-9B49-FC1606A6E10D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CPlusRaft", "CPlusRaft\CPlusRaft.vcxproj", "{9EF07E07-4D5E-42D0-9B49-FC1606A6E10D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

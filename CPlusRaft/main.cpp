@@ -360,7 +360,7 @@ int main(int argc, char** argv)
 	// Inicialitzam el GLFW
 	glfwInit();
 
-	window = glfwCreateWindow(w_width, w_height, "AlphaCraft", NULL, NULL);
+	window = glfwCreateWindow(w_width, w_height, "C++Craft", NULL, NULL);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
