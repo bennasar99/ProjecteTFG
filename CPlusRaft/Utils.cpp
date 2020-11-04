@@ -26,6 +26,7 @@ int convertToInt(char* buffer, int len)
 	return a;
 }
 
+//Codi de: https://stackoverflow.com/questions/36949957/loading-a-wav-file-for-openal
 char* loadWAV(const char* fn, int& chan, int& samplerate, int& bps, int& size)
 {
 	char buffer[4];

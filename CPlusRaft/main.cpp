@@ -420,7 +420,6 @@ int main(int argc, char** argv)
 
 	//Sons
 	SoundManager::initialize();
-	SoundManager::loadSound("Sons/acc.wav", So::ACCELERA); //Càrrega
 	SoundManager::loadSound("Sons/jukebox.wav", So::MUSICA);
 	SoundManager::loadSound("Sons/switch.wav", So::ONOFF);
 	SoundManager::loadSound("Sons/break.wav", So::DESTRUEIX);
