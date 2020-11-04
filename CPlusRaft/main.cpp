@@ -1,11 +1,8 @@
-// Fichero principal 
-////////////////////////////////////////////////////
 
 #include <iostream>
 #include <stdio.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-//#include <GL/freeglut.h>
 #include "Utils.h"
 #include "Vector3.h"
 #include "TextureManager.h"
@@ -13,7 +10,7 @@
 #include "Entities/Player.h"
 #include <sys/stat.h>
 
-int w_width = 500; // Tamano incial de la ventana
+int w_width = 500;
 int w_height = 500;
 GLFWwindow* window;
 
@@ -39,7 +36,7 @@ int darrerIdle = 0, darrerDisplay = 0; //Control del temps
 
 double lastX = 250, lastY = 250; //Darreres posicions del ratolí
 
-//luces
+//llums
 bool llanterna = false;
 bool smoothlight = true;
 
@@ -51,7 +48,6 @@ bool inv = false;
 Entity* ent; //Entitat controlada
 
 bool axisVisible = true; //Eixos ON/OFF
-int numScene = 0; //Escena per defecte
 
 //Nom del món
 std::string wname;
@@ -281,7 +277,7 @@ void Display(GLFWwindow* window)
 // Funcion que se ejecuta cuando el sistema no esta ocupado
 void Idle(void)
 {
-	//Solució temporal shift i ctrl, fins que empri glfw o algo així
+	//Solució temporal shift i ctrl
 	if (GetKeyState(VK_SHIFT) & 0x8000) {
 		KeyboardManager::onKeyDown('{');
 	}
@@ -339,7 +335,6 @@ int main(int argc, char** argv)
 		world = new World(wname, &camera);
 		ent = new Player(world, world->getSpawn() + Vector3(0, 2, 0));
 		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
-		//cotxe = Car(world, Vector3(66, 65, 66));
 	}
 	else {
 		//Si no, el cream

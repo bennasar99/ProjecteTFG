@@ -19,7 +19,7 @@ private:
 
 public:
 
-	//Funcions que cridarà GLUT quan es pitji o amolli una tecla
+	//Funcions que cridarà GLFW quan l'usuari interactui amb el teclat
 	static void onKeyUp(int key);
 	static void onKeyDown(int key);
 
