@@ -133,65 +133,65 @@ void BlockRenderer::drawBloc(Bloc id, bool visible[6]) {
 		glEnd();
 		glEnable(GL_LIGHTING);
 		break;
-	case Bloc::MULTICOLOR: { //Cub multicolor
-		float lado = 1.0f;
+	//case Bloc::MULTICOLOR: { //Cub multicolor
+	//	float lado = 1.0f;
 
-		GLfloat translacions[6][3] =
-		{
-			{0, -0.5f, 0}, //Abaix
-			{0, 0.5f, 0}, //Adalt
-			{-0.5f, 0 ,0}, //Esquerra
-			{0.5f, 0 ,0}, //Dreta
-			{0, 0, -0.5f}, //Darrera
-			{0, 0, 0.5f} //Davant
-		};
-		GLfloat normals[6][3] =
-		{
-			{0, -1 ,0}, //Abaix
-			{0, -1, 0}, //Adalt
-			{0, -1, 0}, //Esquerra
-			{0, -1, 0}, //Dreta
-			{0, -1, 0}, //Darrera
-			{0, -1, 0} //Davant
-		};
-		GLfloat rotacions[6][3] =
-		{
-			{0, 0, 0}, //Abaix
-			{180, 0, 0}, //Adalt
-			{0, 0 ,-90}, //Esquerra
-			{0, 0 ,90}, //Dreta
-			{0, -90, -90}, //Darrera
-			{0, -90, 90}, //Davant
-		};
-		GLfloat colors[3][3][3] =
-		{
-			{{0, 0, 0}, {0, 0, 1}, {0, 1, 0}},
-			{{1, 0, 0}, {0, 1, 1}, {1, 1, 0}},
-			{{1, 0, 1}, {1, 1, 1}, {0.5f, 0.5f, 0.5f}}
-		};
-		for (int i = 0; i < 6; i++) {
-			glPushMatrix();
-			glNormal3fv(normals[i]);
-			glTranslatef(translacions[i][0], translacions[i][1], translacions[i][2]);
-			glRotatef(rotacions[i][0], 1, 0, 0);
-			glRotatef(rotacions[i][1], 0, 1, 0);
-			glRotatef(rotacions[i][2], 0, 0, 1);
-			glTranslatef(-0.5f, 0, -0.5f);
-			for (float x = 0; x < 1; x += (1.0f / 3.0f)) {
-				for (float z = 0; z < 1; z += (1.0f / 3.0f)) {
-					glColor3fv(colors[int(x * 3)][int(z * 3)]);
-					glBegin(GL_QUADS);
-					glVertex3f(x, 0, z + (1.0f / 3.0f));
-					glVertex3f(x, 0, z);
-					glVertex3f(x + (1.0f / 3.0f), 0, z);
-					glVertex3f(x + (1.0f / 3.0f), 0, z + (1.0f / 3.0f));
-					glEnd();
-				}
-			}
-			glPopMatrix();
-		}
-		break;
-	}
+	//	GLfloat translacions[6][3] =
+	//	{
+	//		{0, -0.5f, 0}, //Abaix
+	//		{0, 0.5f, 0}, //Adalt
+	//		{-0.5f, 0 ,0}, //Esquerra
+	//		{0.5f, 0 ,0}, //Dreta
+	//		{0, 0, -0.5f}, //Darrera
+	//		{0, 0, 0.5f} //Davant
+	//	};
+	//	GLfloat normals[6][3] =
+	//	{
+	//		{0, -1 ,0}, //Abaix
+	//		{0, -1, 0}, //Adalt
+	//		{0, -1, 0}, //Esquerra
+	//		{0, -1, 0}, //Dreta
+	//		{0, -1, 0}, //Darrera
+	//		{0, -1, 0} //Davant
+	//	};
+	//	GLfloat rotacions[6][3] =
+	//	{
+	//		{0, 0, 0}, //Abaix
+	//		{180, 0, 0}, //Adalt
+	//		{0, 0 ,-90}, //Esquerra
+	//		{0, 0 ,90}, //Dreta
+	//		{0, -90, -90}, //Darrera
+	//		{0, -90, 90}, //Davant
+	//	};
+	//	GLfloat colors[3][3][3] =
+	//	{
+	//		{{0, 0, 0}, {0, 0, 1}, {0, 1, 0}},
+	//		{{1, 0, 0}, {0, 1, 1}, {1, 1, 0}},
+	//		{{1, 0, 1}, {1, 1, 1}, {0.5f, 0.5f, 0.5f}}
+	//	};
+	//	for (int i = 0; i < 6; i++) {
+	//		glPushMatrix();
+	//		glNormal3fv(normals[i]);
+	//		glTranslatef(translacions[i][0], translacions[i][1], translacions[i][2]);
+	//		glRotatef(rotacions[i][0], 1, 0, 0);
+	//		glRotatef(rotacions[i][1], 0, 1, 0);
+	//		glRotatef(rotacions[i][2], 0, 0, 1);
+	//		glTranslatef(-0.5f, 0, -0.5f);
+	//		for (float x = 0; x < 1; x += (1.0f / 3.0f)) {
+	//			for (float z = 0; z < 1; z += (1.0f / 3.0f)) {
+	//				glColor3fv(colors[int(x * 3)][int(z * 3)]);
+	//				glBegin(GL_QUADS);
+	//				glVertex3f(x, 0, z + (1.0f / 3.0f));
+	//				glVertex3f(x, 0, z);
+	//				glVertex3f(x + (1.0f / 3.0f), 0, z);
+	//				glVertex3f(x + (1.0f / 3.0f), 0, z + (1.0f / 3.0f));
+	//				glEnd();
+	//			}
+	//		}
+	//		glPopMatrix();
+	//	}
+	//	break;
+	//}
 	case Bloc::FUSTA:
 		glColor3f(0.76f, 0.60f, 0.42f);
 		//Aplicam la textura corresponent
@@ -357,9 +357,6 @@ float* BlockRenderer::getColor(Bloc tipus) {
 	case Bloc::LLUMTERRA: //Foco (llum de sòtil però de baix cap adalt)
 		color[0] = 0; color[1] = 0; color[2] = 0; color[3] = 1;
 		break;
-	case Bloc::MULTICOLOR: { //Cub multicolor
-		break;
-	}
 	case Bloc::FUSTA:
 		color[0] = 0.76f; color[1] = 0.6f; color[2] = 0.42f; color[3] = 1;
 		break;

@@ -53,6 +53,11 @@ Vector3 Vector3::operator/(float b) {
 	return Vector3(this->x / b, this->y / b, this->z / b);
 }
 
+//Mòdul d'un vector per un nombre
+Vector3 Vector3::operator%(int b) {
+	return Vector3((int)this->x % b, (int)this->y % b, (int)this->z % b);
+}
+
 bool Vector3::operator!=(const Vector3& b) {
 	return(this->x != b.x || this->y != b.y || this->z != b.z);
 }

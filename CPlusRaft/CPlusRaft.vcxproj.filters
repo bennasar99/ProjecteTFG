@@ -99,6 +99,12 @@
     <ClInclude Include="Render\ChunkMesh.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Blocks\SolidBlock.h">
+      <Filter>Header Files\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="Blocks\LiquidBlock.h">
+      <Filter>Header Files\Blocks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -163,6 +169,12 @@
     </ClCompile>
     <ClCompile Include="SoundManager.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Blocks\SolidBlock.cpp">
+      <Filter>Source Files\Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="Blocks\LiquidBlock.cpp">
+      <Filter>Source Files\Blocks</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

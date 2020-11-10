@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../Render/ChunkMesh.h"
+#include "../Vector3.h"
+
 enum class Bloc {
 	RES,
 	AIRE,
@@ -12,7 +15,6 @@ enum class Bloc {
 	TORXA,
 	LLUMSOTIL,
 	LLUMTERRA,
-	MULTICOLOR,
 	FULLAARBRE,
 	FUSTA,
 	FUSTAARBRE,
@@ -26,6 +28,7 @@ class World;
 class Block {
 protected:
 
+	Vector3 pos;
 	Bloc id;
 	World *world;
 	Block* parent = 0;	/*	Bloc pare: si un bloc té un pare vol dir que el "fill" és un bloc que només serveix per ocupar 
@@ -35,6 +38,7 @@ public:
 	virtual void update(int delta);
 	virtual void destroy();
 	virtual void interact();
+	virtual void draw(ChunkMesh* cM, bool visible[6], Vector3 relPos);
 
 	Block* getParent();
 

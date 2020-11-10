@@ -25,6 +25,10 @@ float TextureAtlas::getCoordY(int index) {
 }
 
 float* TextureAtlas::getCoords(int index) {
+	if (index < 0) {
+		float coords[4] = { 0,0,0,0 };
+		return coords;
+	}
 	float x = this->getCoordX(index);
 	float y = this->getCoordY(index);
 	float coords[4] = { x, y, x + uSizeX, y + uSizeY }; //Coordenades bottom i top (xb, yb, xt, yt)

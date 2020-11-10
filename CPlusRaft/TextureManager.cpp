@@ -2,6 +2,7 @@
 #include "TextureManager.h"
 
 unsigned int TextureManager::text[NTEXT];
+TextureAtlas TextureManager::blockAtlas;
 
 //Carrega una textura, assignant-la a una "Textura" (enum) concreta
 bool TextureManager::LoadTexture(const char* path, Textura nom) {
@@ -38,4 +39,12 @@ bool TextureManager::LoadTexture(const char* path, Textura nom) {
 //Retornam la textura corresponent a "nom"
 unsigned int TextureManager::getTexture(Textura nom) {
 	return TextureManager::text[static_cast<int>(nom)];
+}
+
+void TextureManager::initialize() {
+	TextureManager::blockAtlas = TextureAtlas(1, 7);
+}
+
+float* TextureManager::getTexCoords(int texNum) {
+	return TextureManager::blockAtlas.getCoords(texNum);
 }

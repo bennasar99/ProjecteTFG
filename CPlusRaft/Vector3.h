@@ -15,6 +15,7 @@ public:
 	float operator*(const Vector3& b);
 	Vector3 operator*(float b);
 	Vector3 operator/(float b);
+	Vector3 operator%(int b);
 	bool operator!=(const Vector3& b);
 
 	static Vector3 cross(Vector3 a, Vector3 b);

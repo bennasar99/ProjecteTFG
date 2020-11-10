@@ -416,6 +416,7 @@ int main(int argc, char** argv)
 
 	//Textures
 	glEnable(GL_TEXTURE_2D); //Activació
+	TextureManager::initialize();
 	TextureManager::LoadTexture("Textures/texture.jpg", Textura::BLOC);
 
 	//Sons

@@ -12,9 +12,10 @@
 #include "Light.h"
 #include "Blocks/Block.h"
 #include "Blocks/LightBlock.h"
-#include "Blocks/Pendul.h"
 #include "Blocks/Jukebox.h"
 #include "Blocks/EntityBlock.h"
+#include "Blocks/SolidBlock.h"
+#include "Blocks/LiquidBlock.h"
 #include <algorithm>
 #include "Utils.h"
 #include "Camera.h"

@@ -396,8 +396,11 @@ bool World::setBlock(Bloc tipus, Vector3 pos, Block* parent, bool listUpdate) {
 	case Bloc::ALTAVEU:
 		bloc = new Jukebox(this, pos);
 		break;
+	case Bloc::AIGUA:
+		bloc = new LiquidBlock(this, tipus);
+		break;
 	default:
-		bloc = new Block(this, tipus, parent);
+		bloc = new SolidBlock(this, tipus);
 	}
 	chunks[desp]->setBlock(bloc, bpos);
 	if (listUpdate) {
