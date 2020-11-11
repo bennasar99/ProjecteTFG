@@ -393,6 +393,9 @@ bool World::setBlock(Bloc tipus, Vector3 pos, Block* parent, bool listUpdate) {
 	case Bloc::LLUMSOTIL: case Bloc::LLUMTERRA: case Bloc::TORXA:
 		bloc = new LightBlock(this, tipus, pos);
 		break;
+	case Bloc::HERBA: case Bloc::HERBAFULL:
+		bloc = new SpreadBlock(this, tipus);
+		break;
 	case Bloc::ALTAVEU:
 		bloc = new Jukebox(this, pos);
 		break;

@@ -16,6 +16,7 @@
 #include "Blocks/EntityBlock.h"
 #include "Blocks/SolidBlock.h"
 #include "Blocks/LiquidBlock.h"
+#include "Blocks/SpreadBlock.h"
 #include <algorithm>
 #include "Utils.h"
 #include "Camera.h"
