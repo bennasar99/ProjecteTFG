@@ -1,2 +1,2 @@
-# AlphaCraft
-Just some C++ tests I'm doing
+# ProjecteTFG
+Videojoc amb generació procedural programat amb C++ i OpenGL
