@@ -2,8 +2,8 @@
 *.exe
 Debug/
 Release/
-BaseOpenGL/Debug/
-Etapa6/Debug/
-Etapa6/Release/
-Etapa6/x64/
+CPlusRaft/worlds/
+CPlusRaft/Debug/
+CPlusRaft/Release/
+CPlusRaft/x64/
 x64/
