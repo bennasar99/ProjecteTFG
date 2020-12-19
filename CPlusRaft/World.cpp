@@ -717,7 +717,7 @@ void World::updateNeighborChunks(Vector3 cpos, Vector3 bpos) {
 		ncpos = cpos + Vector3(0, 0, 1);
 	}
 	else if (bpos.z == 0) {
-		ncpos = cpos - Vector3(1, 0, 0);
+		ncpos = cpos - Vector3(0, 0, 1);
 	}
 	desp = getDesp(ncpos);
 	if (desp != -1) {

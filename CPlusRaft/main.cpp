@@ -78,7 +78,7 @@ void Display(GLFWwindow* window)
 
 	fpsc++;
 	if (fpsc > 20) { //Contador fps
-		printf("%f\n", fps);
+		//printf("%f\n", fps);
 		fpsc = 0;
 	}
 	//if (fps < 26) {
