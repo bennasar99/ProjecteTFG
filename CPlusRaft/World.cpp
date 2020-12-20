@@ -156,16 +156,20 @@ void World::generate(int seed) { //TODO: guardar spawn a world
 	srand(seed); //Seed? xD
 	noise.SetSeed(seed);
 	Vector3 pos = Vector3(0, 0, 0);
+	float sealvl = (this->sizey * CHUNKSIZE) / 2;
 	float lasty = 0; // = (this->sizey * CHUNKSIZE) / 2.0f;
 	for (pos.x = 0; pos.x < (this->sizex * CHUNKSIZE); pos.x++) {
 		for (pos.z = 0; pos.z < (this->sizez * CHUNKSIZE); pos.z++) {
-			lasty = (this->sizey*CHUNKSIZE)/2 + noise.GetNoise(pos.x, pos.z) * 80;
-			lasty = std::min(lasty, (float)this->sizey * CHUNKSIZE);
+			lasty = sealvl + noise.GetNoise(pos.x, pos.z) * 80;
+			lasty = std::min(lasty, (float)this->sizey * CHUNKSIZE); //No ha de superar l'altura del món
+			if (pos.x == 255 || pos.x == 256) {
+				printf("last: %f, %f\n", noise.GetNoise(pos.x, pos.z), lasty);
+			}
 			//printf("last: %f\n", lasty);
 			for (pos.y = 0; pos.y < lasty; pos.y++) {
 				this->setBlock(Bloc::TERRA, pos, nullptr, false);
 				if (pos.y == (int)lasty) {
-					if (lasty > (this->sizey * CHUNKSIZE) / 2) { //Elements superfície
+					if (lasty > (this->sizey * CHUNKSIZE) / 2.0f) { //Elements superfície
 						int random = rand() % 128;
 						if (random == 1 || random == 5) {
 							this->setBlock(Bloc::HERBA, pos + Vector3(0, 1, 0), 0, false);
@@ -200,7 +204,7 @@ void World::generate(int seed) { //TODO: guardar spawn a world
 				}
 			}
 			//Oceans
-			for (pos.y = lasty; pos.y <= (this->sizey * CHUNKSIZE)/2; pos.y++) {
+			for (pos.y = lasty; pos.y <= sealvl; pos.y++) {
 				this->setBlock(Bloc::AIGUA, pos, nullptr, false);
 			}
 		}
@@ -363,7 +367,7 @@ bool World::deleteBlock(Vector3 pos, bool destroy) { //Eliminar Bloc::RES?
 	pos.floor();
 	Vector3 cpos = pos / CHUNKSIZE;
 	cpos.floor();
-	Vector3 bpos = Vector3((int)pos.x % CHUNKSIZE, (int)pos.y % CHUNKSIZE, (int)pos.z % CHUNKSIZE);
+	Vector3 bpos = pos % CHUNKSIZE;
 	int desp = getDesp(cpos);
 	if (desp == -1) {
 		return false;
@@ -642,7 +646,7 @@ void World::interact(Vector3 pos) {
 
 //Comprova que una posició valida i retorna el desplaçament corresponent a la posició
 int World::getDesp(Vector3 pos) {
-	int desp = (int)pos.x + this->sizey * ((int)pos.y + this->sizez * (int)pos.z);
+	int desp = (int)pos.x + this->sizex * ((int)pos.y + this->sizey * (int)pos.z);
 	if ((desp >= (this->sizex * this->sizey * this->sizez))||(desp < 0) || pos.x < 0 || pos.y < 0 || pos.z < 0 || pos.x >= this->sizex || pos.y >= this->sizey || pos.z >= this->sizez) {
 		return -1;
 	}

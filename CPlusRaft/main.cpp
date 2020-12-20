@@ -348,7 +348,7 @@ int main(int argc, char** argv)
 		}
 		//int seed = std::atoi(sseed.c_str());
 		printf("Seed: %d\n", seed);
-		world = new World(seed, 16, 16, 16, &camera);
+		world = new World(seed, 32, 16, 32, &camera);
 		ent = new Player(world, world->getSpawn() + Vector3(0, 10, 0));
 		world->save(wname);
 	}
