@@ -1,7 +1,7 @@
 #include "World.h"
 
 
-World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
+World::World(int seed, int sizex, int sizey, int sizez, Camera* camera) //Nou
 {
 	this->br = new BlockRenderer();
 
@@ -35,9 +35,10 @@ World::World(int seed, int sizex, int sizey, int sizez, Camera* camera)
 			break;
 		}
 	}
+
 }
 
-World::World(std::string name, Camera* camera) {
+World::World(std::string name, Camera* camera) { //Càrrega ja existent
 	this->br = new BlockRenderer();
 	this->seed = 0;
 
@@ -50,7 +51,7 @@ World::World(std::string name, Camera* camera) {
 	this->minpos = Vector3((float)sizex - 1, (float)sizey - 1, (float)sizez - 1);
 
 	std::fstream file;
-	file.open("worlds/" + name, std::ios::in | std::ios::binary);
+	file.open("worlds/" + name + "/chunks.cnk", std::ios::in | std::ios::binary);
 
 	//Mida del món
 	char buff[sizeof(int)];
@@ -96,11 +97,17 @@ World::World(std::string name, Camera* camera) {
 			//chunks[i]->updateMesh();
 		}
 	}
+
+	//std::ifstream file("worlds / " + name + " / info.yml");
 }
 
 void World::save(std::string name) {
+	
+	std::string path = "worlds/" + name;
+	std::filesystem::create_directory(path);
+
 	std::fstream file;
-	file.open("worlds/" + name, std::ios::out | std::ios::binary);
+	file.open("worlds/" + name + "/chunks.cnk", std::ios::out | std::ios::binary);
 
 	//Guardam mides i spawn
 	char sX = this->sizex;
@@ -625,9 +632,12 @@ void World::drawSol(Vector3 pos, float dist) {
 		glEnable(GL_FOG);
 		
 		//Establim el color del cel (+ blanc com + adalt sigui el sol)
-		glClearColor(solpos.y, solpos.y, solpos.y, 1);
+		glClearColor(1-solpos.y/1.5f, solpos.y / 3.0f, solpos.y, 1);
 
 		glPopMatrix();
+	}
+	else {
+		glClearColor(0, 0, 0.15f,1);
 	}
 }
 

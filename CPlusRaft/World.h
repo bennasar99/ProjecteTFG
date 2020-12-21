@@ -25,6 +25,7 @@
 #include "Blocks//BlockRenderer.h"
 
 #include "lib/FastNoiseLite.h"
+#include <filesystem>
 
 class Block;
 class LightBlock;
