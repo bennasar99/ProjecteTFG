@@ -9,24 +9,24 @@
 #include <cmath>
 #include "../World.h"
 
-LightBlock::LightBlock(World* world, Bloc id, Vector3 pos) : Block(world, id, 0) {
+LightBlock::LightBlock(World* world, Bloc id, Vector3<int> pos) : Block(world, id, 0) {
     this->light = 0;
     this->pos = pos;
     switch (id) { //Segons el bloc, inicialitzam el llum d'una manera o una altre
     case Bloc::TORXA: 
-        this->light = world->addLight(pos + Vector3(0.5f,0.5f,0.5f));
+        this->light = world->addLight(Vector3<float>((float)pos.x, (float)pos.y, (float)pos.z) + Vector3<float>(0.5f,0.5f,0.5f));
         this->light->setLightConcentration(3.0f);
         this->light->setAttenuation(Attenuation::QUADRATIC, 1.0f);
         break;
     case Bloc::LLUMSOTIL:
-        this->light = world->addLight(pos + Vector3(0, 0.5f,0));
-        this->light->setDir(Vector3(0, -1, 0));
+        this->light = world->addLight(Vector3<float>((float)pos.x, (float)pos.y, (float)pos.z) + Vector3<float>(0, 0.5f,0));
+        this->light->setDir(Vector3<float>(0, -1, 0));
         this->light->setSpreadAngle(90.0f);
         this->light->setLightConcentration(5.0f);
         break;
     case Bloc::LLUMTERRA:
-        this->light = world->addLight(pos - Vector3(0, 0.49f, 0));
-        this->light->setDir(Vector3(0, 1, 0));
+        this->light = world->addLight(Vector3<float>((float)pos.x, (float)pos.y, (float)pos.z) - Vector3<float>(0, 0.49f, 0));
+        this->light->setDir(Vector3<float>(0, 1, 0));
         this->light->setSpreadAngle(135.0f);
         this->light->setLightConcentration(4.0f);
         break;
@@ -40,7 +40,7 @@ void LightBlock::destroy() {
 
 //Llum encesa ON/OFF
 void LightBlock::interact() {
-    SoundManager::playSound(So::ONOFF, this->pos, true);
+    SoundManager::playSound(So::ONOFF, this->light->getPosVec(), true);
     this->light->setEnabled(!this->light->getEnabled());
 }
 

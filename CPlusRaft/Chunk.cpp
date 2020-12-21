@@ -1,7 +1,7 @@
 #include "Chunk.h"
 #include "World.h"
 
-Chunk::Chunk(World* world, Vector3 pos) {
+Chunk::Chunk(World* world, Vector3<int> pos) {
 	for (int x = 0; x < CHUNKSIZE; x++) {
 		for (int y = 0; y < CHUNKSIZE; y++) {
 			for (int z = 0; z < CHUNKSIZE; z++) {
@@ -48,26 +48,26 @@ void Chunk::drawT() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-Vector3 Chunk::getPos() {
+Vector3<int> Chunk::getPos() {
 	return cpos;
 }
 
-bool Chunk::setBlock(Block* bloc, Vector3 pos) {
+bool Chunk::setBlock(Block* bloc, Vector3<int> pos) {
 	//Hi ha blocs amb les seves pròpies classes, sinó s'utilitza la classe genèrica
-	if (this->blocs[(int)pos.x][(int)pos.y][(int)pos.z] != 0) {
-		this->blocs[(int)pos.x][(int)pos.y][(int)pos.z]->destroy();
-		delete this->blocs[(int)pos.x][(int)pos.y][(int)pos.z];
+	if (this->blocs[pos.x][pos.y][pos.z] != nullptr) {
+		this->blocs[pos.x][pos.y][pos.z]->destroy();
+		delete this->blocs[pos.x][pos.y][pos.z];
 		this->nblocs--;
 	}
 	if (bloc->getId() != Bloc::RES) {
-		this->blocs[(int)pos.x][(int)pos.y][(int)pos.z] = bloc;
+		this->blocs[pos.x][pos.y][pos.z] = bloc;
 		this->nblocs++;
 	}
 
 	return true;
 }
 
-Bloc Chunk::getBlock(Vector3 pos) {
+Bloc Chunk::getBlock(Vector3<int> pos) {
 	if (blocs[(int)pos.x][(int)pos.y][(int)pos.z] == 0) {
 		return Bloc::RES;
 	}
@@ -101,32 +101,32 @@ void Chunk::destroy() {
 }
 
 //TODO actualitzar display list
-bool Chunk::delBlock(Vector3 bpos, bool destroy) {
-	if (this->blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z] != 0) {
+bool Chunk::delBlock(Vector3<int> bpos, bool destroy) {
+	if (this->blocs[bpos.x][bpos.y][bpos.z] != 0) {
 		if (destroy) {
-			this->blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z]->destroy();
+			this->blocs[bpos.x][bpos.y][bpos.z]->destroy();
 		}
-		delete this->blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z];
-		this->blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z] = 0;
+		delete this->blocs[bpos.x][bpos.y][bpos.z];
+		this->blocs[bpos.x][bpos.y][bpos.z] = 0;
 		nblocs--;
-		printf("%f, %f %f %f \n", bpos.y, cpos.x, cpos.y, cpos.z);
+		printf("%d, %d %d %d \n", bpos.y, cpos.x, cpos.y, cpos.z);
 		this->updateMesh();
 		world->updateNeighborChunks(this->cpos, bpos);
 	}
 	return true;
 }
 
-void Chunk::interact(Vector3 bpos) {
-	if (blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z] == 0) {
+void Chunk::interact(Vector3<int> bpos) {
+	if (blocs[bpos.x][bpos.y][bpos.z] == 0) {
 		return;
 	}
-	blocs[(int)bpos.x][(int)bpos.y][(int)bpos.z]->interact();
+	blocs[bpos.x][bpos.y][bpos.z]->interact();
 }
 
-bool Chunk::isVisible(Vector3 bpos) {
-	Vector3 pos = cpos * CHUNKSIZE + bpos;
-	Vector3 toCheck[6] = { pos + Vector3(1,0,0), pos - Vector3(1,0,0), pos + Vector3(0,1,0), pos - Vector3(0,1,0),
-						pos + Vector3(0,0,1), pos - Vector3(0,0,1) };
+bool Chunk::isVisible(Vector3<int> bpos) {
+	Vector3<int> pos = cpos * CHUNKSIZE + bpos;
+	Vector3<int> toCheck[6] = { pos + Vector3<int>(1,0,0), pos - Vector3<int>(1,0,0), pos + Vector3<int>(0,1,0), pos - Vector3<int>(0,1,0),
+						pos + Vector3<int>(0,0,1), pos - Vector3<int>(0,0,1) };
 	for (int i = 0; i < 6; i++) {
 		if (Block::isTransparent(getBlockWorld(toCheck[i]))) {
 			return true;
@@ -136,7 +136,7 @@ bool Chunk::isVisible(Vector3 bpos) {
 	return false;
 }
 
-Bloc Chunk::getBlockWorld(Vector3 bpos) {
+Bloc Chunk::getBlockWorld(Vector3<int> bpos) {
 	if (bpos.x >= world->sizex * CHUNKSIZE || bpos.y >= world->sizey * CHUNKSIZE || bpos.z >= world->sizez * CHUNKSIZE ||
 		bpos.x < 0 || bpos.y < 0 || bpos.z < 0) {
 		return Bloc::TERRA; //Optimització no dibuixar bloc border
@@ -158,7 +158,7 @@ bool Chunk::getByteData(char* arr) {
 	for (int x = 0; x < CHUNKSIZE; x++) {
 		for (int y = 0; y < CHUNKSIZE; y++) {
 			for (int z = 0; z < CHUNKSIZE; z++) {
-				arr[desp++] = static_cast<unsigned char>(this->getBlock(Vector3((float)x, (float)y, (float)z)));
+				arr[desp++] = static_cast<unsigned char>(this->getBlock(Vector3<int>(x, y, z)));
 			}
 		}
 	}
@@ -172,7 +172,7 @@ bool Chunk::readFromByteData(char* arr) {
 			for (int z = 0; z < CHUNKSIZE; z++) {
 				//printf("%d ", arr[desp]);
 				Bloc tipus = static_cast<Bloc>(arr[desp++]);
-				world->setBlock(tipus, (this->cpos * CHUNKSIZE) + Vector3(x, y, z), nullptr, false);
+				world->setBlock(tipus, (this->cpos * CHUNKSIZE) + Vector3<int>(x, y, z), nullptr, false);
 			}
 		}
 	}
@@ -187,11 +187,11 @@ void Chunk::updateMesh() {
 		for (int z = 0; z < CHUNKSIZE; z++) {
 			for (int y = 0; y < CHUNKSIZE; y++) {
 				if (blocs[x][y][z] != 0) {
-					Vector3 bpos = Vector3(x, y, z);
+					Vector3 bpos = Vector3<int>(x, y, z);
 					//Ordre: Esquerra, Damunt, Dreta, Abaix, Davant, Darrera
-					Vector3 pos = cpos * CHUNKSIZE + bpos;
-					Vector3 toCheck[6] = { pos - Vector3(1,0,0), pos + Vector3(0,1,0), pos + Vector3(1,0,0), pos - Vector3(0,1,0),
-						pos + Vector3(0,0,1), pos - Vector3(0,0,1) };
+					Vector3<int> pos = cpos * CHUNKSIZE + bpos;
+					Vector3<int> toCheck[6] = { pos - Vector3<int>(1,0,0), pos + Vector3<int>(0,1,0), pos + Vector3<int>(1,0,0), pos - Vector3<int>(0,1,0),
+						pos + Vector3<int>(0,0,1), pos - Vector3<int>(0,0,1) };
 
 					bool qualcun = false;
 					bool visible[6] = { false, false, false, false, false, false };
@@ -211,7 +211,7 @@ void Chunk::updateMesh() {
 						}
 					}
 					if (qualcun) {
-						blocs[x][y][z]->draw(cMesh, visible, Vector3(x, y, z));
+						blocs[x][y][z]->draw(cMesh, visible, Vector3((float)x, (float)y, (float)z));
 					}
 					nb++;
 

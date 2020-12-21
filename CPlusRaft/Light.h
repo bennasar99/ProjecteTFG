@@ -25,12 +25,12 @@ private:
 
 	bool enabled = true; //Indica si la llum està encesa
 public:
-	void setPos(Vector3 pos);
+	void setPos(Vector3<float> pos);
 	void setPos(float pos[4]);
 	float* getPos();
-	Vector3 getPosVec();
+	Vector3<float> getPosVec();
 
-	void setDir(Vector3 dir);
+	void setDir(Vector3<float> dir);
 	void setDir(float dir[3]);
 	float* getDir();
 
@@ -56,5 +56,5 @@ public:
 
 	bool operator<(const Light& other);
 
-	Light(Vector3 pos);
+	Light(Vector3<float> pos);
 };

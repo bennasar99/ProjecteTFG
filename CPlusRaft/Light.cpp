@@ -1,6 +1,6 @@
 #include "Light.h"
 
-Light::Light(Vector3 pos) {
+Light::Light(Vector3<float> pos) {
 	this->setPos(pos);
 	this->dist = 10000;
 	this->setColor(1, 1, 1, 1); //Llum blanca per defecte
@@ -11,11 +11,11 @@ float* Light::getPos() {
 	return this->pos;
 }
 
-Vector3 Light::getPosVec() {
+Vector3<float> Light::getPosVec() {
 	return Vector3(this->pos[0], this->pos[1], this->pos[2]);
 }
 
-void Light::setPos(Vector3 pos) {
+void Light::setPos(Vector3<float> pos) {
 	this->pos[0] = pos.x;
 	this->pos[1] = pos.y;
 	this->pos[2] = pos.z;
@@ -30,7 +30,7 @@ float* Light::getDir() {
 	return this->spotDir;
 }
 
-void Light::setDir(Vector3 dir) {
+void Light::setDir(Vector3<float> dir) {
 	this->spotDir[0] = dir.x;
 	this->spotDir[1] = dir.y;
 	this->spotDir[2] = dir.z;

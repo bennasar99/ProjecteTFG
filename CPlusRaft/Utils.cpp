@@ -350,10 +350,10 @@ void drawSphere(double r, int lats, int longs) {
 			double x = cos(lng);
 			double y = sin(lng);
 
-			glNormal3f(x * zr0, y * zr0, z0);
-			glVertex3f(r * x * zr0, r * y * zr0, r * z0);
-			glNormal3f(x * zr1, y * zr1, z1);
-			glVertex3f(r * x * zr1, r * y * zr1, r * z1);
+			glNormal3d(x * zr0, y * zr0, z0);
+			glVertex3d(r * x * zr0, r * y * zr0, r * z0);
+			glNormal3d(x * zr1, y * zr1, z1);
+			glVertex3d(r * x * zr1, r * y * zr1, r * z1);
 		}
 		glEnd();
 	}

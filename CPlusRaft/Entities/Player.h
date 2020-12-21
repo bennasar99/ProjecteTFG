@@ -27,7 +27,7 @@ private:
 	int gamemode = 0; //0 = creative, 1 = survival
 
 public:
-	Player(World* world, Vector3 pos);
+	Player(World* world, Vector3<float> pos);
 
 	void update(int delta);
 	void control(int key);

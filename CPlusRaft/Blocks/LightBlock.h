@@ -1,8 +1,8 @@
 #pragma once
-#include "../Vector3.h"
 #include "Block.h"
 #include "../Light.h"
 #include "../SoundManager.h"
+#include "../Vector3.h"
 
 class World;
 
@@ -14,10 +14,10 @@ private:
 
 	Light* light; //Llum vinculada
 
-	Vector3 pos; //Posició del bloc
+	Vector3<int> pos; //Posició del bloc
 
 public:
-	LightBlock(World* world, Bloc id, Vector3 pos);
+	LightBlock(World* world, Bloc id, Vector3<int> pos);
 
 	void destroy();
 

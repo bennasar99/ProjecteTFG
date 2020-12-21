@@ -39,16 +39,16 @@ private:
 	Chunk **chunks;
 	int sol = 0;
 	float daytime = 0;
-	Vector3 solpos;
+	Vector3<float> solpos;
 
-	Vector3 minpos;
-	Vector3 maxpos = Vector3(0, 0, 0);
+	Vector3<int> minpos;
+	Vector3<int> maxpos = Vector3<int>(0, 0, 0);
 
 	std::list<Light*> lights;
 	std::list<Entity*> entities;
 
-	int getDesp(Vector3 pos);
-	Vector3 spawn; //Spawn point
+	int getDesp(Vector3<int> pos);
+	Vector3<int> spawn; //Spawn point
 
 	int seed;
 	int updTimer = 1000;
@@ -66,41 +66,42 @@ public:
 
 	void drawBloc(Bloc tipus);
 
-	bool setBlock(Bloc tipus, Vector3 pos);
-	bool setBlock(Bloc tipus, Vector3 pos, Block* parent, bool listUpdate);
-	bool setBlock(Block* bloc, Vector3 pos, bool listUpdate);
-	Bloc getBlock(Vector3 pos);
-	Block* getBlockPointer(Vector3 pos, bool remove);
-	bool deleteBlock(Vector3 pos, bool destroy);
+	bool setBlock(Bloc tipus, Vector3<int> pos);
+	bool setBlock(Bloc tipus, Vector3<int> pos, Block* parent, bool listUpdate);
+	bool setBlock(Block* bloc, Vector3<int> pos, bool listUpdate);
+	Bloc getBlock(Vector3<int> pos);
+	Bloc getBlock(Vector3<float> pos);
+	Block* getBlockPointer(Vector3<int> pos, bool remove);
+	bool deleteBlock(Vector3<int> pos, bool destroy);
 
-	void interact(Vector3 pos);
+	void interact(Vector3<int> pos);
 
 	void destroy();
 
-	Vector3 getSpawn();
+	Vector3<int> getSpawn();
 
-	void drawAxis(Vector3 pos, float axisSize);
-	void draw(Vector3 pos, float dist);
+	void drawAxis(Vector3<float> pos, float axisSize);
+	void draw(Vector3<float> pos, float dist);
 
 	//Llums
-	void updateLights(Vector3 camPos, Vector3 front, float camFov, float aspect);
+	void updateLights(Vector3<float> camPos, Vector3<float> front, float camFov, float aspect);
 	void setLight(int lightnum, Light* light);
-	Light* addLight(Vector3 pos);
+	Light* addLight(Vector3<float> pos);
 	void delLight(Light* light);
 
 	//Entitats
-	Entity* addEntity(Entitat ent, Vector3 pos);
+	Entity* addEntity(Entitat ent, Vector3<float> pos);
 	void delEntity(Entity* ent);
-	Entity* getNearestEntity(Vector3 pos, float range, bool controllable);
+	Entity* getNearestEntity(Vector3<float> pos, float range, bool controllable);
 
 	//Sol
 	void setSol(int sol);
-	void drawSol(Vector3 pos, float dist); //Respecte una posició i a una distància determinada
+	void drawSol(Vector3<float> pos, float dist); //Respecte una posició i a una distància determinada
 
 	//Chunks
-	void updateNeighborChunks(Vector3 cpos, Vector3 bpos);
+	void updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos);
 
-	void update(int delta, Vector3 camPos);
+	void update(int delta, Vector3<float> camPos);
 
 	void generate(int seed);
 	void save(std::string file);

@@ -25,6 +25,6 @@ private:
 	SoundManager() {}
 public:
 	static bool loadSound(const char* path, So nom);
-	static void playSound(So nom, Vector3 pos, bool forceStart);
+	static void playSound(So nom, Vector3<float> pos, bool forceStart);
 	static bool initialize();
 };

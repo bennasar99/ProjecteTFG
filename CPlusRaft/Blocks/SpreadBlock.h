@@ -10,14 +10,14 @@ class World;
 class SpreadBlock : public Block {
 private:
 
-	Vector3 pos; //Posició del bloc
+	Vector3<float> pos; //Posició del bloc
 
 public:
 	SpreadBlock(World* world, Bloc id);
 
 	void destroy();
 
-	void draw(ChunkMesh *cM, bool visible[6], Vector3 relPos);
+	void draw(ChunkMesh *cM, bool visible[6], Vector3<float> relPos);
 
 	void interact();
 

@@ -125,9 +125,6 @@
     <ClCompile Include="Utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vector3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="World.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

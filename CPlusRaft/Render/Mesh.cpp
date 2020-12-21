@@ -4,6 +4,7 @@
 Mesh::Mesh(Primitiva prim) {
 	this->prim = prim;
 	this->vbo = 0;
+	this->vao = 0;
 }
 
 //Estructura vertex: x,y,z, nx,ny,nz, R,G,B,A, tx,ty (12 floats)
@@ -89,13 +90,13 @@ void Mesh::draw() {
 	//Draw the mesh
 	switch (this->prim) {
 	case Primitiva::QUAD:
-		glDrawArrays(GL_QUADS, 0, this->vert.size() / 3);
+		glDrawArrays(GL_QUADS, 0, (GLsizei)this->vert.size() / 3);
 		break;
 	case Primitiva::LINIA:
-		glDrawArrays(GL_LINES, 0, this->vert.size() / 3);
+		glDrawArrays(GL_LINES, 0, (GLsizei)this->vert.size() / 3);
 		break;
 	case Primitiva::TRIANGLE:
-		glDrawArrays(GL_TRIANGLES, 0, this->vert.size() / 3);
+		glDrawArrays(GL_TRIANGLES, (GLsizei)0, this->vert.size() / 3);
 		break;
 	}
 

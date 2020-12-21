@@ -14,10 +14,10 @@ private:
 
 	Entity*ent; //Entitat vinculada
 
-	Vector3 pos; //Posició del bloc
+	Vector3<float> pos; //Posició del bloc
 
 public:
-	EntityBlock(World* world, Bloc id, Vector3 pos);
+	EntityBlock(World* world, Bloc id, Vector3<float> pos);
 
 	void destroy();
 

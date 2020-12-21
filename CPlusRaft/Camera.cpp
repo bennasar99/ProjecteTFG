@@ -1,45 +1,45 @@
 #include "Camera.h"
 
-Camera::Camera(Vector3 pos, Vector3 target) {
+Camera::Camera(Vector3<float> pos, Vector3<float> target) {
 	this->pos = pos;
-	this->front = Vector3::normalize(target - pos);
+	this->front = Vector3<float>::normalize(target - pos);
 	this->updateVec();
 	this->updateCorners();
 }
 
 //Actualitza els vectors de la càmera després de canviar front
 void Camera::updateVec() {
-	this->right = Vector3::normalize(Vector3::cross(this->worldUp, this->front));
-	this->up = Vector3::normalize(Vector3::cross(this->front, this->right));
-	this->camRight = Vector3::normalize(Vector3::cross(this->front, this->up));
+	this->right = Vector3<float>::normalize(Vector3<float>::cross(this->worldUp, this->front));
+	this->up = Vector3<float>::normalize(Vector3<float>::cross(this->front, this->right));
+	this->camRight = Vector3<float>::normalize(Vector3<float>::cross(this->front, this->up));
 }
 
-Vector3 Camera::getPos() {
+Vector3<float> Camera::getPos() {
 	return this->pos;
 }
 
-void Camera::setPos(Vector3 pos) {
+void Camera::setPos(Vector3<float> pos) {
 	this->pos = pos;
 
 	//Actualitzam la posició de l'escoltador OpenAL
 	alListener3f(AL_POSITION, this->pos.x, this->pos.y, this->pos.z);
 }
 
-Vector3 Camera::getFront() {
+Vector3<float> Camera::getFront() {
 	return this->front;
 }
 
-void Camera::setFront(Vector3 front) {
+void Camera::setFront(Vector3<float> front) {
 	this->front = front;
 	this->updateVec();
 	this->updateCorners();
 }
 
-Vector3 Camera::getRight() {
+Vector3<float> Camera::getRight() {
 	return this->right;
 }
 
-void Camera::setRight(Vector3 right) {
+void Camera::setRight(Vector3<float> right) {
 	this->right = right;
 	this->updateVec();
 	this->updateCorners();
@@ -71,7 +71,7 @@ void Camera::lookAround(double x, double y, double lastX, double lastY) {
 
 		//Establim el nou vector front, segons pitch i yaw
 		Vector3 direction = Vector3(cosf(toRad(yaw)) * cosf(toRad(pitch)), sinf(toRad(pitch)), sinf(toRad(yaw)) * cosf(toRad(pitch)));
-		this->front = Vector3::normalize(direction);
+		this->front = Vector3<float>::normalize(direction);
 		this->updateVec(); //Actualitzam la resta de vectors
 
 		//Establim l'orientació de l'escoltador OpenAL
@@ -88,7 +88,7 @@ void Camera::move(Camera::direction dir, int delta) {
 		float camSpeed = delta * this->speed;
 		Vector3 front = this->front * camSpeed; front.y = 0;
 		Vector3 right = this->camRight * camSpeed; right.y = 0;
-		Vector3 up = Vector3(0, 1, 0) * camSpeed;
+		Vector3<float> up = Vector3<float>(0, 1.0f, 0) * camSpeed;
 		switch (dir) {
 		case direction::ENVANT:
 			this->pos = this->pos + front;
@@ -123,50 +123,50 @@ void Camera::move(Camera::direction dir, int delta) {
 }
 
 //Modifica la càmera perquè l'escena es vegi amb l'angle que correspongui
-void Camera::setAngle(Camera::angle angle, Vector3 punt, float distancia) {
+void Camera::setAngle(Camera::angle angle, Vector3<float> punt, float distancia) {
 	switch (angle) {
 	case angle::NADIR:
 		this->pos = Vector3(punt.x, punt.y - distancia, punt.z);
-		this->up = Vector3(0, 0, 1);
+		this->up = Vector3<float>(0, 0, 1);
 		break;
 	case angle::CONTRAPICAT:
 		this->pos = Vector3(punt.x, punt.y - distancia, punt.z + distancia);
-		this->up = Vector3(0, 1, 0);
+		this->up = Vector3<float>(0, 1, 0);
 		break;
 	case angle::NORMAL:
 		this->pos = Vector3(punt.x, punt.y, punt.z + distancia);
-		this->up = Vector3(0, 1, 0);
+		this->up = Vector3<float>(0, 1, 0);
 		break;
 	case angle::PICAT:
 		this->pos = Vector3(punt.x, punt.y + distancia, punt.z + distancia);
-		this->up = Vector3(0, 1, 0);
+		this->up = Vector3<float>(0, 1, 0);
 		break;
 	case angle::CENITAL:
 		this->pos = Vector3(punt.x, punt.y + distancia, punt.z);
-		this->up = Vector3(0, 0, 1);
+		this->up = Vector3<float>(0, 0, 1);
 		break;
 	}
 	this->lookAt(punt);
 }
 
 //Modifica la càmera perquè l'escena es vegi amb el pla que correspongui
-void Camera::setPla(Camera::pla pla, Vector3 punt, float distancia) {
+void Camera::setPla(Camera::pla pla, Vector3<float> punt, float distancia) {
 	switch (pla) {
 	case pla::PLANTA:
 		this->pos = Vector3(punt.x, punt.y + distancia, punt.z);
-		this->up = Vector3(0, 0, 1);
+		this->up = Vector3<float>(0, 0, 1);
 		break;
 	case pla::ALÇAT:
 		this->pos = Vector3(punt.x - distancia, punt.y, punt.z);
-		this->up = Vector3(0, 1, 0);
+		this->up = Vector3<float>(0, 1, 0);
 		break;
 	case pla::PERFIL:
 		this->pos = Vector3(punt.x, punt.y, punt.z - distancia);
-		this->up = Vector3(0, 1, 0);
+		this->up = Vector3<float>(0, 1, 0);
 		break;
 	case pla::PERSPECTIVA:
 		this->pos = Vector3(punt.x + distancia, punt.y + distancia, punt.z + distancia);
-		this->up = Vector3(0, 1, 0);
+		this->up = Vector3<float>(0, 1, 0);
 		break;
 	}
 	this->lookAt(punt);
@@ -182,7 +182,7 @@ void Camera::display() {
 		if (this->punts.size() > 0) {
 			glPushMatrix();
 			glDisable(GL_LIGHTING);
-			std::list<Vector3>::iterator it = this->punts.begin();
+			std::list< Vector3<float> >::iterator it = this->punts.begin();
 			glBegin(GL_LINE_LOOP);
 			for (int i = 0; i < (int)this->punts.size(); i++) {
 				Vector3 p = *it;
@@ -249,8 +249,8 @@ void Camera::setDrawMove(bool set) {
 }
 //Actualitzam 'estat de la càmera perque miri on s'indica
 
-void Camera::lookAt(Vector3 pos) {
-	this->front = Vector3::normalize(pos - this->pos);
+void Camera::lookAt(Vector3<float> pos) {
+	this->front = Vector3<float>::normalize(pos - this->pos);
 	this->pitch = toDegree(asinf(front.y));
 	this->yaw = toDegree(atan2f(front.x, front.z));
 	this->updateVec();
@@ -258,8 +258,8 @@ void Camera::lookAt(Vector3 pos) {
 }
 
 //Indica si un punt és visible per la càmera
-bool Camera::isVisible(Vector3 pos, float marge) {
-	float dist = Vector3::module(pos - this->pos);
+bool Camera::isVisible(Vector3<float> pos, float marge) {
+	float dist = Vector3<float>::module(pos - this->pos);
 	if (dist < aspect) { //Abans 4 * aspect
 		return true;
 	}

@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
+#include <GLFW/glfw3.h>
 #include "Mesh.h"
-#include <GLFW/glfw3.h>"
 
 class ChunkMesh {
 private:

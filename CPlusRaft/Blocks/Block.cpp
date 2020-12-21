@@ -44,7 +44,7 @@ void Block::interact() {
 	}
 };
 
-void Block::draw(ChunkMesh* cM, bool visible[6], Vector3 relPos) {
+void Block::draw(ChunkMesh* cM, bool visible[6], Vector3<float> relPos) {
 	GLfloat vert[6][4][3] = {
 		{{-.5f, .5f, .5f},  {-.5f, .5f,-.5f},  {-.5f,-.5f,-.5f}, {-.5f,-.5f, .5f}}, // v1,v6,v7,v2 (left)
 		{{.5f, .5f, .5f},   {.5f, .5f,-.5f},  {-.5f, .5f,-.5f}, {-.5f, .5f, .5f}}, // v0,v5,v6,v1 (top)

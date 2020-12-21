@@ -28,7 +28,7 @@ class World;
 class Block {
 protected:
 
-	Vector3 pos;
+	Vector3<float> pos;
 	Bloc id;
 	World *world;
 	Block* parent = 0;	/*	Bloc pare: si un bloc té un pare vol dir que el "fill" és un bloc que només serveix per ocupar 
@@ -38,7 +38,7 @@ public:
 	virtual void update(int delta);
 	virtual void destroy();
 	virtual void interact();
-	virtual void draw(ChunkMesh* cM, bool visible[6], Vector3 relPos);
+	virtual void draw(ChunkMesh* cM, bool visible[6], Vector3<float> relPos);
 
 	Block* getParent();
 

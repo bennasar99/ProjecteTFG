@@ -10,12 +10,12 @@
 class Camera {
 private:
 
-	Vector3 pos;
-	Vector3 worldUp = Vector3(0, 1, 0); //up del món (sempre aquest)
-	Vector3 front = Vector3(0, 0, -1); //Indica on apunta la càmera
-	Vector3 up = Vector3(0, 1, 0); //Up de la càmera (variable)
-	Vector3 right = Vector3(0, 0, 1); //Perpendicular a worldUp i front
-	Vector3 camRight = Vector3(1, 0, 0); //Right de la càmera
+	Vector3<float> pos;
+	Vector3<float> worldUp = Vector3(0.0f, 1.0f, 0.0f); //up del món (sempre aquest)
+	Vector3<float> front = Vector3(0.0f, 0.0f, -1.0f); //Indica on apunta la càmera
+	Vector3<float> up = Vector3(0.0f, 1.0f, 0.0f); //Up de la càmera (variable)
+	Vector3<float> right = Vector3(0.0f, 0.0f, 1.0f); //Perpendicular a worldUp i front
+	Vector3<float> camRight = Vector3(1.0f, 0.0f, 0.0f); //Right de la càmera
 
 	float fov = 60.0f; //Angle de visió (eix Y) de la càmera
 	float aspect = 1.0f; //Aspecte (width/height)
@@ -27,7 +27,7 @@ private:
 	bool freeLook = true; //Orientació lliure permesa
 	bool drawMove = true; //Dibuix del camí de la càmera activat
 
-	std::list<Vector3> punts; //Posicions anteriors
+	std::list< Vector3<float> > punts; //Posicions anteriors
 
 public:
 	int xmin, ymin, zmin, xmax, ymax, zmax; //Punts de l'àrea visible definida per la càmera
@@ -59,14 +59,14 @@ public:
 	void updateVec();
 	void updateCorners();
 
-	Vector3 getPos();
-	void setPos(Vector3 pos);
+	Vector3<float> getPos();
+	void setPos(Vector3<float> pos);
 
-	Vector3 getFront();
-	void setFront(Vector3 front);
+	Vector3<float> getFront();
+	void setFront(Vector3<float> front);
 
-	Vector3 getRight();
-	void setRight(Vector3 right);
+	Vector3<float> getRight();
+	void setRight(Vector3<float> right);
 
 	void setFov(float fov);
 	float getFov();
@@ -86,7 +86,7 @@ public:
 	bool getDrawMove();
 	void setDrawMove(bool set);
 
-	void lookAt(Vector3 pos);
+	void lookAt(Vector3<float> pos);
 	void zoom(float zoom);
 
 	float pitch = 0.0f; //Adalt o abaix
@@ -94,11 +94,11 @@ public:
 
 	void lookAround(double x, double y, double lastX, double lastY);
 	void move(Camera::direction dir, int delta);
-	void setAngle(Camera::angle angle, Vector3 punt, float distancia);
-	void setPla(Camera::pla pla, Vector3 punt, float distancia);
+	void setAngle(Camera::angle angle, Vector3<float> punt, float distancia);
+	void setPla(Camera::pla pla, Vector3<float> punt, float distancia);
 	void display();
 
-	bool isVisible(Vector3 pos, float marge);
+	bool isVisible(Vector3<float> pos, float marge);
 
-	Camera(Vector3 pos, Vector3 target);
+	Camera(Vector3<float> pos, Vector3<float> target);
 };

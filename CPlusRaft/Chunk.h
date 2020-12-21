@@ -8,7 +8,7 @@
 class Chunk {
 private:
 	Block* blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE];
-	Vector3 cpos;
+	Vector3<int> cpos;
 
 	World* world;
 
@@ -20,18 +20,18 @@ public:
 	void drawO();
 	void drawT();
 
-	Vector3 getPos();
+	Vector3<int> getPos();
 
-	bool setBlock(Block* bloc, Vector3 bpos);
-	bool delBlock(Vector3 bpos, bool destroy);
-	Bloc getBlock(Vector3 bpos);
+	bool setBlock(Block* bloc, Vector3<int> bpos);
+	bool delBlock(Vector3<int> bpos, bool destroy);
+	Bloc getBlock(Vector3<int> bpos);
 
-	void interact(Vector3 bpos);
+	void interact(Vector3<int> bpos);
 	void update(int delta);
 	void destroy();
 
-	bool isVisible(Vector3 bpos);
-	Bloc getBlockWorld(Vector3 bpos);
+	bool isVisible(Vector3<int> bpos);
+	Bloc getBlockWorld(Vector3<int> bpos);
 
 	bool getByteData(char* arr);
 	bool readFromByteData(char* arr);
@@ -40,5 +40,5 @@ public:
 
 	int nblocs;
 
-	Chunk(World* world, Vector3 pos);
+	Chunk(World* world, Vector3<int> pos);
 };

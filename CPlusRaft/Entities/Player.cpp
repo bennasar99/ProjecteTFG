@@ -11,9 +11,9 @@
 
 class World;
 
-Player::Player(World* world, Vector3 pos): Entity(world, pos)
+Player::Player(World* world, Vector3<float> pos): Entity(world, pos)
 {
-
+	this->health = 5;
 }
 
 /**
@@ -21,19 +21,19 @@ Player::Player(World* world, Vector3 pos): Entity(world, pos)
   */
 void Player::update(int delta) {
 	if (this->gamemode == 1) { //Gravetat
-		Vector3 grav = Vector3(0, -1, 0) * (((float)delta / 100.0f) * this->grav);
+		Vector3<float> grav = Vector3<float>(0, -1, 0) * (((float)delta / 100.0f) * this->grav);
 		if (world->getBlock(this->pos) == Bloc::AIGUA) { //A l'aigua queim més lent
 			grav = grav / 4.0f;
 		}
-		Vector3 newPos = this->pos + grav;
-		if (!Block::isSolid(world->getBlock(newPos - Vector3(0, 1, 0))) && this->grav >= 0) { //Caiem
+		Vector3<float> newPos = this->pos + grav;
+		if (!Block::isSolid(world->getBlock(newPos - Vector3<float>(0, 1, 0))) && this->grav >= 0) { //Caiem
 			this->pos = newPos;
 		}
 		if (this->grav < 1) { //"Gravetat"
 			this->grav += 0.003f * delta;
 		}
 		if (this->grav < 0) { //Si tocam adalt, tornam caure
-			if (Block::isSolid(world->getBlock(this->pos + Vector3(0,eyesOffset + 0.2f,0)))) {
+			if (Block::isSolid(world->getBlock(this->pos + Vector3<float>(0,eyesOffset + 0.2f,0)))) {
 				this->grav = 0;
 			}
 		}
@@ -46,7 +46,7 @@ void Player::update(int delta) {
 
 //Control per teclat
 void Player::control(int key) {
-	if (key == GLFW_KEY_SPACE && Block::isSolid(world->getBlock(this->pos - Vector3(0, 2, 0))) && grav >= 1 && this->gamemode == 1) {
+	if (key == GLFW_KEY_SPACE && Block::isSolid(world->getBlock(this->pos - Vector3<float>(0, 2, 0))) && grav >= 1 && this->gamemode == 1) {
 		grav = -1.0f;
 	}
 	if (key == GLFW_KEY_G) {
@@ -64,8 +64,8 @@ void Player::control(int key) {
 */
 void Player::control(int delta, Camera *cam) {
 	//Actualitzam la posició del jugador
-	Vector3 add = Vector3(0, 0, 0);
-	Vector3 forward = Vector3::normalize(Vector3(cam->getFront().x, 0, cam->getFront().z)) * this->speed;
+	Vector3<float> add = Vector3<float>(0, 0, 0);
+	Vector3<float> forward = Vector3<float>::normalize(Vector3<float>(cam->getFront().x, 0, cam->getFront().z)) * this->speed;
 	if (KeyboardManager::isPressed(GLFW_KEY_W)) {
 		add = add + forward;
 	}
@@ -79,10 +79,10 @@ void Player::control(int delta, Camera *cam) {
 		add = add + cam->getRight();
 	}
 	if ((KeyboardManager::isPressed(GLFW_KEY_SPACE) && this->gamemode==0) || (grav < 0)) { //Creatiu o acabam de botar
-		add = add + Vector3(0, 1, 0);
+		add = add + Vector3<float>(0, 1, 0);
 	}
 	else if (KeyboardManager::isPressed('{') && this->gamemode == 0) {
-		add = add - Vector3(0, 1, 0);
+		add = add - Vector3<float>(0, 1, 0);
 	}
 	if (KeyboardManager::isPressed('}')) { //Crouch
 		this->eyesOffset = 0.0f;
@@ -96,19 +96,19 @@ void Player::control(int delta, Camera *cam) {
 	else if (this->gamemode == 1) {
 		this->speed = 1;
 	}
-	Vector3 newPos = this->pos + add * ((float)delta / 200.0f);
+	Vector3<float> newPos = this->pos + add * ((float)delta / 200.0f);
 	if (newPos != this->pos) {
-		if (Block::isSolid(world->getBlock(newPos + add * ((float)delta / 200.0f) - Vector3(0, 1, 0))) ||
+		if (Block::isSolid(world->getBlock(newPos + add * ((float)delta / 200.0f) - Vector3<float>(0, 1, 0))) ||
 			Block::isSolid(world->getBlock(newPos + add * ((float)delta / 200.0f)))) {
-			Vector3 poss[6] = { Vector3(add.x, add.y, 0), Vector3(add.x, 0, add.z), Vector3(0, add.y, add.z),
-				Vector3(add.x, 0, 0), Vector3(0, add.y, 0), Vector3(0, 0, add.z) };
+			Vector3<float> poss[6] = { Vector3<float>(add.x, add.y, 0), Vector3<float>(add.x, 0, add.z), Vector3<float>(0, add.y, add.z),
+				Vector3<float>(add.x, 0, 0), Vector3<float>(0, add.y, 0), Vector3<float>(0, 0, add.z) };
 			for (int i = 0; i < 6; i++) {
-				Vector3 newAdd = poss[i];
+				Vector3<float> newAdd = poss[i];
 				newPos = this->pos + newAdd * ((float)delta / 200.0f);
-				if (!Block::isSolid(world->getBlock(newPos + newAdd * ((float)delta / 200.0f) - Vector3(0, 1, 0))) &&
-					!Block::isSolid(world->getBlock(newPos + newAdd * ((float)delta / 200.0f) + Vector3(0, eyesOffset, 0)))) {
+				if (!Block::isSolid(world->getBlock(newPos + newAdd * ((float)delta / 200.0f) - Vector3<float>(0, 1, 0))) &&
+					!Block::isSolid(world->getBlock(newPos + newAdd * ((float)delta / 200.0f) + Vector3<float>(0, eyesOffset, 0)))) {
 					this->pos = newPos;
-					if (Block::isSolid(world->getBlock(this->pos - Vector3(0,1,0)))) {
+					if (Block::isSolid(world->getBlock(this->pos - Vector3<float>(0,1,0)))) {
 						SoundManager::playSound(So::CAMINA, this->pos, false);
 					}
 					break;
@@ -117,7 +117,7 @@ void Player::control(int delta, Camera *cam) {
 		}
 		else {
 			this->pos = newPos;
-			if (world->getBlock(this->pos - Vector3(0, 1, 0)) != Bloc::AIGUA) {
+			if (world->getBlock(this->pos - Vector3<float>(0, 1, 0)) != Bloc::AIGUA) {
 				SoundManager::playSound(So::CAMINA, this->pos, false);
 			}
 		}
@@ -134,7 +134,7 @@ void Player::destroy() {
 }
 
 void Player::setCam(Camera* cam) {
-	cam->setPos(this->pos + Vector3(0, eyesOffset, 0));
+	cam->setPos(this->pos + Vector3<float>(0, eyesOffset, 0));
 }
 
 void Player::onAttach() {

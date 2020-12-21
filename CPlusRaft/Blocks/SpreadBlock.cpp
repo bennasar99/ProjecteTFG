@@ -18,7 +18,7 @@ void SpreadBlock::interact() {
 }
 
 //Funció de dibuixat (Del bloc/objecte tal com és, no icona)
-void SpreadBlock::draw(ChunkMesh* cM, bool visible[6], Vector3 relPos) {
+void SpreadBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<float> relPos) {
 
 	//GLfloat vertP[17][2][3] = {
 	//{ {0.5, 0.3, 0.5}, {0.5, -0.5, 0.5} },

@@ -43,7 +43,7 @@ bool SoundManager::loadSound(const char* path, So nom) {
     return true;
 }
 
-void SoundManager::playSound(So nom, Vector3 pos, bool forceStart) {
+void SoundManager::playSound(So nom, Vector3<float> pos, bool forceStart) {
     int sonum = static_cast<int>(nom);
 
     alSource3f(sons[sonum], AL_POSITION, pos.x, pos.y, pos.z); //Establim la posició del so

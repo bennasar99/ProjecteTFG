@@ -9,7 +9,7 @@
 #include <cmath>
 #include "../World.h"
 
-Jukebox::Jukebox(World* world, Vector3 pos) : Block(world, Bloc::ALTAVEU, 0) {
+Jukebox::Jukebox(World* world, Vector3<int> pos) : Block(world, Bloc::ALTAVEU, 0) {
     this->pos = pos;
 }
 
@@ -18,5 +18,5 @@ void Jukebox::destroy() {
 }
 
 void Jukebox::interact() { //Reproduim música
-    SoundManager::playSound(So::MUSICA, this->pos, true);
+    SoundManager::playSound(So::MUSICA, Vector3<float>((float)this->pos.x, (float)this->pos.y, (float)this->pos.z), true);
 }

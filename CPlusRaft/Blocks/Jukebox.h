@@ -9,10 +9,10 @@
 class Jukebox: public Block {
 private:
 
-	Vector3 pos;
+	Vector3<int> pos;
 
 public:
-	Jukebox(World* world, Vector3 pos);
+	Jukebox(World* world, Vector3<int> pos);
 
 	void destroy();
 

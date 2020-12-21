@@ -20,14 +20,14 @@ float zFar = 160.0f;
 
 const float axisSize = zFar;
 
-Vector3 ba; //Bloc actual (posició)
+Vector3<float> ba; //Bloc actual (posició)
 
 int btipus = 1; //Bloc actual (tipus)
 
 #include "KeyboardManager.h"
 
 #include "Camera.h"
-Camera camera = Camera(Vector3(64, 66, 64), Vector3(64, 66, 60));
+Camera camera = Camera(Vector3<float>(64, 66, 64), Vector3<float>(64, 66, 60));
 
 #include "World.h"
 World* world;
@@ -71,7 +71,7 @@ int fpsc = 0;
 // Funcion que visualiza la escena OpenGL
 void Display(GLFWwindow* window)
 { 
-	int temps = glfwGetTime() * 1000;
+	int temps = int(glfwGetTime() * 1000);
 	//printf("%d\n", temps);
 	int delta = temps - darrerDisplay;
 	float fps = 1.0f / ((float)delta / 1000.0f);
@@ -126,7 +126,7 @@ void Display(GLFWwindow* window)
 	world->draw(camera.getPos(), zFar); //Dibuixam el món
 
 	//Actualitzam les llums del món
-	world->updateLights(camera.getPos(), Vector3::normalize(camera.getFront()), camera.getFov(), camera.getAspect());
+	world->updateLights(camera.getPos(), Vector3<float>::normalize(camera.getFront()), camera.getFov(), camera.getAspect());
 
 	//Dibuixam el bloc seleccionat
 	if (Block::isSolid(world->getBlock(ba))) {
@@ -169,7 +169,7 @@ void Display(GLFWwindow* window)
 
 	// dibuixar els 3 eixos
 	if (axisVisible) {
-		world->drawAxis(Vector3((float)(world->sizex*CHUNKSIZE)/2, (float)(world->sizey*CHUNKSIZE) / 2 + 1, (float)(world->sizez*CHUNKSIZE) / 2), 50.0f);
+		world->drawAxis(Vector3<float>((float)(world->sizex*CHUNKSIZE)/2, (float)(world->sizey*CHUNKSIZE) / 2 + 1, (float)(world->sizez*CHUNKSIZE) / 2), 50.0f);
 	}
 
 	glPopMatrix(); 
@@ -293,7 +293,7 @@ void Idle(void)
 
 	//Gestió del temps
 	//int temps = glutGet(GLUT_ELAPSED_TIME);
-	int temps = glfwGetTime() * 1000;
+	int temps = int(glfwGetTime() * 1000);
 	int delta = temps - darrerIdle;
 	darrerIdle = temps;
 
@@ -320,7 +320,7 @@ int main(int argc, char** argv)
 {
 
 	//Càmera
-	camera.setPos(Vector3(64, 66, 64));
+	camera.setPos(Vector3<float>(64, 66, 64));
 	camera.setFreeLook(true);
 	camera.setFreeMove(true);
 	camera.setDrawMove(true);
@@ -331,14 +331,14 @@ int main(int argc, char** argv)
 	struct stat buffer;
 	if (stat(path.c_str(), &buffer) == 0) {
 		//Si el món ja existeix, el carregam
-		printf("Loading world %s... \n", wname);
+		printf("Loading world %s... \n", wname.c_str());
 		world = new World(wname, &camera);
-		ent = new Player(world, world->getSpawn() + Vector3(0, 2, 0));
+		ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 2.0f, 0));
 		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
 	}
 	else {
 		//Si no, el cream
-		printf("Creating world %s... \n", wname);
+		printf("Creating world %s... \n", wname.c_str());
 		printf("Seed: ");
 		std::string sseed;
 		std::cin >> sseed;
@@ -349,7 +349,7 @@ int main(int argc, char** argv)
 		//int seed = std::atoi(sseed.c_str());
 		printf("Seed: %d\n", seed);
 		world = new World(seed, 32, 16, 32, &camera);
-		ent = new Player(world, world->getSpawn() + Vector3(0, 10, 0));
+		ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 10.0f, 0));
 		world->save(wname);
 	}
 	// Inicialitzam el GLFW
@@ -470,7 +470,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 	}
 	else {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) { //Botó dret, eliminar blocs
-			if (world->deleteBlock(ba, true)) {
+			if (world->deleteBlock(Vector3<int>((int)ba.x, (int)ba.y, (int)ba.z), true)) {
 				SoundManager::playSound(So::DESTRUEIX, ba, true);
 			}
 		}
@@ -484,17 +484,17 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 				Vector3 bpos = ba - front * 0.1f;
 				Vector3 epos;
 				if (ent != nullptr) {
-					epos = ent->getPos() - Vector3(0,1,0);
+					epos = ent->getPos() - Vector3<float>(0,1,0);
 					epos.floor();
 				}
 				bpos.floor();
 				if (ent == nullptr || epos != bpos) {
-					world->setBlock(tipusbloc, bpos);
+					world->setBlock(tipusbloc, Vector3<int>((int)bpos.x, (int)bpos.y, (int)bpos.z));
 					SoundManager::playSound(So::COLOCA, ba, true);
 				}
 			}
 			else {
-				world->interact(ba); //Si no tenim cap bloc seleccionat, interactuam
+				world->interact(Vector3<int>((int)ba.x, (int)ba.y, (int)ba.z)); //Si no tenim cap bloc seleccionat, interactuam
 			}
 		}
 	}
@@ -524,6 +524,7 @@ void movement(int key) {
 		}
 		else {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			centerPointer();
 		}
 	}
 
@@ -554,11 +555,11 @@ void scaleListener(GLFWwindow* window, double xoffset, double yoffset) {
 	if (KeyboardManager::isPressed('q')) { //Permetem fer la llanterna més grossa o petita
 		float cutoff;
 		glGetLightfv(GL_LIGHT0, GL_SPOT_CUTOFF, &cutoff);
-		cutoff += yoffset;
+		cutoff += (float)yoffset;
 		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, cutoff);
 	}
 	else { //Feim zoom
-		camera.zoom(yoffset * 0.5f);
+		camera.zoom((float)yoffset * 0.5f);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		gluPerspective(camera.getFov(), (float)w_width / (float)w_height, zNear, zFar);
@@ -656,11 +657,12 @@ void updatePlayerBlock() {
 	ba = camera.getPos() + camera.getFront();
 	int i = 0;
 	while (world->getBlock(ba) == Bloc::RES && i < 100) { //Traçam una línia cap a la direcció del front de la càmera
+		Vector3<float> front = camera.getFront();
 		ba = ba + camera.getFront() * 0.1f;
 		i++;
 	}
 	if (i == 100) { //Si no hem trobat cap bloc, no es veurà la selecció
-		ba = Vector3(-1, -1, -1);
+		ba = Vector3<float>(0, 0, 0);
 	}
 }
 

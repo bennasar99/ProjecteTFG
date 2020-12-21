@@ -9,14 +9,14 @@
 #include <cmath>
 #include "../World.h"
 
-EntityBlock::EntityBlock(World* world, Bloc id, Vector3 pos) : Block(world, id, 0) {
+EntityBlock::EntityBlock(World* world, Bloc id, Vector3<float> pos) : Block(world, id, 0) {
     this->ent = 0;
     this->pos = pos;
-    switch (id) {
+    //switch (id) {
     //case Bloc::TIPUS:
         //this->ent = world->addEntity(Entitat::TIPUS, this->pos);
         //break;
-    }
+    //}
 }
 
 void EntityBlock::destroy() {

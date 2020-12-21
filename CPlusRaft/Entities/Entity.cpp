@@ -2,14 +2,14 @@
 #include "../World.h"
 #include <iostream>
 
-Entity::Entity(World* world, Vector3 pos) {
+Entity::Entity(World* world, Vector3<float> pos) {
 	this->world = world;
 	this->pos = pos;
 }
 
 Entity::Entity() {
 	this->world = NULL;
-	this->pos = Vector3(0, 0, 0);
+	this->pos = Vector3<float>(0, 0, 0);
 }
 
 void Entity::draw() {}
@@ -18,11 +18,11 @@ void Entity::update(int delta) {}
 
 void Entity::destroy() {}
 
-Vector3 Entity::getPos() {
+Vector3<float> Entity::getPos() {
 	return this->pos;
 }
 
-void Entity::setPos(Vector3 pos) {
+void Entity::setPos(Vector3<float> pos) {
 	this->pos = pos;
 }
 
