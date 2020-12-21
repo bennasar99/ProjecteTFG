@@ -49,26 +49,29 @@ World::World(std::string name, Camera* camera) { //Càrrega ja existent
 	this->camera = camera;
 	this->minpos = Vector3((float)sizex - 1, (float)sizey - 1, (float)sizez - 1);
 
+	//Lectura informació món
+	std::ifstream info("worlds/" + name + "/info.yml");
+	std::string str((std::istreambuf_iterator<char>(info)),
+		std::istreambuf_iterator<char>());
+	char *par = (char*)str.c_str();
+	c4::substr parse = c4::to_substr(par);
+	ryml::Tree tree = ryml::parse(parse);
+	ryml::read(tree["seed"], &this->seed);
+	ryml::read(tree["spawn"]["x"], &this->spawn.x);
+	ryml::read(tree["spawn"]["y"], &this->spawn.y);
+	ryml::read(tree["spawn"]["z"], &this->spawn.z);
+	ryml::read(tree["size"]["x"], &this->sizex);
+	ryml::read(tree["size"]["y"], &this->sizey);
+	ryml::read(tree["size"]["z"], &this->sizez);
+	printf("Mides del mon: %d %d %d, spawn a: %f %f %f. Seed %d\n", this->sizex, this->sizey, this->sizez, this->spawn.x, this->spawn.y, this->spawn.z, this->seed);
+	info.close();
+
 	std::fstream file;
 	file.open("worlds/" + name + "/chunks.cnk", std::ios::in | std::ios::binary);
 
-	//Mida del món
-	char buff[sizeof(int)];
-	file.read(buff, 3);
-	this->sizex = int(buff[0]);
-	this->sizey = int(buff[1]);
-	this->sizez = int(buff[2]);
-	file.read(buff, 3);
-	int sX = unsigned char(buff[0]);
-	int sY = unsigned char(buff[1]);
-	int sZ = unsigned char(buff[2]);
-	this->spawn = Vector3((float)sX, (float)sY, (float)sZ);
-	//file.read(buff, sizeof(int));
-	//this->seed = int(buff);
-
 	this->chunks = new Chunk * [(size_t)sizex * (size_t)sizey * (size_t)sizez];
 
-	printf("Mides del mon: %d %d %d, spawn a: %d %d %d. Seed %d\n", this->sizex, this->sizey, this->sizez, sX, sY, sZ, this->seed);
+	//printf("Mides del mon: %d %d %d, spawn a: %d %d %d. Seed %d\n", this->sizex, this->sizey, this->sizez, sX, sY, sZ, this->seed);
 
 	const int chunkSize = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
 	char buffer[chunkSize];
@@ -108,22 +111,6 @@ void World::save(std::string name) {
 	std::fstream file;
 	file.open("worlds/" + name + "/chunks.cnk", std::ios::out | std::ios::binary);
 
-	//Guardam mides i spawn
-	char sX = this->sizex;
-	char sY = this->sizey;
-	char sZ = this->sizez;
-	file.write(&sX, 1);
-	file.write(&sY, 1);
-	file.write(&sZ, 1);
-	sX = (int)this->spawn.x;
-	sY = (int)this->spawn.y;
-	sZ = (int)this->spawn.z;
-	file.write(&sX, 1);
-	file.write(&sY, 1);
-	file.write(&sZ, 1);
-	//char seed = this->seed;
-	//file.write(&seed, 1);
-
 	const int chunkSize = CHUNKSIZE* CHUNKSIZE* CHUNKSIZE;
 	char buffer[chunkSize];
 
@@ -143,16 +130,6 @@ void World::save(std::string name) {
 			}
 		}
 	}
-	//for (int i = 0; i < this->sizex * this->sizey * this->sizez; i++) {
-	//	if (chunks[i] != nullptr) {
-	//		chunks[i]->getByteData(buffer);
-	//		file.write(buffer, chunkSize);
-	//	}
-	//	else {
-	//		char zeros[chunkSize];
-	//		file.write(zeros, chunkSize);
-	//	}
-	//}
 
 	file.close();
 
