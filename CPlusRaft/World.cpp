@@ -35,7 +35,6 @@ World::World(int seed, int sizex, int sizey, int sizez, Camera* camera) //Nou
 			break;
 		}
 	}
-
 }
 
 World::World(std::string name, Camera* camera) { //Càrrega ja existent
@@ -156,6 +155,19 @@ void World::save(std::string name) {
 	//}
 
 	file.close();
+
+	//Cream yml del món
+	std::ofstream info("worlds/" + name + "/info.yml");
+	info << "seed: " << seed << "\n";
+	info << "spawn:\n";
+	info << " x: " << this->spawn.x << "\n";
+	info << " y: " << this->spawn.y << "\n";
+	info << " z: " << this->spawn.z << "\n";
+	info << "size:\n";
+	info << " x: " << this->sizex << "\n";
+	info << " y: " << this->sizey << "\n";
+	info << " z: " << this->sizez << "\n";
+	info.close();
 }
 
 void World::generate(int seed) { //TODO: guardar spawn a world
