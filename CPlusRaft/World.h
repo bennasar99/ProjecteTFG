@@ -26,7 +26,6 @@
 #include "Blocks//BlockRenderer.h"
 
 #include "lib/FastNoiseLite.h"
-#include "lib/ryml/ryml.hpp"
 
 class Block;
 class LightBlock;
