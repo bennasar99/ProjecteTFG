@@ -4,24 +4,20 @@
 
 TextureAtlas blockAtlas = TextureAtlas(1, 7);
 
-Block::Block(World* world, Bloc id, Block* parent) {
-	this->world = world;
+Block::Block(Bloc id) {
+	//this->world = world;
 	this->id = id;
-	this->parent = parent;
+	//this->parent = parent;
 }
 
 Block::Block() {
-	this->world = NULL;
+	//this->world = NULL;
 	this->id = Bloc::RES;
-	this->parent = 0;
+	//this->parent = 0;
 }
 
-void Block::update(int delta) {
+void Block::update(int delta, World* world) {
 
-}
-
-Block* Block::getParent() {
-	return this->parent;
 }
 
 Bloc Block::getId() {
@@ -32,19 +28,19 @@ void Block::setId(Bloc id) {
 	this->id = id;
 }
 
-void Block::destroy(){
-	if (parent != 0) {
-		this->parent->destroy();
-	}
+void Block::destroy(World* world){
+	//if (parent != 0) {
+	//	this->parent->destroy();
+	//}
 };
 
-void Block::interact() {
-	if (parent != 0) {
+void Block::interact(World* world) {
+	/*if (parent != 0) {
 		this->parent->interact();
-	}
+	}*/
 };
 
-void Block::draw(ChunkMesh* cM, bool visible[6], Vector3<float> relPos) {
+void Block::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 	GLfloat vert[6][4][3] = {
 		{{-.5f, .5f, .5f},  {-.5f, .5f,-.5f},  {-.5f,-.5f,-.5f}, {-.5f,-.5f, .5f}}, // v1,v6,v7,v2 (left)
 		{{.5f, .5f, .5f},   {.5f, .5f,-.5f},  {-.5f, .5f,-.5f}, {-.5f, .5f, .5f}}, // v0,v5,v6,v1 (top)
@@ -114,7 +110,7 @@ void Block::draw(ChunkMesh* cM, bool visible[6], Vector3<float> relPos) {
 		if (visible[i]) {
 			for (int j = 0; j < 4; j++) {
 				float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
-				vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
+				vPos[0] += (float)relPos.x; vPos[1] += (float)relPos.y; vPos[2] += (float)relPos.z;
 				cM->addVertexO(vPos, normals[i][j], color, text[i][j], Primitiva::QUAD);
 			}
 		}

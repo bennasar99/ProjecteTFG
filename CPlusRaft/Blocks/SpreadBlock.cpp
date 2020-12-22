@@ -5,20 +5,20 @@
 #include "../World.h"
 
 
-SpreadBlock::SpreadBlock(World* world, Bloc id) : Block(world, id, nullptr) {
+SpreadBlock::SpreadBlock(Bloc id) : Block(id) {
 
 }
 
-void SpreadBlock::destroy() {
+void SpreadBlock::destroy(World* world) {
 
 }
 
-void SpreadBlock::interact() {
+void SpreadBlock::interact(World* world) {
 
 }
 
 //Funció de dibuixat (Del bloc/objecte tal com és, no icona)
-void SpreadBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<float> relPos) {
+void SpreadBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 
 	//GLfloat vertP[17][2][3] = {
 	//{ {0.5, 0.3, 0.5}, {0.5, -0.5, 0.5} },

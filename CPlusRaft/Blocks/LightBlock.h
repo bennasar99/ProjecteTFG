@@ -19,10 +19,10 @@ private:
 public:
 	LightBlock(World* world, Bloc id, Vector3<int> pos);
 
-	void destroy();
+	void destroy(World* world);
 
 	void draw();
 
-	void interact();
+	void interact(World* world);
 
 };

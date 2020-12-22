@@ -9,7 +9,7 @@
 #include <cmath>
 #include "../World.h"
 
-EntityBlock::EntityBlock(World* world, Bloc id, Vector3<float> pos) : Block(world, id, 0) {
+EntityBlock::EntityBlock(World* world, Bloc id, Vector3<int> pos) : Block(id) {
     this->ent = 0;
     this->pos = pos;
     //switch (id) {
@@ -19,8 +19,8 @@ EntityBlock::EntityBlock(World* world, Bloc id, Vector3<float> pos) : Block(worl
     //}
 }
 
-void EntityBlock::destroy() {
-    this->world->delEntity(this->ent); //Eliminam l'entitat del món
+void EntityBlock::destroy(World* world) {
+    world->delEntity(this->ent); //Eliminam l'entitat del món
     this->ent = 0;
 }
 

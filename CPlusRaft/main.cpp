@@ -192,7 +192,7 @@ void Display(GLFWwindow* window)
 	glPushMatrix();
 
 	//Dibuixam el bloc seleccionat al cantó esquerra inferior
-	Block bsel = Block(NULL, static_cast<Bloc>(btipus), NULL);
+	Block bsel = Block(static_cast<Bloc>(btipus));
 	glTranslatef(0.9f * camera.getAspect(), 0.1f, -2);
 	glScalef(0.1f, 0.1f, 0.1f);
 	glEnable(GL_TEXTURE_2D);
@@ -235,7 +235,7 @@ void Display(GLFWwindow* window)
 		for (int i = 0; i < 16; i++) { //Objectes de l'inventari
 			glPushMatrix();
 			glScalef(0.1f, 0.1f, 0.1f);
-			Block bsel = Block(NULL, static_cast<Bloc>(i+2), NULL); //+2 perque botam aire i null
+			Block bsel = Block(static_cast<Bloc>(i+2)); //+2 perque botam aire i null
 			glDisable(GL_LIGHTING);
 			world->drawBloc(bsel.getId());
 			glPopMatrix();

@@ -12,7 +12,7 @@ private:
 	Vector3<int> pos;
 
 public:
-	Jukebox(World* world, Vector3<int> pos);
+	Jukebox(Vector3<int> pos);
 
 	void destroy();
 

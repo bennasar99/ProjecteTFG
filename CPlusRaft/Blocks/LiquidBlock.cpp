@@ -5,20 +5,20 @@
 #include "../World.h"
 
 
-LiquidBlock::LiquidBlock(World* world, Bloc id) : Block(world, id, nullptr) {
+LiquidBlock::LiquidBlock(Bloc id) : Block(id) {
 
 }
 
-void LiquidBlock::destroy() {
+void LiquidBlock::destroy(World* world) {
 
 }
 
-void LiquidBlock::interact() {
+void LiquidBlock::interact(World* world) {
 
 }
 
 //Funció de dibuixat (Del bloc/objecte tal com és, no icona)
-void LiquidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<float> relPos) {
+void LiquidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
     GLfloat vert[6][4][3] = {
     {{-.5f, .5f, .5f},  {-.5f, .5f,-.5f},  {-.5f,-.5f,-.5f}, {-.5f,-.5f, .5f}}, // v1,v6,v7,v2 (left)
     {{.5f, .5f, .5f},   {.5f, .5f,-.5f},  {-.5f, .5f,-.5f}, {-.5f, .5f, .5f}}, // v0,v5,v6,v1 (top)

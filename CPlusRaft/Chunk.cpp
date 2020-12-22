@@ -55,7 +55,7 @@ Vector3<int> Chunk::getPos() {
 bool Chunk::setBlock(Block* bloc, Vector3<int> pos) {
 	//Hi ha blocs amb les seves pròpies classes, sinó s'utilitza la classe genèrica
 	if (this->blocs[pos.x][pos.y][pos.z] != nullptr) {
-		this->blocs[pos.x][pos.y][pos.z]->destroy();
+		this->blocs[pos.x][pos.y][pos.z]->destroy(this->world);
 		delete this->blocs[pos.x][pos.y][pos.z];
 		this->nblocs--;
 	}
@@ -79,7 +79,7 @@ void Chunk::update(int delta) {
 		for (int y = 0; y < CHUNKSIZE; y++) {
 			for (int z = 0; z < CHUNKSIZE; z++) {
 				if (blocs[x][y][z] != 0) {
-					blocs[x][y][z]->update(delta);
+					blocs[x][y][z]->update(delta, this->world);
 				}
 			}
 		}
@@ -91,7 +91,7 @@ void Chunk::destroy() {
 		for (int y = 0; y < CHUNKSIZE; y++) {
 			for (int z = 0; z < CHUNKSIZE; z++) {
 				if (blocs[x][y][z] != 0) {
-					blocs[x][y][z]->destroy();
+					blocs[x][y][z]->destroy(this->world);
 					delete blocs[x][y][z];
 				}
 			}
@@ -104,7 +104,7 @@ void Chunk::destroy() {
 bool Chunk::delBlock(Vector3<int> bpos, bool destroy) {
 	if (this->blocs[bpos.x][bpos.y][bpos.z] != 0) {
 		if (destroy) {
-			this->blocs[bpos.x][bpos.y][bpos.z]->destroy();
+			this->blocs[bpos.x][bpos.y][bpos.z]->destroy(this->world);
 		}
 		delete this->blocs[bpos.x][bpos.y][bpos.z];
 		this->blocs[bpos.x][bpos.y][bpos.z] = 0;
@@ -120,7 +120,7 @@ void Chunk::interact(Vector3<int> bpos) {
 	if (blocs[bpos.x][bpos.y][bpos.z] == 0) {
 		return;
 	}
-	blocs[bpos.x][bpos.y][bpos.z]->interact();
+	blocs[bpos.x][bpos.y][bpos.z]->interact(this->world);
 }
 
 bool Chunk::isVisible(Vector3<int> bpos) {
@@ -211,7 +211,7 @@ void Chunk::updateMesh() {
 						}
 					}
 					if (qualcun) {
-						blocs[x][y][z]->draw(cMesh, visible, Vector3((float)x, (float)y, (float)z));
+						blocs[x][y][z]->draw(cMesh, visible, Vector3<int>(x, y, z));
 					}
 					nb++;
 

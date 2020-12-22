@@ -5,7 +5,7 @@
 #include "../World.h"
 
 
-SolidBlock::SolidBlock(World* world, Bloc id) : Block(world, id, nullptr) {
+SolidBlock::SolidBlock(Bloc id) : Block(id) {
 
 }
 
@@ -18,7 +18,7 @@ void SolidBlock::interact() {
 }
 
 //Funció de dibuixat (Del bloc/objecte tal com és, no icona)
-void SolidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<float> relPos) {
+void SolidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
     GLfloat vert[6][4][3] = {
     {{-.5f, .5f, .5f},  {-.5f, .5f,-.5f},  {-.5f,-.5f,-.5f}, {-.5f,-.5f, .5f}}, // v1,v6,v7,v2 (left)
     {{.5f, .5f, .5f},   {.5f, .5f,-.5f},  {-.5f, .5f,-.5f}, {-.5f, .5f, .5f}}, // v0,v5,v6,v1 (top)

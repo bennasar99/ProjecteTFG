@@ -11,15 +11,15 @@ class World;
 class LiquidBlock : public Block {
 private:
 
-	Vector3<float> pos; //Posició del bloc
+	Vector3<int> pos; //Posició del bloc
 
 public:
-	LiquidBlock(World* world, Bloc id);
+	LiquidBlock(Bloc id);
 
-	void destroy();
+	void destroy(World* world);
 
-	void draw(ChunkMesh *cM, bool visible[6], Vector3<float> relPos);
+	void draw(ChunkMesh *cM, bool visible[6], Vector3<int> relPos);
 
-	void interact();
+	void interact(World* world);
 
 };

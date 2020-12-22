@@ -75,14 +75,18 @@ World::World(std::string name, Camera* camera) { //Càrrega ja existent
 
 	const int chunkSize = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
 	char buffer[chunkSize];
+	char zeros[chunkSize];
+	memset(zeros, 0, chunkSize);
 	for (int x = 0; x < this->sizex; x++) {
 		for (int y = 0; y < this->sizey; y++) {
 			for (int z = 0; z < this->sizez; z++) {
 				//printf("Chunk a %d %d %d...\n", x, y, z);
 				int desp = getDesp(Vector3<int>(x, y, z));
 				file.read(buffer, chunkSize);
-				chunks[desp] = new Chunk(this, Vector3<int>(x, y, z));
-				chunks[desp]->readFromByteData(buffer);
+				if (memcmp(buffer, zeros, chunkSize) != 0) { //Si el chunk no és buit, el carregam
+					chunks[desp] = new Chunk(this, Vector3<int>(x, y, z));
+					chunks[desp]->readFromByteData(buffer);
+				}
 				//printf("LLEGIT\n");
 			}
 		}
@@ -147,7 +151,7 @@ void World::save(std::string name) {
 	info.close();
 }
 
-void World::generate(int seed) { //TODO: guardar spawn a world
+void World::generate(int seed) {
 	//Generador del món
 	srand(seed); //Seed? xD
 	noise.SetSeed(seed);
@@ -400,16 +404,16 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, Block* parent, bool listUpdat
 		bloc = new LightBlock(this, tipus, pos);
 		break;
 	case Bloc::HERBA: case Bloc::HERBAFULL:
-		bloc = new SpreadBlock(this, tipus);
+		bloc = new SpreadBlock(tipus);
 		break;
 	case Bloc::ALTAVEU:
-		bloc = new Jukebox(this, pos);
+		bloc = new Jukebox(pos);
 		break;
 	case Bloc::AIGUA:
-		bloc = new LiquidBlock(this, tipus);
+		bloc = new LiquidBlock(tipus);
 		break;
 	default:
-		bloc = new SolidBlock(this, tipus);
+		bloc = new SolidBlock(tipus);
 	}
 	chunks[desp]->setBlock(bloc, bpos);
 	if (listUpdate) {

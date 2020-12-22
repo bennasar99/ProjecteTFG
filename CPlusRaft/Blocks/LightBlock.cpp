@@ -9,7 +9,7 @@
 #include <cmath>
 #include "../World.h"
 
-LightBlock::LightBlock(World* world, Bloc id, Vector3<int> pos) : Block(world, id, 0) {
+LightBlock::LightBlock(World* world, Bloc id, Vector3<int> pos) : Block(id) {
     this->light = 0;
     this->pos = pos;
     switch (id) { //Segons el bloc, inicialitzam el llum d'una manera o una altre
@@ -33,13 +33,13 @@ LightBlock::LightBlock(World* world, Bloc id, Vector3<int> pos) : Block(world, i
     }
 }
 
-void LightBlock::destroy() { 
-    this->world->delLight(this->light);
+void LightBlock::destroy(World* world) {
+    world->delLight(this->light);
     this->light = 0;
 }
 
 //Llum encesa ON/OFF
-void LightBlock::interact() {
+void LightBlock::interact(World* world) {
     SoundManager::playSound(So::ONOFF, this->light->getPosVec(), true);
     this->light->setEnabled(!this->light->getEnabled());
 }

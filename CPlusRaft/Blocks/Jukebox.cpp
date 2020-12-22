@@ -9,7 +9,7 @@
 #include <cmath>
 #include "../World.h"
 
-Jukebox::Jukebox(World* world, Vector3<int> pos) : Block(world, Bloc::ALTAVEU, 0) {
+Jukebox::Jukebox(Vector3<int> pos) : Block(Bloc::ALTAVEU) {
     this->pos = pos;
 }
 
