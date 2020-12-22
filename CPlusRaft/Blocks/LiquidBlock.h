@@ -14,8 +14,8 @@ private:
 	Vector3<int> pos; //Posició del bloc
 
 public:
-	LiquidBlock(Bloc id);
-	LiquidBlock(Bloc id, int lvl);
+	LiquidBlock(Bloc id, Vector3<int> pos);
+	LiquidBlock(Bloc id, Vector3<int> pos, int lvl);
 
 	void destroy(World* world);
 

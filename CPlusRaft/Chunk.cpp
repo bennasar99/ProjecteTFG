@@ -83,7 +83,7 @@ void Chunk::update(int delta) {
 			}
 	}
 	lastYupd++;
-	lastYupd %= 16;
+	lastYupd %= CHUNKSIZE;
 }
 
 void Chunk::destroy() {

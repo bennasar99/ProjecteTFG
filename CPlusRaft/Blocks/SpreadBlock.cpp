@@ -11,12 +11,14 @@ SpreadBlock::SpreadBlock(Bloc id, Vector3<int> pos) : Block(id) {
 }
 
 void SpreadBlock::destroy(World* world) {
-	if ((world->getBlock(this->pos + Vector3<int>(0, 1, 0)) == Bloc::HERBA) || (world->getBlock(this->pos + Vector3<int>(0, 1, 0)) == Bloc::HERBAFULL)){
-		world->deleteBlock(this->pos + Vector3<int>(0, 1, 0), true);
-	}
+
 }
 
 void SpreadBlock::update(int delta, World* world) {
+	if (world->getBlock(this->pos + Vector3<int>(0, -1, 0)) == Bloc::RES) {
+		world->deleteBlock(this->pos, true);
+		return;
+	}
 	this->growTimer-=delta;
 	//printf("grow %d\n", growTimer);
 	if (growTimer <= 0) {

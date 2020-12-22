@@ -378,7 +378,7 @@ bool World::deleteBlock(Vector3<int> pos, bool destroy) { //Eliminar Bloc::RES?
 	if (desp == -1) {
 		return false;
 	}
-	return this->chunks[desp]->delBlock(bpos, true);
+	return this->chunks[desp]->delBlock(bpos, destroy);
 }
 
 //Col·locam un bloc d'un tipus determinat a la posició indicada
@@ -410,7 +410,7 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, Block* parent, bool listUpdat
 		bloc = new Jukebox(pos);
 		break;
 	case Bloc::AIGUA:
-		bloc = new LiquidBlock(tipus);
+		bloc = new LiquidBlock(tipus, pos);
 		break;
 	default:
 		bloc = new SolidBlock(tipus);
