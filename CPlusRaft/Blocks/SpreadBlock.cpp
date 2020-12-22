@@ -5,12 +5,28 @@
 #include "../World.h"
 
 
-SpreadBlock::SpreadBlock(Bloc id) : Block(id) {
-
+SpreadBlock::SpreadBlock(Bloc id, Vector3<int> pos) : Block(id) {
+	this->pos = pos;
+	this->growTimer = 1000;
 }
 
 void SpreadBlock::destroy(World* world) {
+	if ((world->getBlock(this->pos + Vector3<int>(0, 1, 0)) == Bloc::HERBA) || (world->getBlock(this->pos + Vector3<int>(0, 1, 0)) == Bloc::HERBAFULL)){
+		world->deleteBlock(this->pos + Vector3<int>(0, 1, 0), true);
+	}
+}
 
+void SpreadBlock::update(int delta, World* world) {
+	this->growTimer-=delta;
+	//printf("grow %d\n", growTimer);
+	if (growTimer <= 0) {
+		if (rand() % 3 == 2) {
+			if (world->getBlock(this->pos + Vector3<int>(0, 1, 0)) == Bloc::AIRE || world->getBlock(this->pos + Vector3<int>(0, 1, 0)) == Bloc::RES) {
+				world->setBlock(Bloc::HERBAFULL, this->pos + Vector3<int>(0, 1, 0));
+			}
+		}
+		growTimer = 1000;
+	}
 }
 
 void SpreadBlock::interact(World* world) {

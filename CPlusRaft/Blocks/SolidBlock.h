@@ -14,10 +14,6 @@ private:
 public:
 	SolidBlock(Bloc id);
 
-	void destroy();
-
 	void draw(ChunkMesh *cM, bool visible[6], Vector3<int> relPos);
-
-	void interact();
 
 };

@@ -68,22 +68,22 @@ bool Chunk::setBlock(Block* bloc, Vector3<int> pos) {
 }
 
 Bloc Chunk::getBlock(Vector3<int> pos) {
-	if (blocs[(int)pos.x][(int)pos.y][(int)pos.z] == 0) {
+	if (blocs[pos.x][pos.y][pos.z] == 0) {
 		return Bloc::RES;
 	}
-	return blocs[(int)pos.x][(int)pos.y][(int)pos.z]->getId();
+	return blocs[pos.x][pos.y][pos.z]->getId();
 }
 
 void Chunk::update(int delta) {
 	for (int x = 0; x < CHUNKSIZE; x++) {
-		for (int y = 0; y < CHUNKSIZE; y++) {
 			for (int z = 0; z < CHUNKSIZE; z++) {
-				if (blocs[x][y][z] != 0) {
-					blocs[x][y][z]->update(delta, this->world);
+				if (blocs[x][lastYupd][z] != 0) {
+					blocs[x][lastYupd][z]->update(delta, this->world);
 				}
 			}
-		}
 	}
+	lastYupd++;
+	lastYupd %= 16;
 }
 
 void Chunk::destroy() {

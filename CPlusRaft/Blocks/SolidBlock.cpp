@@ -9,14 +9,6 @@ SolidBlock::SolidBlock(Bloc id) : Block(id) {
 
 }
 
-void SolidBlock::destroy() {
-
-}
-
-void SolidBlock::interact() {
-
-}
-
 //Funció de dibuixat (Del bloc/objecte tal com és, no icona)
 void SolidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
     GLfloat vert[6][4][3] = {

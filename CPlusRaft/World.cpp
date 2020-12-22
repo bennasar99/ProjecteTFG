@@ -303,11 +303,11 @@ void World::update(int delta, Vector3<float> pos) {
 		glDisable(sol);
 	}
 	
-	updTimer -= delta;
-	if (updTimer > 0) {
-		return;
-	}
-	updTimer = 1000; //10 tps
+	//updTimer -= delta;
+	//if (updTimer > 0) {
+	//	return;
+	//}
+	//updTimer = 1000; //10 tps
 	//Ordenació llums
 	std::list<Light*>::iterator it;
 	for (it = lights.begin(); (it != lights.end()); it++) {
@@ -318,7 +318,7 @@ void World::update(int delta, Vector3<float> pos) {
 	//NOU CODI CHUNKS
 	pos = pos / CHUNKSIZE;
 	pos.floor();
-	float dist = floor(camera->getViewDist() / CHUNKSIZE);
+	int dist = floor(camera->getViewDist() / CHUNKSIZE / 3);
 	for (int x = (int)(pos.x - dist); x < pos.x + dist; x++) {
 		for (int y = (int)(pos.y - dist); y < pos.y + dist; y++) {
 			for (int z = (int)(pos.z - dist); z < pos.z + dist; z++) {
@@ -404,7 +404,7 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, Block* parent, bool listUpdat
 		bloc = new LightBlock(this, tipus, pos);
 		break;
 	case Bloc::HERBA: case Bloc::HERBAFULL:
-		bloc = new SpreadBlock(tipus);
+		bloc = new SpreadBlock(tipus, pos);
 		break;
 	case Bloc::ALTAVEU:
 		bloc = new Jukebox(pos);

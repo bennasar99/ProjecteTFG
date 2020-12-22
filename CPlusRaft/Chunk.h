@@ -16,6 +16,8 @@ private:
 
 	ChunkMesh *cMesh;
 
+	int lastYupd = 0;
+
 public:
 	void drawO();
 	void drawT();
