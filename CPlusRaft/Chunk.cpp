@@ -224,3 +224,11 @@ void Chunk::updateMesh() {
 	}
 	cMesh->update();
 }
+
+Bioma Chunk::getBiome() {
+	return this->bio;
+}
+
+void Chunk::setBiome(Bioma biome) {
+	this->bio = biome;
+}

@@ -3,9 +3,10 @@
 
 World::World(int seed, int sizex, int sizey, int sizez, Camera* camera) //Nou
 {
+	this->wGen = WorldGenerator(seed, this);
 	this->br = new BlockRenderer();
 
-	this->noise.SetNoiseType(FastNoiseLite::NoiseType_ValueCubic);
+	this->noise.SetNoiseType(FastNoiseLite::NoiseType_Value);
 	this->noise.SetFrequency(0.01f);
 	this->noise.SetFractalGain(0.8f);
 	this->noise.SetSeed(seed);
@@ -29,9 +30,9 @@ World::World(int seed, int sizex, int sizey, int sizez, Camera* camera) //Nou
 	//Col·locam càmera
 	int x = rand() % (sizex * CHUNKSIZE);
 	int z = rand() % (sizez * CHUNKSIZE);
-	for (int y = 0; y < this->sizey * CHUNKSIZE; y++) {
-		if (getBlock(Vector3<int>(x, y, z)) == Bloc::RES) {
-			spawn = Vector3<int>(x, y + 1, z);
+	for (int y = this->sizey * CHUNKSIZE; y > 0; y--) {
+		if (getBlock(Vector3<int>(x, y, z)) == Bloc::TERRA) {
+			spawn = Vector3<int>(x, y + 2, z);
 			break;
 		}
 	}
@@ -67,6 +68,9 @@ World::World(std::string name, Camera* camera) { //Càrrega ja existent
 	info.close();
 
 	std::fstream file;
+
+	this->wGen = WorldGenerator(this->seed, this);
+
 	file.open("worlds/" + name + "/chunks.cnk", std::ios::in | std::ios::binary);
 
 	this->chunks = new Chunk * [(size_t)sizex * (size_t)sizey * (size_t)sizez];
@@ -156,66 +160,74 @@ void World::generate(int seed) {
 	srand(seed); //Seed? xD
 	noise.SetSeed(seed);
 	Vector3<int> pos = Vector3<int>(0, 0, 0);
-	int sealvl = (int)floorf(((float)this->sizey * CHUNKSIZE) / 2.0f);
-	float lasty = 0; // = (this->sizey * CHUNKSIZE) / 2.0f;
-	for (pos.x = 0; pos.x < (this->sizex * CHUNKSIZE); pos.x++) {
-		for (pos.z = 0; pos.z < (this->sizez * CHUNKSIZE); pos.z++) {
-			//printf("gen %d %d %d\n", pos.x, pos.z);
-			lasty = sealvl + noise.GetNoise((float)pos.x, (float)pos.z) * 80;
-			lasty = std::min(lasty, (float)this->sizey * CHUNKSIZE); //No ha de superar l'altura del món
-			lasty = std::max(lasty, 0.0f); // Ni ser menor que 0
-			if (pos.x == 255 || pos.x == 256) {
-				//printf("last: %f, %f\n", noise.GetNoise((float)pos.x, (float)pos.z), lasty);
-			}
-			//printf("last: %f\n", lasty);
-			for (pos.y = 0; pos.y < lasty; pos.y++) {
-				//("terra %d %d %d\n", pos.x, pos.z);
-				this->setBlock(Bloc::TERRA, pos, nullptr, false);
-				if (pos.y == (int)lasty) {
-					if (lasty > (this->sizey * CHUNKSIZE) / 2.0f) { //Elements superfície
-						int random = rand() % 128;
-						if (random == 1 || random == 5) {
-							this->setBlock(Bloc::HERBA, pos + Vector3<int>(0, 1, 0), 0, false);
-						}
-						else if (random == 2 || random == 6) {
-							this->setBlock(Bloc::HERBAFULL, pos + Vector3<int>(0, 1, 0), 0, false);
-							this->setBlock(Bloc::HERBA, pos + Vector3<int>(0, 2, 0), 0, false);
-						}
-						else if (random == 3) {
-							this->setBlock(Bloc::AIGUA, pos, 0, false);
-						}
-						else if (random == 4) {
-							//Tronc
-							this->setBlock(Bloc::FUSTAARBRE, pos, 0, false);
-							int rand2 = rand() % 5 + 1;
-							for (int i = 1; i <= rand2; i++) {
-								this->setBlock(Bloc::FUSTAARBRE, pos + Vector3<int>(0, i, 0), 0, false);
-							}
-							//Fulles
-							int altura = rand() % 3 + 1;
-							int amplada = (rand() % (rand2)) + 1;
-							for (int y = 0; y < altura; y++) {
-								for (int x = -amplada; x <= amplada; x++) {
-									for (int z = -amplada; z <= amplada; z++) {
-										Vector3<int> lpos = pos + Vector3<int>(0, rand2 + y, 0)
-											+ Vector3<int>(x, 0, 0) + Vector3<int>(0, 0, z);
-										if (lpos.z >= 0 && lpos.z < this->sizez * CHUNKSIZE && lpos.x >= 0 && lpos.x < this->sizex * CHUNKSIZE) {
-											this->setBlock(Bloc::FULLAARBRE, lpos, 0, false);
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			//Oceans
-			for (pos.y = (int)lasty; pos.y <= sealvl; pos.y++) {
-				this->setBlock(Bloc::AIGUA, pos, nullptr, false);
+	//int sealvl = 100;//(int)floorf(((float)this->sizey * CHUNKSIZE) / 2.0f);
+	//float lasty = 0; // = (this->sizey * CHUNKSIZE) / 2.0f;
+	//for (pos.x = 0; pos.x < (this->sizex * CHUNKSIZE); pos.x++) {
+	//	for (pos.z = 0; pos.z < (this->sizez * CHUNKSIZE); pos.z++) {
+	//		//printf("gen %d %d %d\n", pos.x, pos.z);
+	//		lasty = sealvl + noise.GetNoise((float)pos.x, (float)pos.z) * ((this->sizey*CHUNKSIZE)/3);
+	//		lasty = std::min(lasty, (float)this->sizey * CHUNKSIZE); //No ha de superar l'altura del món
+	//		lasty = std::max(lasty, 0.0f); // Ni ser menor que 0
+	//		//printf("last: %f\n", lasty);
+	//		for (pos.y = 0; pos.y < lasty; pos.y++) {
+	//			//("terra %d %d %d\n", pos.x, pos.z);
+	//			this->setBlock(Bloc::TERRA, pos, nullptr, false);
+	//			if (pos.y == (int)lasty) {
+	//				if (lasty > sealvl) { //Elements superfície
+	//					int random = rand() % 128;
+	//					if (random == 1 || random == 5) {
+	//						this->setBlock(Bloc::HERBA, pos + Vector3<int>(0, 1, 0), 0, false);
+	//					}
+	//					else if (random == 2 || random == 6) {
+	//						this->setBlock(Bloc::HERBAFULL, pos + Vector3<int>(0, 1, 0), 0, false);
+	//						this->setBlock(Bloc::HERBA, pos + Vector3<int>(0, 2, 0), 0, false);
+	//					}
+	//					else if (random == 3) {
+	//						this->setBlock(Bloc::AIGUA, pos, 0, false);
+	//					}
+	//					else if (random == 4) {
+	//						//Tronc
+	//						this->setBlock(Bloc::FUSTAARBRE, pos, 0, false);
+	//						int rand2 = rand() % 5 + 1;
+	//						for (int i = 1; i <= rand2; i++) {
+	//							this->setBlock(Bloc::FUSTAARBRE, pos + Vector3<int>(0, i, 0), 0, false);
+	//						}
+	//						//Fulles
+	//						int altura = rand() % 3 + 1;
+	//						int amplada = (rand() % (rand2)) + 1;
+	//						for (int y = 0; y < altura; y++) {
+	//							for (int x = -amplada; x <= amplada; x++) {
+	//								for (int z = -amplada; z <= amplada; z++) {
+	//									Vector3<int> lpos = pos + Vector3<int>(0, rand2 + y, 0)
+	//										+ Vector3<int>(x, 0, 0) + Vector3<int>(0, 0, z);
+	//									if (lpos.z >= 0 && lpos.z < this->sizez * CHUNKSIZE && lpos.x >= 0 && lpos.x < this->sizex * CHUNKSIZE) {
+	//										this->setBlock(Bloc::FULLAARBRE, lpos, 0, false);
+	//									}
+	//								}
+	//							}
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//		//Oceans
+	//		for (pos.y = (int)lasty; pos.y <= sealvl; pos.y++) {
+	//			this->setBlock(Bloc::AIGUA, pos, nullptr, false);
+	//		}
+	//		if (lasty <= sealvl+1) {
+	//			pos.y = sealvl + 1;
+	//			this->setBlock(Bloc::AIGUA, pos, nullptr, false);
+	//		}
+	//	}
+	//}
+
+	for (pos.x = 0; pos.x < this->sizex; pos.x++) {
+		for (pos.y = 0; pos.y < this->sizey; pos.y++) {
+			for (pos.z = 0; pos.z < this->sizez; pos.z++) {
+				chunks[getDesp(Vector3<int>(pos.x,pos.y,pos.z))] = wGen.generate(pos.x, pos.y, pos.z);
 			}
 		}
 	}
-
 
 }
 

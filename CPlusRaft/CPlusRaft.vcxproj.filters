@@ -37,6 +37,12 @@
     <Filter Include="Header Files\Render">
       <UniqueIdentifier>{c8a23fca-a0f9-4d80-a4ed-1fba3365386e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Generation">
+      <UniqueIdentifier>{63b84505-659b-41ef-b8f5-30ca7e680d80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Generation">
+      <UniqueIdentifier>{220c5328-22d9-4fbf-ab78-e2f5f454a6f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -108,6 +114,9 @@
     <ClInclude Include="Blocks\SpreadBlock.h">
       <Filter>Header Files\Blocks</Filter>
     </ClInclude>
+    <ClInclude Include="Generation\WorldGenerator.h">
+      <Filter>Header Files\Generation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -178,6 +187,9 @@
     </ClCompile>
     <ClCompile Include="Blocks\SpreadBlock.cpp">
       <Filter>Source Files\Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="Generation\WorldGenerator.cpp">
+      <Filter>Source Files\Generation</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

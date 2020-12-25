@@ -3,11 +3,16 @@
 #include "Blocks/Block.h"
 #include "Render/ChunkMesh.h"
 #include "Vector3.h"
+#include "Generation/WorldGenerator.h"
 #define CHUNKSIZE 16
 
 class Chunk {
 private:
 	Block* blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE];
+	//int height[CHUNKSIZE][CHUNKSIZE]; //Heightmap
+
+	Bioma bio;
+
 	Vector3<int> cpos;
 
 	World* world;
@@ -37,6 +42,9 @@ public:
 
 	bool getByteData(char* arr);
 	bool readFromByteData(char* arr);
+
+	Bioma getBiome();
+	void setBiome(Bioma biome);
 
 	void updateMesh();
 

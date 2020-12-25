@@ -32,7 +32,9 @@ void ChunkMesh::drawO() {
 }
 
 void ChunkMesh::drawT() {
+	glDisable(GL_CULL_FACE);
 	tMesh->draw();
+	glEnable(GL_CULL_FACE);
 }
 
 void ChunkMesh::erase() {

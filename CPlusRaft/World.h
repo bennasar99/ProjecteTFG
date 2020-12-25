@@ -24,7 +24,7 @@
 #include "Entities/Entity.h"
 #include "Chunk.h"
 #include "Blocks//BlockRenderer.h"
-
+#include "Generation/WorldGenerator.h"
 #include "lib/FastNoiseLite.h"
 #include "ryml.hpp"
 
@@ -35,6 +35,8 @@ enum class Bloc;
 
 class World {
 private:
+
+	WorldGenerator wGen;
 
 	Chunk **chunks;
 	int sol = 0;

@@ -16,7 +16,7 @@ GLFWwindow* window;
 
 //Clipping planes
 const float zNear = 0.001f;
-float zFar = 160.0f;
+float zFar = 256.0f;
 
 const float axisSize = zFar;
 
