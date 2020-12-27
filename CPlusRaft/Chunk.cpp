@@ -68,7 +68,7 @@ bool Chunk::setBlock(Block* bloc, Vector3<int> pos) {
 }
 
 Bloc Chunk::getBlock(Vector3<int> pos) {
-	if (blocs[pos.x][pos.y][pos.z] == 0) {
+	if (blocs[pos.x][pos.y][pos.z] == nullptr) {
 		return Bloc::RES;
 	}
 	return blocs[pos.x][pos.y][pos.z]->getId();
@@ -172,7 +172,9 @@ bool Chunk::readFromByteData(char* arr) {
 			for (int z = 0; z < CHUNKSIZE; z++) {
 				//printf("%d ", arr[desp]);
 				Bloc tipus = static_cast<Bloc>(arr[desp++]);
-				world->setBlock(tipus, (this->cpos * CHUNKSIZE) + Vector3<int>(x, y, z), nullptr, false);
+				if (tipus != Bloc::RES) {
+					world->setBlock(tipus, (this->cpos * CHUNKSIZE) + Vector3<int>(x, y, z), nullptr, false);
+				}
 			}
 		}
 	}

@@ -515,7 +515,7 @@ void movement(int key) {
 		}
 	}
 	if (key == GLFW_KEY_P) {
-		printf("%f %f %f \n", ent->getPos().x, ent->getPos().y, ent->getPos().z);
+		printf("x:%f y:%f z:%f b:%d \n", ent->getPos().x, ent->getPos().y, ent->getPos().z, world->getBlock(ent->getPos()));
 	}
 	if (key == GLFW_KEY_TAB) { //Tab: obrir inventari
 		inv = !inv;

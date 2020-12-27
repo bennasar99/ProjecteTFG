@@ -31,7 +31,7 @@ World::World(int seed, int sizex, int sizey, int sizez, Camera* camera) //Nou
 	int x = rand() % (sizex * CHUNKSIZE);
 	int z = rand() % (sizez * CHUNKSIZE);
 	for (int y = this->sizey * CHUNKSIZE; y > 0; y--) {
-		if (getBlock(Vector3<int>(x, y, z)) == Bloc::TERRA) {
+		if (getBlock(Vector3<int>(x, y, z)) == Bloc::TERRA || getBlock(Vector3<int>(x, y, z)) == Bloc::PEDRA) {
 			spawn = Vector3<int>(x, y + 2, z);
 			break;
 		}
@@ -224,7 +224,14 @@ void World::generate(int seed) {
 	for (pos.x = 0; pos.x < this->sizex; pos.x++) {
 		for (pos.y = 0; pos.y < this->sizey; pos.y++) {
 			for (pos.z = 0; pos.z < this->sizez; pos.z++) {
-				chunks[getDesp(Vector3<int>(pos.x,pos.y,pos.z))] = wGen.generate(pos.x, pos.y, pos.z);
+				chunks[getDesp(pos)] = wGen.generateTerrain(pos);
+			}
+		}
+	}
+	for (pos.x = 0; pos.x < this->sizex; pos.x++) {
+		for (pos.y = 0; pos.y < this->sizey; pos.y++) {
+			for (pos.z = 0; pos.z < this->sizez; pos.z++) {
+				wGen.generateDetail(chunks[getDesp(pos)]);
 			}
 		}
 	}
