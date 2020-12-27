@@ -40,9 +40,6 @@ double lastX = 250, lastY = 250; //Darreres posicions del ratolí
 bool llanterna = false;
 bool smoothlight = true;
 
-//Indica si l'inventari està obert
-bool inv = false;
-
 //Entitats
 #include "Entities/Entity.h"
 Entity* ent; //Entitat controlada
@@ -68,9 +65,17 @@ void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 int fpsc = 0;
 
+enum class Active {
+	JOC,
+	INVENTARI,
+	MAPA
+};
+
+Active act = Active::JOC; //Indica a quin menú / part està l'usuari
+
 // Funcion que visualiza la escena OpenGL
 void Display(GLFWwindow* window)
-{ 
+{
 	int temps = int(glfwGetTime() * 1000);
 	//printf("%d\n", temps);
 	int delta = temps - darrerDisplay;
@@ -99,7 +104,7 @@ void Display(GLFWwindow* window)
 	glPushMatrix();
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(camera.getFov(), camera.getAspect() , zNear, zFar);
+	gluPerspective(camera.getFov(), camera.getAspect(), zNear, zFar);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -117,7 +122,7 @@ void Display(GLFWwindow* window)
 	if (ent != 0) { //Si hi ha una entitat controlada, centram la càmera a ella
 		ent->setCam(&camera);
 	}
-	
+
 	//Transformam la matriu de visualització per mirar on toqui
 	camera.display();
 
@@ -165,14 +170,14 @@ void Display(GLFWwindow* window)
 		glEnable(GL_LIGHTING); //El volem veure sempre
 	}
 
-	world->drawSol(camera.getPos(), zFar-1); //Dibuixam el sol
+	world->drawSol(camera.getPos(), zFar - 1); //Dibuixam el sol
 
 	// dibuixar els 3 eixos
 	if (axisVisible) {
-		world->drawAxis(Vector3<float>((float)(world->sizex*CHUNKSIZE)/2, (float)(world->sizey*CHUNKSIZE) / 2 + 1, (float)(world->sizez*CHUNKSIZE) / 2), 50.0f);
+		world->drawAxis(Vector3<float>((float)(world->sizex * CHUNKSIZE) / 2, (float)(world->sizey * CHUNKSIZE) / 2 + 1, (float)(world->sizez * CHUNKSIZE) / 2), 50.0f);
 	}
 
-	glPopMatrix(); 
+	glPopMatrix();
 
 	//Dibuix 2D, damunt l'escena 3D
 	glMatrixMode(GL_PROJECTION);
@@ -200,13 +205,13 @@ void Display(GLFWwindow* window)
 	world->drawBloc(bsel.getId());
 	glPopMatrix();
 
-	if (inv) { //Dibuixam inventari
+	if (act == Active::INVENTARI) { //Dibuixam inventari
 		glPushMatrix();
 		float aspect = camera.getAspect();
 		glDisable(GL_LIGHTING);
 		glDisable(GL_TEXTURE_2D);
 
-		glColor3f(1,1,1);
+		glColor3f(1, 1, 1);
 		glBegin(GL_QUADS); //Quadrat blanc exterior
 		glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
 		glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
@@ -214,7 +219,7 @@ void Display(GLFWwindow* window)
 		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
 		glEnd();
 
-		glColor4f(0,0,0,1);
+		glColor4f(0, 0, 0, 1);
 		glLineWidth(3.0f);
 		glBegin(GL_LINES); //Línies que indiquen els límits del dibuixat de l'inventari
 		glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
@@ -235,18 +240,21 @@ void Display(GLFWwindow* window)
 		for (int i = 0; i < 16; i++) { //Objectes de l'inventari
 			glPushMatrix();
 			glScalef(0.1f, 0.1f, 0.1f);
-			Block bsel = Block(static_cast<Bloc>(i+2)); //+2 perque botam aire i null
+			Block bsel = Block(static_cast<Bloc>(i + 2)); //+2 perque botam aire i null
 			glDisable(GL_LIGHTING);
 			world->drawBloc(bsel.getId());
 			glPopMatrix();
 
 			glTranslatef(0.12f, 0, 0); //Passam a la següent columna
-			if ((i+1) % 6 == 0) { //I, si cal, a la següent fila
+			if ((i + 1) % 6 == 0) { //I, si cal, a la següent fila
 				glTranslatef(0, -0.12f, 0);
-				glTranslatef(-0.12f*6, 0, 0);
+				glTranslatef(-0.12f * 6, 0, 0);
 			}
 		}
 		glPopMatrix();
+	}
+	else if (act == Active::MAPA){
+		world->drawMap(camera.getAspect());
 	}
 	else {
 		glColor3i(0, 0, 0); 
@@ -447,7 +455,7 @@ int main(int argc, char** argv)
 
 //Control amb botons del ratolí
 void mouseListener(GLFWwindow* window, int button, int action, int mods) {
-	if (inv) { //Interacció amb l'inventari
+	if (act == Active::INVENTARI) { //Interacció amb l'inventari
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) { 
 			float maxy = (float)w_height * 0.85f;
 			float miny = (float)w_height * 0.15f;
@@ -467,6 +475,9 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 				btipus = 0;
 			}
 		}
+	}
+	else if (act == Active::MAPA) {
+
 	}
 	else {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) { //Botó dret, eliminar blocs
@@ -505,6 +516,7 @@ void movement(int key) {
 	if (ent != 0) {
 		ent->control(key);
 	}
+	
 	if (key == GLFW_KEY_F) {
 		llanterna = !llanterna;
 		if (llanterna) {
@@ -514,21 +526,14 @@ void movement(int key) {
 			glDisable(GL_LIGHT0);
 		}
 	}
-	if (key == GLFW_KEY_P) {
+	else if (key == GLFW_KEY_P) {
 		printf("x:%f y:%f z:%f b:%d \n", ent->getPos().x, ent->getPos().y, ent->getPos().z, world->getBlock(ent->getPos()));
 	}
-	if (key == GLFW_KEY_TAB) { //Tab: obrir inventari
-		inv = !inv;
-		if (inv) {
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		}
-		else {
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			centerPointer();
-		}
+	else if (key == GLFW_KEY_TAB) { //Tab: obrir inventari
+		act = Active::INVENTARI;
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
-
-	if (key == GLFW_KEY_E) { //Attach a una entitat propera
+	else if (key == GLFW_KEY_E) { //Attach a una entitat propera
 		if (ent != NULL) { //Si controlam una entitat, la deixam
 			ent->onDeattach();
 			ent = NULL;
@@ -544,9 +549,18 @@ void movement(int key) {
 			}
 		}
 	}
-
-	if (key == GLFW_KEY_T) {
+	else if (key == GLFW_KEY_T) {
 		world->save(wname);
+	}
+	else if (key == GLFW_KEY_M) { //Mapa biomes
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		act = Active::MAPA;
+
+	}
+	else if (key == GLFW_KEY_ESCAPE) {
+		act = Active::JOC;
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		centerPointer();
 	}
 }
 
@@ -630,7 +644,7 @@ void setLighting() {
 
 //Hook pel moviment del ratolí
 void lookAround(GLFWwindow* window, double x, double y) {
-	if (!inv) {
+	if (act == Active::JOC) {
 		camera.lookAround(x, y, lastX, lastY);
 
 		updatePlayerBlock();
@@ -668,7 +682,7 @@ void updatePlayerBlock() {
 
 void onKey(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS && act == Active::JOC) {
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 	if (action == GLFW_PRESS) {

@@ -765,3 +765,82 @@ void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
 Vector3<int> World::getSpawn() {
 	return this->spawn;
 }
+
+void World::drawMap(float scrAspect) {
+	glPushMatrix();
+	float aspect = scrAspect;
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+
+	glColor3f(1, 1, 1);
+	glBegin(GL_QUADS); //Quadrat blanc exterior
+	glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
+	glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
+	glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
+	glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
+	glEnd();
+
+	glColor4f(0, 0, 0, 1);
+	glLineWidth(3.0f);
+	glBegin(GL_LINES); //Línies que indiquen els límits del dibuixat del mapa
+	glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
+	glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
+
+	glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
+	glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
+
+	glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
+	glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
+
+	glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
+	glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
+	glEnd();
+
+	glTranslatef(0.5f * aspect - 0.4f, 0.9f, -1);
+	for (int x = 0; x < this->sizex; x++) {
+		for (int z = 0; z < this->sizez; z++) {
+			glPushMatrix();
+			int desp = getDesp(Vector3<int>(x, 5, z));
+			glTranslatef((float)x / (float)this->sizex, -(float)z / (float)this->sizez, 0);
+			if (chunks[desp] == nullptr) {
+				glColor3f(1, 1, 1);
+			}
+			else {
+				switch (chunks[desp]->getBiome()) {
+				case Bioma::MUNTANYA:
+					glColor3f(1, 0, 0);
+					break;
+				case Bioma::NEUTRAL:
+					glColor3f(0, 1, 0);
+					break;
+				case Bioma::OCEA:
+					glColor3f(0, 0, 1);
+					break;
+				case Bioma::PLANA:
+					glColor3f(0, 0, 0);
+					break;
+				}
+			}
+			glBegin(GL_QUADS);
+			glVertex2f(0, 0);
+			glVertex2f(0, 0.02f);
+			glVertex2f(0.02f, 0.02f);
+			glVertex2f(0.02f, 0);
+			glEnd();
+			glPopMatrix();
+		}
+	}
+	//for (int i = 0; i < 16; i++) { //Objectes de l'inventari
+	//	glPushMatrix();
+	//	glScalef(0.1f, 0.1f, 0.1f);
+	//	Block bsel = Block(static_cast<Bloc>(i + 2)); //+2 perque botam aire i null
+	//	glPopMatrix();
+
+	//	glTranslatef(0.12f, 0, 0); //Passam a la següent columna
+	//	if ((i + 1) % 6 == 0) { //I, si cal, a la següent fila
+	//		glTranslatef(0, -0.12f, 0);
+	//		glTranslatef(-0.12f * 6, 0, 0);
+	//	}
+	//}
+	glPopMatrix();
+}

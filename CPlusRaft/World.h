@@ -109,6 +109,8 @@ public:
 	void generate(int seed);
 	void save(std::string file);
 
+	void drawMap(float scrAspect);
+
 	World(int seed, int sizex, int sizey, int sizez, Camera* camera);
 	World(std::string file, Camera* camera);
 	World();
