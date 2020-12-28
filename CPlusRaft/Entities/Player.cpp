@@ -60,7 +60,7 @@ void Player::control(int key) {
 }
 
 /*
-  Funció d'actualització de l'estat intern del cotxe (activa, quan està controlat)
+  Funció d'actualització de l'estat intern del jugador (activa, quan està controlat)
 */
 void Player::control(int delta, Camera *cam) {
 	//Actualitzam la posició del jugador

@@ -34,6 +34,7 @@ public:
 
 	Vector3<float> getPos();
 	float getRot();
+	void setRot(float rot);
 	void setPos(Vector3<float> pos);
 	bool getControllable();
 

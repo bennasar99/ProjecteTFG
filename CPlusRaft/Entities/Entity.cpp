@@ -26,6 +26,16 @@ void Entity::setPos(Vector3<float> pos) {
 	this->pos = pos;
 }
 
+void Entity::setRot(float rot) {
+	this->rot = fmodf(rot, 360.0f);
+	if (this->rot >= 360) {
+		this->rot -= 360;
+	}
+	if (this->rot < 0.0f) {
+		this->rot += 360;
+	}
+}
+
 float Entity::getRot() {
 	return this->rot;
 }

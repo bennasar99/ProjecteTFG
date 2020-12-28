@@ -70,6 +70,7 @@ void Camera::lookAround(double x, double y, double lastX, double lastY) {
 		}
 
 		//Establim el nou vector front, segons pitch i yaw
+		this->pitch = pitch;
 		Vector3 direction = Vector3(cosf(toRad(yaw)) * cosf(toRad(pitch)), sinf(toRad(pitch)), sinf(toRad(yaw)) * cosf(toRad(pitch)));
 		this->front = Vector3<float>::normalize(direction);
 		this->updateVec(); //Actualitzam la resta de vectors

@@ -83,7 +83,7 @@ void Display(GLFWwindow* window)
 
 	fpsc++;
 	if (fpsc > 20) { //Contador fps
-		printf("%f\n", fps);
+		//printf("%f\n", fps);
 		fpsc = 0;
 	}
 	//if (fps < 26) {
@@ -254,7 +254,7 @@ void Display(GLFWwindow* window)
 		glPopMatrix();
 	}
 	else if (act == Active::MAPA){
-		world->drawMap(camera.getAspect());
+		world->drawMap(camera.getAspect(), ent);
 	}
 	else {
 		glColor3i(0, 0, 0); 
@@ -313,6 +313,7 @@ void Idle(void)
 
 	if (ent != nullptr) { //TEMPORAL: se n'ha d'encarregar el món
 		ent->update(delta);
+		ent->setRot(camera.yaw);
 	}
 
 	//Si tenim una entitat controlada
@@ -342,6 +343,7 @@ int main(int argc, char** argv)
 		printf("Loading world %s... \n", wname.c_str());
 		world = new World(wname, &camera);
 		ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 2.0f, 0));
+		ent->setPos(Vector3<float>(500, 100, 1));
 		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
 	}
 	else {
@@ -527,7 +529,7 @@ void movement(int key) {
 		}
 	}
 	else if (key == GLFW_KEY_P) {
-		printf("x:%f y:%f z:%f b:%d \n", ent->getPos().x, ent->getPos().y, ent->getPos().z, world->getBlock(ent->getPos()));
+		printf("x:%f y:%f z:%f b:%d r:%f\n", ent->getPos().x, ent->getPos().y, ent->getPos().z, world->getBlock(ent->getPos()), ent->getRot());
 	}
 	else if (key == GLFW_KEY_TAB) { //Tab: obrir inventari
 		act = Active::INVENTARI;

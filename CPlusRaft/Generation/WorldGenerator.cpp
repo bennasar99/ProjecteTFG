@@ -19,7 +19,7 @@ WorldGenerator::WorldGenerator() {
 }
 
 Bioma WorldGenerator::getBiomeAt(int cX, int cZ) {
-	float biome = biomeNoise.GetNoise((float)cX, (float)cZ);
+	float biome = -0.5f + biomeNoise.GetNoise((float)cX, (float)cZ);
 	if (biome < -0.5f) {
 		return Bioma::MUNTANYA;
 	}
@@ -98,7 +98,7 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 	float density = 0;
 	float threshold = 0.99f;
 	switch (chunk->getBiome()) {
-	case Bioma::PLANA:
+	case Bioma::MUNTANYA:
 		this->heightNoise.SetFrequency(0.02f);
 		break;
 	default:
@@ -114,7 +114,7 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 				density = (float(CHUNKSIZE*cPos.y + y)/80.0f) + heightNoise.GetNoise((float)x + CHUNKSIZE*(float)cPos.x, (float)y + CHUNKSIZE * (float)cPos.y, float(z) + CHUNKSIZE * (float)cPos.z)/1.5f;
 				if (density < threshold) {
 					//printf("TERRA\n");
-					if (chunk->getBiome() == Bioma::PLANA) {
+					if (chunk->getBiome() == Bioma::MUNTANYA) {
 						chunk->setBlock(new SolidBlock(Bloc::PEDRA), pos);
 					}
 					else {

@@ -86,10 +86,13 @@ World::World(std::string name, Camera* camera) { //Càrrega ja existent
 			for (int z = 0; z < this->sizez; z++) {
 				//printf("Chunk a %d %d %d...\n", x, y, z);
 				int desp = getDesp(Vector3<int>(x, y, z));
+				file.read(buffer, 1);
+				Bioma bio = static_cast<Bioma>(buffer[0]);
 				file.read(buffer, chunkSize);
 				if (memcmp(buffer, zeros, chunkSize) != 0) { //Si el chunk no és buit, el carregam
 					chunks[desp] = new Chunk(this, Vector3<int>(x, y, z));
 					chunks[desp]->readFromByteData(buffer);
+					chunks[desp]->setBiome(bio);
 				}
 				//printf("LLEGIT\n");
 			}
@@ -127,13 +130,15 @@ void World::save(std::string name) {
 			for (int z = 0; z < this->sizez; z++) {
 				int desp = getDesp(Vector3<int>(x, y, z));
 				if (chunks[desp] != nullptr) {
+					buffer[0] = static_cast<int>(chunks[desp]->getBiome());
+					file.write(buffer, 1);
 					chunks[desp]->getByteData(buffer);
 					file.write(buffer, chunkSize);
 				}
 				else {
-					char zeros[chunkSize];
-					memset(zeros, 0, chunkSize);
-					file.write(zeros, chunkSize);
+					char zeros[chunkSize+1];
+					memset(zeros, 0, chunkSize+1); //+1 per el byte de bioma
+					file.write(zeros, chunkSize+1);
 				}
 			}
 		}
@@ -766,7 +771,7 @@ Vector3<int> World::getSpawn() {
 	return this->spawn;
 }
 
-void World::drawMap(float scrAspect) {
+void World::drawMap(float scrAspect, Entity *ent) {
 	glPushMatrix();
 	float aspect = scrAspect;
 	glDisable(GL_LIGHTING);
@@ -796,51 +801,68 @@ void World::drawMap(float scrAspect) {
 	glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
 	glEnd();
 
-	glTranslatef(0.5f * aspect - 0.4f, 0.9f, -1);
+	float dX = 0.8f * ((float)1 / (float)this->sizex);
+	float dZ = 0.8f * ((float)1 / (float)this->sizez);
+
+	glTranslatef(0.5f * aspect - 0.4f, 0.1f, -1);
 	for (int x = 0; x < this->sizex; x++) {
 		for (int z = 0; z < this->sizez; z++) {
 			glPushMatrix();
-			int desp = getDesp(Vector3<int>(x, 5, z));
-			glTranslatef((float)x / (float)this->sizex, -(float)z / (float)this->sizez, 0);
+			int desp = getDesp(Vector3<int>(x, 1, z));
+			glTranslatef(((float)x / (float)this->sizex)*0.8f, ((float)z / (float)this->sizez)*0.8f, 0);
 			if (chunks[desp] == nullptr) {
-				glColor3f(1, 1, 1);
+				glColor3f(0,0,0);
 			}
 			else {
 				switch (chunks[desp]->getBiome()) {
-				case Bioma::MUNTANYA:
-					glColor3f(1, 0, 0);
-					break;
-				case Bioma::NEUTRAL:
-					glColor3f(0, 1, 0);
-					break;
-				case Bioma::OCEA:
-					glColor3f(0, 0, 1);
-					break;
-				case Bioma::PLANA:
-					glColor3f(0, 0, 0);
-					break;
+					case Bioma::MUNTANYA:
+						glColor3f(1,1,1);
+						break;
+					case Bioma::NEUTRAL:
+						glColor3f(1, 0, 0);
+						break;
+					case Bioma::OCEA:
+						glColor3f(0, 0, 1);
+						break;
+					case Bioma::PLANA:
+						glColor3f(0, 1, 0);
+						break;
+					default:
+						glColor3f(1, 0, 0);
+						break;
 				}
 			}
 			glBegin(GL_QUADS);
+			glVertex2f(0, dZ);
+			glVertex2f(dX, dZ);
+			glVertex2f(dX, 0);
 			glVertex2f(0, 0);
-			glVertex2f(0, 0.02f);
-			glVertex2f(0.02f, 0.02f);
-			glVertex2f(0.02f, 0);
 			glEnd();
 			glPopMatrix();
 		}
 	}
-	//for (int i = 0; i < 16; i++) { //Objectes de l'inventari
-	//	glPushMatrix();
-	//	glScalef(0.1f, 0.1f, 0.1f);
-	//	Block bsel = Block(static_cast<Bloc>(i + 2)); //+2 perque botam aire i null
-	//	glPopMatrix();
+	glPushMatrix();
 
-	//	glTranslatef(0.12f, 0, 0); //Passam a la següent columna
-	//	if ((i + 1) % 6 == 0) { //I, si cal, a la següent fila
-	//		glTranslatef(0, -0.12f, 0);
-	//		glTranslatef(-0.12f * 6, 0, 0);
-	//	}
-	//}
+	//Dibuix del jugador
+
+	float pX = ent->getPos().x / CHUNKSIZE;
+	float pZ = ent->getPos().z / CHUNKSIZE;
+	glTranslatef((pX / (float)this->sizex) * 0.8f + dX/2, (pZ / (float)this->sizez) * 0.8f + dZ/2, 0);
+	glRotatef(ent->getRot() - 90, 0, 0, 1);
+	glColor3f(1, 1, 0);
+	glBegin(GL_TRIANGLES);
+	glVertex2f(-dX/2, -dZ/2);
+	glVertex2f(0, dZ/2);
+	glVertex2f(dX/2, -dZ/2);
+	glEnd();
+	//Petit indica visió jugador
+	glColor3f(0, 0, 1);
+	glBegin(GL_TRIANGLES);
+	glVertex2f(dX /4, 0);
+	glVertex2f(0, dZ / 2);
+	glVertex2f(-dX / 4, 0);
+	glEnd();
+	glPopMatrix();
+
 	glPopMatrix();
 }
