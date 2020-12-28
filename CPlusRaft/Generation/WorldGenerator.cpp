@@ -4,9 +4,22 @@
 
 WorldGenerator::WorldGenerator(int seed, World* world) {
 	srand(seed);
+
+	//Oceans
+	this->oceanNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	this->oceanNoise.SetSeed(seed*4);
+	this->oceanNoise.SetFrequency(0.05f);
+
+	//Clima (calor, templat, fred)
+	this->climateNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	this->climateNoise.SetSeed(seed*3);
+	this->climateNoise.SetFrequency(0.01f);
+
+	//Bioma (depen del clima)
 	this->biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-	this->biomeNoise.SetSeed(seed);
-	this->biomeNoise.SetFrequency(0.08f);
+	this->biomeNoise.SetSeed(seed*2);
+	this->biomeNoise.SetFrequency(0.1f);
+
 	this->heightNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	this->heightNoise.SetSeed(seed);
 	this->heightNoise.SetFrequency(0.01f);
@@ -19,18 +32,49 @@ WorldGenerator::WorldGenerator() {
 }
 
 Bioma WorldGenerator::getBiomeAt(int cX, int cZ) {
-	float biome = -0.5f + biomeNoise.GetNoise((float)cX, (float)cZ);
-	if (biome < -0.5f) {
-		return Bioma::MUNTANYA;
-	}
-	else if (biome >= -0.5f && biome < 0) {
-		return Bioma::NEUTRAL;
-	}
-	else if (biome >= 0 && biome < 0.5f) {
-		return Bioma::PLANA;
-	}
-	else /*if (biome >= 0.5f)*/ {
+	float ocean = oceanNoise.GetNoise((float)cX, (float)cZ);
+	float climate = climateNoise.GetNoise((float)cX, (float)cZ);
+	float biome = biomeNoise.GetNoise((float)cX, (float)cZ);
+
+	if (ocean < 0.05f) {
 		return Bioma::OCEA;
+	}
+
+	if (climate < -0.25f) { //Clima fred
+		if (biome < 0) {
+			return Bioma::GEL;
+		}
+		else {
+			return Bioma::MUNTGEL;
+		}
+	}
+	else if (climate >= -0.25f && climate < 0.25f) { //Clima templat
+		if (biome < -0.3f) {
+			return Bioma::OCEA;
+		}
+		else if (biome >= -0.3f && biome < 0.1f) {
+			return Bioma::PLANA;
+		}
+		else if (biome >= 0.1f && biome < 0.5f) {
+			return Bioma::BOSC;
+		}
+		else /*if (biome >= 0.5f)*/ {
+			return Bioma::MUNTANYA;
+		}
+	}
+	else if (climate >= 0.25f) { //Clima calent
+		if (biome < -0.3f) {
+			return Bioma::OCEA;
+		}
+		else if (biome >= -0.3f && biome < 0.1f) {
+			return Bioma::DESERT;
+		}
+		else if (biome >= 0.1f && biome < 0.6f) {
+			return Bioma::SABANA;
+		}
+		else /*if (biome >= 0.5f)*/ {
+			return Bioma::MUNTANYA;
+		}
 	}
 }
 

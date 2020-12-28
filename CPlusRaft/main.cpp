@@ -343,7 +343,6 @@ int main(int argc, char** argv)
 		printf("Loading world %s... \n", wname.c_str());
 		world = new World(wname, &camera);
 		ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 2.0f, 0));
-		ent->setPos(Vector3<float>(500, 100, 1));
 		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
 	}
 	else {
@@ -358,7 +357,7 @@ int main(int argc, char** argv)
 		}
 		//int seed = std::atoi(sseed.c_str());
 		printf("Seed: %d\n", seed);
-		world = new World(seed, 32, 16, 32, &camera);
+		world = new World(seed, 40, 12, 40, &camera);
 		ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 10.0f, 0));
 		world->save(wname);
 	}

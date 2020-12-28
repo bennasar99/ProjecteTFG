@@ -808,7 +808,7 @@ void World::drawMap(float scrAspect, Entity *ent) {
 	for (int x = 0; x < this->sizex; x++) {
 		for (int z = 0; z < this->sizez; z++) {
 			glPushMatrix();
-			int desp = getDesp(Vector3<int>(x, 1, z));
+			int desp = getDesp(Vector3<int>(x, 0, z));
 			glTranslatef(((float)x / (float)this->sizex)*0.8f, ((float)z / (float)this->sizez)*0.8f, 0);
 			if (chunks[desp] == nullptr) {
 				glColor3f(0,0,0);
@@ -818,7 +818,7 @@ void World::drawMap(float scrAspect, Entity *ent) {
 					case Bioma::MUNTANYA:
 						glColor3f(1,1,1);
 						break;
-					case Bioma::NEUTRAL:
+					case Bioma::BOSC:
 						glColor3f(1, 0, 0);
 						break;
 					case Bioma::OCEA:
@@ -826,6 +826,18 @@ void World::drawMap(float scrAspect, Entity *ent) {
 						break;
 					case Bioma::PLANA:
 						glColor3f(0, 1, 0);
+						break;
+					case Bioma::DESERT:
+						glColor3f(0.76f, 0.60f, 0.42f);
+						break;
+					case Bioma::SABANA:
+						glColor3f(1, 1, 0);
+						break;
+					case Bioma::MUNTGEL:
+						glColor3f(1, 1, 1);
+						break;
+					case Bioma::GEL:
+						glColor3f(0.68f, 0.85f, 0.9f);
 						break;
 					default:
 						glColor3f(1, 0, 0);

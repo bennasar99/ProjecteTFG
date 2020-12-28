@@ -6,9 +6,13 @@
 
 enum class Bioma {
 	MUNTANYA,
-	NEUTRAL,
+	BOSC,
 	OCEA,
-	PLANA
+	PLANA,
+	SABANA,
+	DESERT,
+	GEL,
+	MUNTGEL
 };
 
 class World;
@@ -16,8 +20,10 @@ class Chunk;
 
 class WorldGenerator {
 private:
+	FastNoiseLite climateNoise;
 	FastNoiseLite biomeNoise;
 	FastNoiseLite heightNoise;
+	FastNoiseLite oceanNoise;
 
 	World *world;
 	
