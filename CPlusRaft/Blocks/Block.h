@@ -20,6 +20,7 @@ enum class Bloc {
 	FUSTAARBRE,
 	PEDRA,
 	ALTAVEU,
+	NEU,
 	LIMIT //SEMPRE DARRER
 };
 

@@ -822,6 +822,7 @@ void World::drawMap(float scrAspect, Entity *ent) {
 						glColor3f(1, 0, 0);
 						break;
 					case Bioma::OCEA:
+					case Bioma::MAR:
 						glColor3f(0, 0, 1);
 						break;
 					case Bioma::PLANA:

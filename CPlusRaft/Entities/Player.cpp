@@ -91,7 +91,7 @@ void Player::control(int delta, Camera *cam) {
 		this->eyesOffset = 0.5f;
 	}
 	if (KeyboardManager::isPressed('{') && this->gamemode == 1) {
-		this->speed = 2;
+		this->speed = 4;
 	}
 	else if (this->gamemode == 1) {
 		this->speed = 1;

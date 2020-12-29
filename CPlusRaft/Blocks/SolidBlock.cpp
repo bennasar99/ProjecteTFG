@@ -59,6 +59,8 @@ void SolidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 		case Bloc::FULLAARBRE:
             texNum = 2;
 			color[0] = 0; color[1] = 0.5f; color[2] = 0; color[3] = 1;
+		case Bloc::NEU:
+			color[0] = 1; color[1] = 1; color[2] = 1; color[3] = 1;
 			break;
 	}
 

@@ -8,6 +8,7 @@ enum class Bioma {
 	MUNTANYA,
 	BOSC,
 	OCEA,
+	MAR,
 	PLANA,
 	SABANA,
 	DESERT,

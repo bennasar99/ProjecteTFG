@@ -36,7 +36,7 @@ Bioma WorldGenerator::getBiomeAt(int cX, int cZ) {
 	float climate = climateNoise.GetNoise((float)cX, (float)cZ);
 	float biome = biomeNoise.GetNoise((float)cX, (float)cZ);
 
-	if (ocean < 0.05f) {
+	if (ocean < 0) {
 		return Bioma::OCEA;
 	}
 
@@ -81,13 +81,22 @@ Bioma WorldGenerator::getBiomeAt(int cX, int cZ) {
 bool WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks dels voltants ja estan generats
 	Vector3<int> cPos = chunk->getPos();
 	float density = 0;
-	float threshold = 0.3f;
+	int randmax; //Com més alt, - densitat de coses
+	Bioma bio = chunk->getBiome();
+	switch (bio) {
+	case Bioma::BOSC:
+		randmax = 256;
+		break;
+	case Bioma::PLANA:
+		randmax = 1024;
+		break;
+	}
 	Vector3<int> pos = Vector3<int>(0, 0, 0);
 	for (pos.x = 0; pos.x < CHUNKSIZE; pos.x++) {
 		for (pos.z = 0; pos.z < CHUNKSIZE; pos.z++) {
 			//Intentar que com més abaix + (molt més) probable que sigui sòlid
 			density = heightNoise.GetNoise((float)pos.x + CHUNKSIZE * (float)cPos.x, CHUNKSIZE * (float)cPos.y, (float)pos.z + CHUNKSIZE * (float)cPos.z);
-			if (density < threshold) { //Afegim cosa
+			//if (density > threshold) { //Afegim cosa
 				//Agafam la coordenada Y amb un bloc i aire damunt més gran
 				bool trobat = false;
 				for (pos.y = 14; (pos.y >= 0)/*&&(!trobat)*/; pos.y--) {
@@ -96,7 +105,7 @@ bool WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks de
 					Bloc b2 = chunk->getBlock(tpos);
 					if (b1 == Bloc::TERRA && b2 == Bloc::RES){
 						trobat = true;
-						int random = rand() % 128;
+						int random = rand() % randmax;
 						if (random == 4 || random == 5 || random == 6 || random == 7 || random == 8) {
 							chunk->setBlock(new SpreadBlock(Bloc::HERBA, tpos), tpos);
 						}
@@ -127,7 +136,7 @@ bool WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks de
 						}
 					}
 				}
-			}
+			//}
 		}
 	}
 	return true;
@@ -140,10 +149,15 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 
 	float y = 0;
 	float density = 0;
-	float threshold = 0.99f;
+	float threshold = 1;
 	switch (chunk->getBiome()) {
 	case Bioma::MUNTANYA:
+	case Bioma::MUNTGEL:
 		this->heightNoise.SetFrequency(0.02f);
+		threshold = 1.4f;
+		break;
+	case Bioma::OCEA:
+		threshold = 0.7f;
 		break;
 	default:
 		this->heightNoise.SetFrequency(0.005f);
@@ -161,6 +175,9 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 					if (chunk->getBiome() == Bioma::MUNTANYA) {
 						chunk->setBlock(new SolidBlock(Bloc::PEDRA), pos);
 					}
+					else if (chunk->getBiome() == Bioma::MUNTGEL) {
+						chunk->setBlock(new SolidBlock(Bloc::NEU), pos);
+					}
 					else {
 						chunk->setBlock(new SolidBlock(Bloc::TERRA), pos);
 					}
@@ -168,6 +185,7 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 				else {
 					if ((CHUNKSIZE*cPos.y + y) < 80) {
 						chunk->setBlock(new LiquidBlock(Bloc::AIGUA, pos), pos);
+						chunk->setBiome(Bioma::MAR);
 					}
 				}
 			}
