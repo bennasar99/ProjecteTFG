@@ -14,16 +14,17 @@ bool TextureManager::LoadTexture(const char* path, Textura nom) {
 	//Característiques de la textura
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //GL_NEAREST
+
 
 
 	//Carregam les dades de la imatge que emprarem com a textura
 	int width, height, canals;
-	unsigned char* data = stbi_load(path, &width, &height, &canals, 0);
+	unsigned char* data = stbi_load(path, &width, &height, &canals, STBI_rgb_alpha);
 
 	if (data) { //La càrrega és correcte, assignam la imatge a la textura
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D); //Generam el mipmap de la textura
 	}
 	else {
@@ -42,7 +43,7 @@ unsigned int TextureManager::getTexture(Textura nom) {
 }
 
 void TextureManager::initialize() {
-	TextureManager::blockAtlas = TextureAtlas(1, 7);
+	TextureManager::blockAtlas = TextureAtlas(1, 8);
 }
 
 float* TextureManager::getTexCoords(int texNum) {

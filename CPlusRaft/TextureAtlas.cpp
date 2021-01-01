@@ -31,6 +31,7 @@ float* TextureAtlas::getCoords(int index) {
 	}
 	float x = this->getCoordX(index);
 	float y = this->getCoordY(index);
-	float coords[4] = { x, y, x + uSizeX, y + uSizeY }; //Coordenades bottom i top (xb, yb, xt, yt)
+	float marge = 0.00; //Per evitar "bleeding edges"
+	float coords[4] = { x + marge, y+marge, x + uSizeX - marge, y + uSizeY - marge}; //Coordenades bottom i top (xb, yb, xt, yt)
 	return coords;
 }

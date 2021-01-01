@@ -13,27 +13,28 @@ World::World(int seed, int sizex, int sizey, int sizez, Camera* camera) //Nou
 
 	this->seed = seed;
 	this->camera = camera;
-	this->minpos = Vector3<int>(sizex - 1, sizey - 1, sizez - 1);
+
+	this->size.x = sizex;
+	this->size.y = sizey;
+	this->size.z = sizez;
 
 	//NOU CODI CHUNKS:
-	this->chunks = new Chunk * [(size_t)sizex * (size_t)sizey * (size_t)sizez];
-	for (int i = 0; i < sizex * sizey * sizez; i++) {
+	this->chunks = new Chunk * [(size_t)size.x * (size_t)size.y * (size_t)size.z];
+	for (int i = 0; i < size.x * size.y * size.z; i++) {
 		this->chunks[i] = nullptr;
 	}
-
-	this->sizex = sizex;
-	this->sizey = sizey;
-	this->sizez = sizez;
 
 	this->generate(seed);
 
 	//Col·locam càmera
-	int x = rand() % (sizex * CHUNKSIZE);
-	int z = rand() % (sizez * CHUNKSIZE);
-	for (int y = this->sizey * CHUNKSIZE; y > 0; y--) {
-		if (getBlock(Vector3<int>(x, y, z)) == Bloc::TERRA || getBlock(Vector3<int>(x, y, z)) == Bloc::PEDRA) {
+	int x = rand() % (size.x * CHUNKSIZE);
+	int z = rand() % (size.z * CHUNKSIZE);
+	bool trobat = false;
+	for (int y = (this->size.y * CHUNKSIZE - 1); y > 0 && (!trobat); y--) {
+		Bloc b = getBlock(Vector3<int>(x, y, z));
+		if (b != Bloc::RES) {
+			trobat = true;
 			spawn = Vector3<int>(x, y + 2, z);
-			break;
 		}
 	}
 }
@@ -48,7 +49,7 @@ World::World(std::string name, Camera* camera) { //Càrrega ja existent
 	this->noise.SetSeed(seed);
 
 	this->camera = camera;
-	this->minpos = Vector3<int>(sizex - 1, sizey - 1, sizez - 1);
+	this->minpos = Vector3<int>(size.x - 1, size.y - 1, size.z - 1);
 
 	//Lectura informació món
 	std::ifstream info("worlds/" + name + "/info.yml");
@@ -61,10 +62,10 @@ World::World(std::string name, Camera* camera) { //Càrrega ja existent
 	ryml::read(tree["spawn"]["x"], &this->spawn.x);
 	ryml::read(tree["spawn"]["y"], &this->spawn.y);
 	ryml::read(tree["spawn"]["z"], &this->spawn.z);
-	ryml::read(tree["size"]["x"], &this->sizex);
-	ryml::read(tree["size"]["y"], &this->sizey);
-	ryml::read(tree["size"]["z"], &this->sizez);
-	printf("Mides del mon: %d %d %d, spawn a: %d %d %d. Seed %d\n", this->sizex, this->sizey, this->sizez, this->spawn.x, this->spawn.y, this->spawn.z, this->seed);
+	ryml::read(tree["size"]["x"], &this->size.x);
+	ryml::read(tree["size"]["y"], &this->size.y);
+	ryml::read(tree["size"]["z"], &this->size.z);
+	printf("Mides del mon: %d %d %d, spawn a: %d %d %d. Seed %d\n", this->size.x, this->size.y, this->size.z, this->spawn.x, this->spawn.y, this->spawn.z, this->seed);
 	info.close();
 
 	std::fstream file;
@@ -73,17 +74,17 @@ World::World(std::string name, Camera* camera) { //Càrrega ja existent
 
 	file.open("worlds/" + name + "/chunks.cnk", std::ios::in | std::ios::binary);
 
-	this->chunks = new Chunk * [(size_t)sizex * (size_t)sizey * (size_t)sizez];
+	this->chunks = new Chunk * [(size_t)size.x * (size_t)size.y * (size_t)size.z];
 
-	//printf("Mides del mon: %d %d %d, spawn a: %d %d %d. Seed %d\n", this->sizex, this->sizey, this->sizez, sX, sY, sZ, this->seed);
+	//printf("Mides del mon: %d %d %d, spawn a: %d %d %d. Seed %d\n", this->size.x, this->size.y, this->size.z, sX, sY, sZ, this->seed);
 
 	const int chunkSize = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
 	char buffer[chunkSize];
 	char zeros[chunkSize];
 	memset(zeros, 0, chunkSize);
-	for (int x = 0; x < this->sizex; x++) {
-		for (int y = 0; y < this->sizey; y++) {
-			for (int z = 0; z < this->sizez; z++) {
+	for (int x = 0; x < this->size.x; x++) {
+		for (int y = 0; y < this->size.y; y++) {
+			for (int z = 0; z < this->size.z; z++) {
 				//printf("Chunk a %d %d %d...\n", x, y, z);
 				int desp = getDesp(Vector3<int>(x, y, z));
 				file.read(buffer, 1);
@@ -102,16 +103,6 @@ World::World(std::string name, Camera* camera) { //Càrrega ja existent
 	fflush(stdout);;
 
 	file.close();
-
-	//Fi generació món
-	for (int i = 0; i < this->sizex * this->sizey * this->sizez; i++) {
-		if (chunks[i] != nullptr) {
-			//chunks[i]->updateDL();
-			//chunks[i]->updateMesh();
-		}
-	}
-
-	//std::ifstream file("worlds / " + name + " / info.yml");
 }
 
 void World::save(std::string name) {
@@ -125,9 +116,9 @@ void World::save(std::string name) {
 	const int chunkSize = CHUNKSIZE* CHUNKSIZE* CHUNKSIZE;
 	char buffer[chunkSize];
 
-	for (int x = 0; x < this->sizex; x++) {
-		for (int y = 0; y < this->sizey; y++) {
-			for (int z = 0; z < this->sizez; z++) {
+	for (int x = 0; x < this->size.x; x++) {
+		for (int y = 0; y < this->size.y; y++) {
+			for (int z = 0; z < this->size.z; z++) {
 				int desp = getDesp(Vector3<int>(x, y, z));
 				if (chunks[desp] != nullptr) {
 					buffer[0] = static_cast<int>(chunks[desp]->getBiome());
@@ -154,9 +145,9 @@ void World::save(std::string name) {
 	info << " y: " << this->spawn.y << "\n";
 	info << " z: " << this->spawn.z << "\n";
 	info << "size:\n";
-	info << " x: " << this->sizex << "\n";
-	info << " y: " << this->sizey << "\n";
-	info << " z: " << this->sizez << "\n";
+	info << " x: " << this->size.x << "\n";
+	info << " y: " << this->size.y << "\n";
+	info << " z: " << this->size.z << "\n";
 	info.close();
 }
 
@@ -165,13 +156,13 @@ void World::generate(int seed) {
 	srand(seed); //Seed? xD
 	noise.SetSeed(seed);
 	Vector3<int> pos = Vector3<int>(0, 0, 0);
-	//int sealvl = 100;//(int)floorf(((float)this->sizey * CHUNKSIZE) / 2.0f);
-	//float lasty = 0; // = (this->sizey * CHUNKSIZE) / 2.0f;
-	//for (pos.x = 0; pos.x < (this->sizex * CHUNKSIZE); pos.x++) {
-	//	for (pos.z = 0; pos.z < (this->sizez * CHUNKSIZE); pos.z++) {
+	//int sealvl = 100;//(int)floorf(((float)this->size.y * CHUNKSIZE) / 2.0f);
+	//float lasty = 0; // = (this->size.y * CHUNKSIZE) / 2.0f;
+	//for (pos.x = 0; pos.x < (this->size.x * CHUNKSIZE); pos.x++) {
+	//	for (pos.z = 0; pos.z < (this->size.z * CHUNKSIZE); pos.z++) {
 	//		//printf("gen %d %d %d\n", pos.x, pos.z);
-	//		lasty = sealvl + noise.GetNoise((float)pos.x, (float)pos.z) * ((this->sizey*CHUNKSIZE)/3);
-	//		lasty = std::min(lasty, (float)this->sizey * CHUNKSIZE); //No ha de superar l'altura del món
+	//		lasty = sealvl + noise.GetNoise((float)pos.x, (float)pos.z) * ((this->size.y*CHUNKSIZE)/3);
+	//		lasty = std::min(lasty, (float)this->size.y * CHUNKSIZE); //No ha de superar l'altura del món
 	//		lasty = std::max(lasty, 0.0f); // Ni ser menor que 0
 	//		//printf("last: %f\n", lasty);
 	//		for (pos.y = 0; pos.y < lasty; pos.y++) {
@@ -205,7 +196,7 @@ void World::generate(int seed) {
 	//								for (int z = -amplada; z <= amplada; z++) {
 	//									Vector3<int> lpos = pos + Vector3<int>(0, rand2 + y, 0)
 	//										+ Vector3<int>(x, 0, 0) + Vector3<int>(0, 0, z);
-	//									if (lpos.z >= 0 && lpos.z < this->sizez * CHUNKSIZE && lpos.x >= 0 && lpos.x < this->sizex * CHUNKSIZE) {
+	//									if (lpos.z >= 0 && lpos.z < this->size.z * CHUNKSIZE && lpos.x >= 0 && lpos.x < this->size.x * CHUNKSIZE) {
 	//										this->setBlock(Bloc::FULLAARBRE, lpos, 0, false);
 	//									}
 	//								}
@@ -226,16 +217,16 @@ void World::generate(int seed) {
 	//	}
 	//}
 
-	for (pos.x = 0; pos.x < this->sizex; pos.x++) {
-		for (pos.y = 0; pos.y < this->sizey; pos.y++) {
-			for (pos.z = 0; pos.z < this->sizez; pos.z++) {
+	for (pos.x = 0; pos.x < this->size.x; pos.x++) {
+		for (pos.y = 0; pos.y < this->size.y; pos.y++) {
+			for (pos.z = 0; pos.z < this->size.z; pos.z++) {
 				chunks[getDesp(pos)] = wGen.generateTerrain(pos);
 			}
 		}
 	}
-	for (pos.x = 0; pos.x < this->sizex; pos.x++) {
-		for (pos.y = 0; pos.y < this->sizey; pos.y++) {
-			for (pos.z = 0; pos.z < this->sizez; pos.z++) {
+	for (pos.x = 0; pos.x < this->size.x; pos.x++) {
+		for (pos.y = 0; pos.y < this->size.y; pos.y++) {
+			for (pos.z = 0; pos.z < this->size.z; pos.z++) {
 				wGen.generateDetail(chunks[getDesp(pos)]);
 			}
 		}
@@ -365,7 +356,7 @@ void World::update(int delta, Vector3<float> pos) {
 void World::destroy() {
 
 	//NOU CODI CHUNKS
-	for (int i = 0; i < this->sizex * this->sizey * this->sizez; i++) {
+	for (int i = 0; i < this->size.x * this->size.y * this->size.z; i++) {
 		this->chunks[i]->destroy();
 	}
 
@@ -537,11 +528,8 @@ void World::draw(Vector3<float> pos, float dist) {
 	int ymin = camera->ymin;	int ymax = camera->ymax;
 	int zmin = camera->zmin;	int zmax = camera->zmax;
 
-	xmin = std::max(xmin, (int)minpos.x);	ymin = std::max(ymin, (int)minpos.y);	zmin = std::max(zmin, (int)minpos.z);
-	xmax = std::min(xmax, (int)maxpos.x);	ymax = std::min(ymax, (int)maxpos.y);	zmax = std::min(zmax, (int)maxpos.z);
-
 	xmin = std::max(xmin, 0);				ymin = std::max(ymin, 0);				zmin = std::max(zmin, 0);
-	xmax = std::min(xmax, this->sizex* CHUNKSIZE);		ymax = std::min(ymax, this->sizey* CHUNKSIZE);		zmax = std::min(zmax, this->sizez* CHUNKSIZE);
+	xmax = std::min(xmax, this->size.x* CHUNKSIZE);		ymax = std::min(ymax, this->size.y* CHUNKSIZE);		zmax = std::min(zmax, this->size.z* CHUNKSIZE);
 
 	//NOU CODI CHUNKS
 	Vector3<int> cMin = Vector3<int>(xmin, ymin, zmin);
@@ -556,7 +544,7 @@ void World::draw(Vector3<float> pos, float dist) {
 		for (float y = (float)cMin.y; y <= (float)cMax.y; y++) {
 			for (float z = (float)cMin.z; z <= (float)cMax.z; z++) {
 				int desp = getDesp(Vector3<int>((int)x, (int)y, (int)z));
-				if (chunks[desp] == nullptr) {
+				if (chunks[desp] == nullptr || desp == -1) {
 					continue;
 				}
 				float dist = Vector3<float>::module(camera->getPos() - Vector3<float>(x * CHUNKSIZE + CHUNKSIZE/2, y * CHUNKSIZE + CHUNKSIZE/2, z * CHUNKSIZE + CHUNKSIZE/2));
@@ -582,7 +570,7 @@ void World::draw(Vector3<float> pos, float dist) {
 		for (float y = (float)cMin.y; y <= (float)cMax.y; y++) {
 			for (float z = (float)cMin.z; z <= (float)cMax.z; z++) {
 				int desp = getDesp(Vector3<int>((int)x, (int)y, (int)z));
-				if (chunks[desp] == nullptr) {
+				if (chunks[desp] == nullptr || desp == -1) {
 					continue;
 				}
 				float dist = Vector3<float>::module(camera->getPos() - Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE));
@@ -681,8 +669,8 @@ void World::interact(Vector3<int> pos) {
 
 //Comprova que una posició és valida i retorna el desplaçament corresponent a la posició
 int World::getDesp(Vector3<int> pos) {
-	int desp = pos.x + this->sizex * (pos.y + this->sizey * pos.z);
-	if ((desp >= (this->sizex * this->sizey * this->sizez))||(desp < 0) || pos.x < 0 || pos.y < 0 || pos.z < 0 || pos.x >= this->sizex || pos.y >= this->sizey || pos.z >= this->sizez) {
+	int desp = pos.x + this->size.x * (pos.y + this->size.y * pos.z);
+	if ((desp >= (this->size.x * this->size.y * this->size.z))||(desp < 0) || pos.x < 0 || pos.y < 0 || pos.z < 0 || pos.x >= this->size.x || pos.y >= this->size.y || pos.z >= this->size.z) {
 		return -1;
 	}
 	return desp;
@@ -801,27 +789,29 @@ void World::drawMap(float scrAspect, Entity *ent) {
 	glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
 	glEnd();
 
-	float dX = 0.8f * ((float)1 / (float)this->sizex);
-	float dZ = 0.8f * ((float)1 / (float)this->sizez);
+	float dX = 0.8f * ((float)1 / (float)this->size.x);
+	float dZ = 0.8f * ((float)1 / (float)this->size.z);
 
 	glTranslatef(0.5f * aspect - 0.4f, 0.1f, -1);
-	for (int x = 0; x < this->sizex; x++) {
-		for (int z = 0; z < this->sizez; z++) {
+	for (int x = 0; x < this->size.x; x++) {
+		for (int z = 0; z < this->size.z; z++) {
 			glPushMatrix();
-			int desp = getDesp(Vector3<int>(x, 0, z));
-			glTranslatef(((float)x / (float)this->sizex)*0.8f, ((float)z / (float)this->sizez)*0.8f, 0);
+			int desp = getDesp(Vector3<int>(x, 5, z));
+			glTranslatef(((float)x / (float)this->size.x)*0.8f, ((float)z / (float)this->size.z)*0.8f, 0);
 			if (chunks[desp] == nullptr) {
 				glColor3f(0,0,0);
 			}
 			else {
 				switch (chunks[desp]->getBiome()) {
 					case Bioma::MUNTANYA:
-						glColor3f(1,1,1);
+						glColor3f(0.8f,0.8f,0.8f);
 						break;
 					case Bioma::BOSC:
 						glColor3f(1, 0, 0);
 						break;
 					case Bioma::OCEA:
+						glColor3f(0, 0, 0.5f);
+						break;
 					case Bioma::MAR:
 						glColor3f(0, 0, 1);
 						break;
@@ -834,11 +824,11 @@ void World::drawMap(float scrAspect, Entity *ent) {
 					case Bioma::SABANA:
 						glColor3f(1, 1, 0);
 						break;
-					case Bioma::MUNTGEL:
+					case Bioma::ARTIC:
 						glColor3f(1, 1, 1);
 						break;
 					case Bioma::GEL:
-						glColor3f(0.68f, 0.85f, 0.9f);
+						glColor3f(0.5f, 0.5f, 1);
 						break;
 					default:
 						glColor3f(1, 0, 0);
@@ -860,7 +850,7 @@ void World::drawMap(float scrAspect, Entity *ent) {
 
 	float pX = ent->getPos().x / CHUNKSIZE;
 	float pZ = ent->getPos().z / CHUNKSIZE;
-	glTranslatef((pX / (float)this->sizex) * 0.8f + dX/2, (pZ / (float)this->sizez) * 0.8f + dZ/2, 0);
+	glTranslatef((pX / (float)this->size.x) * 0.8f + dX/2, (pZ / (float)this->size.z) * 0.8f + dZ/2, 0);
 	glRotatef(ent->getRot() - 90, 0, 0, 1);
 	glColor3f(1, 1, 0);
 	glBegin(GL_TRIANGLES);

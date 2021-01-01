@@ -13,7 +13,7 @@ enum class Bioma {
 	SABANA,
 	DESERT,
 	GEL,
-	MUNTGEL
+	ARTIC
 };
 
 class World;

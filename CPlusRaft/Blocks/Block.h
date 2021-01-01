@@ -21,6 +21,7 @@ enum class Bloc {
 	PEDRA,
 	ALTAVEU,
 	NEU,
+	GEL,
 	LIMIT //SEMPRE DARRER
 };
 

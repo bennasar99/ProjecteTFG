@@ -59,8 +59,14 @@ void SolidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 		case Bloc::FULLAARBRE:
             texNum = 2;
 			color[0] = 0; color[1] = 0.5f; color[2] = 0; color[3] = 1;
+			break;
 		case Bloc::NEU:
+			texNum = 1;
 			color[0] = 1; color[1] = 1; color[2] = 1; color[3] = 1;
+			break;
+		case Bloc::GEL:
+			texNum = 7;
+			color[0] = 0; color[1] = 0; color[2] = 1; color[3] = 0.8f;
 			break;
 	}
 
@@ -83,7 +89,12 @@ void SolidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 			for (int j = 0; j < 4; j++) {
 				float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
 				vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
-				cM->addVertexO(vPos, normals[i][j], color, text[i][j], Primitiva::QUAD);
+				if (Block::isTransparent(this->id)) {
+					cM->addVertexT(vPos, normals[i][j], color, text[i][j]);
+				}
+				else {
+					cM->addVertexO(vPos, normals[i][j], color, text[i][j], Primitiva::QUAD);
+				}
 			}
 		}
 	}

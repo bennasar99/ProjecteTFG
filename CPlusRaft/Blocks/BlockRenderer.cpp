@@ -1,7 +1,7 @@
 #include "BlockRenderer.h"
 
 BlockRenderer::BlockRenderer() {
-	blockAtlas = new TextureAtlas(1, 7);
+	blockAtlas = new TextureAtlas(1, 8);
 }
 
 void BlockRenderer::drawBloc(Bloc id) {

@@ -11,7 +11,7 @@ bool KeyboardManager::isPressed(int key) {
 }
 
 void KeyboardManager::onKeyDown(int key) {
-	if (key >= KEYNUM) {
+	if (key >= KEYNUM || key < 0) {
 		return;
 	}
 	// invocar tots els escoltadors d'aquesta tecla (si no s'han invocat)

@@ -41,7 +41,7 @@ void Chunk::drawT() {
 		firstdraw = true;
 		this->updateMesh();
 	}
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	glFrontFace(GL_CCW);
 	glTranslatef(0.5f, 0.5f, 0.5f);
 	this->cMesh->drawT();
@@ -137,7 +137,7 @@ bool Chunk::isVisible(Vector3<int> bpos) {
 }
 
 Bloc Chunk::getBlockWorld(Vector3<int> bpos) {
-	if (bpos.x >= world->sizex * CHUNKSIZE || bpos.y >= world->sizey * CHUNKSIZE || bpos.z >= world->sizez * CHUNKSIZE ||
+	if (bpos.x >= world->size.x * CHUNKSIZE || bpos.y >= world->size.y * CHUNKSIZE || bpos.z >= world->size.z * CHUNKSIZE ||
 		bpos.x < 0 || bpos.y < 0 || bpos.z < 0) {
 		return Bloc::TERRA; //Optimització no dibuixar bloc border
 	}

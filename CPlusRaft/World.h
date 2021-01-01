@@ -60,9 +60,7 @@ private:
 
 public:
 	//Han de ser nombres parells
-	int sizex;
-	int sizey;
-	int sizez;
+	Vector3<int> size;
 
 	Camera* camera;
 	BlockRenderer *br;

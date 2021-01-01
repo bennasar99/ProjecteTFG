@@ -174,7 +174,7 @@ void Display(GLFWwindow* window)
 
 	// dibuixar els 3 eixos
 	if (axisVisible) {
-		world->drawAxis(Vector3<float>((float)(world->sizex * CHUNKSIZE) / 2, (float)(world->sizey * CHUNKSIZE) / 2 + 1, (float)(world->sizez * CHUNKSIZE) / 2), 50.0f);
+		world->drawAxis(Vector3<float>((float)(world->size.x * CHUNKSIZE) / 2, (float)(world->size.y * CHUNKSIZE) / 2 + 1, (float)(world->size.z * CHUNKSIZE) / 2), 50.0f);
 	}
 
 	glPopMatrix();
@@ -357,7 +357,7 @@ int main(int argc, char** argv)
 		}
 		//int seed = std::atoi(sseed.c_str());
 		printf("Seed: %d\n", seed);
-		world = new World(seed, 40, 12, 40, &camera);
+		world = new World(seed, 64, 12, 64, &camera); //Mides per crear mapa de biomes be i que no peti: 100, 6, 100
 		ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 10.0f, 0));
 		world->save(wname);
 	}
@@ -391,7 +391,7 @@ int main(int argc, char** argv)
 	glEnable(GL_LIGHTING); //Il·luminació
 	glEnable(GL_COLOR_MATERIAL); //Perquè els objectes reflecteixin el color
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-	float specular[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	float specular[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular); //Especular per defecte
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1); //Brillantor
 	glShadeModel(GL_SMOOTH); //Model d'ombrejat
@@ -426,7 +426,7 @@ int main(int argc, char** argv)
 	//Textures
 	glEnable(GL_TEXTURE_2D); //Activació
 	TextureManager::initialize();
-	TextureManager::LoadTexture("Textures/texture.jpg", Textura::BLOC);
+	TextureManager::LoadTexture("Textures/texture.png", Textura::BLOC);
 
 	//Sons
 	SoundManager::initialize();
