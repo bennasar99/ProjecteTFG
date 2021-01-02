@@ -1,8 +1,9 @@
 #include "World.h"
 
 
-World::World(int seed, int sizex, int sizey, int sizez, Camera* camera) //Nou
+World::World(std::string name, int seed, int sizex, int sizey, int sizez, Camera* camera) //Nou
 {
+	this->name = name;
 	this->wGen = WorldGenerator(seed, this);
 	this->br = new BlockRenderer();
 
@@ -42,6 +43,7 @@ World::World(int seed, int sizex, int sizey, int sizez, Camera* camera) //Nou
 World::World(std::string name, Camera* camera) { //Càrrega ja existent
 	this->br = new BlockRenderer();
 	this->seed = 0;
+	this->name = name;
 
 	this->noise.SetNoiseType(FastNoiseLite::NoiseType_ValueCubic);
 	this->noise.SetFrequency(0.01f);
@@ -72,70 +74,33 @@ World::World(std::string name, Camera* camera) { //Càrrega ja existent
 
 	this->wGen = WorldGenerator(this->seed, this);
 
-	file.open("worlds/" + name + "/chunks.cnk", std::ios::in | std::ios::binary);
-
 	this->chunks = new Chunk * [(size_t)size.x * (size_t)size.y * (size_t)size.z];
+	//Carregam les regions
+	for (int rX = 0; rX < ceil((float)this->size.x / 16.0f); rX++) {
+		for (int rY = 0; rY < ceil((float)this->size.y / 16.0f); rY++) {
+			for (int rZ = 0; rZ < ceil((float)this->size.z / 16.0f); rZ++) {
+				loadRegion(Vector3<int>(rX, rY, rZ));
+			}
+		}
+	}
 
 	//printf("Mides del mon: %d %d %d, spawn a: %d %d %d. Seed %d\n", this->size.x, this->size.y, this->size.z, sX, sY, sZ, this->seed);
-
-	const int chunkSize = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
-	char buffer[chunkSize];
-	char zeros[chunkSize];
-	memset(zeros, 0, chunkSize);
-	for (int x = 0; x < this->size.x; x++) {
-		for (int y = 0; y < this->size.y; y++) {
-			for (int z = 0; z < this->size.z; z++) {
-				//printf("Chunk a %d %d %d...\n", x, y, z);
-				int desp = getDesp(Vector3<int>(x, y, z));
-				file.read(buffer, 1);
-				Bioma bio = static_cast<Bioma>(buffer[0]);
-				file.read(buffer, chunkSize);
-				if (memcmp(buffer, zeros, chunkSize) != 0) { //Si el chunk no és buit, el carregam
-					chunks[desp] = new Chunk(this, Vector3<int>(x, y, z));
-					chunks[desp]->readFromByteData(buffer);
-					chunks[desp]->setBiome(bio);
-				}
-				//printf("LLEGIT\n");
-			}
-		}
-	}
-	printf("Món llegit");
-	fflush(stdout);;
-
-	file.close();
 }
 
-void World::save(std::string name) {
+void World::save() {
 	
-	std::string path = "worlds/" + name;
-	std::filesystem::create_directory(path);
+	std::string path = "worlds/" + this->name;
+	std::filesystem::create_directory(path.c_str());
+	path += "/chunks";
+	std::filesystem::create_directory(path.c_str());
 
-	std::fstream file;
-	file.open("worlds/" + name + "/chunks.cnk", std::ios::out | std::ios::binary);
-
-	const int chunkSize = CHUNKSIZE* CHUNKSIZE* CHUNKSIZE;
-	char buffer[chunkSize];
-
-	for (int x = 0; x < this->size.x; x++) {
-		for (int y = 0; y < this->size.y; y++) {
-			for (int z = 0; z < this->size.z; z++) {
-				int desp = getDesp(Vector3<int>(x, y, z));
-				if (chunks[desp] != nullptr) {
-					buffer[0] = static_cast<int>(chunks[desp]->getBiome());
-					file.write(buffer, 1);
-					chunks[desp]->getByteData(buffer);
-					file.write(buffer, chunkSize);
-				}
-				else {
-					char zeros[chunkSize+1];
-					memset(zeros, 0, chunkSize+1); //+1 per el byte de bioma
-					file.write(zeros, chunkSize+1);
-				}
+	for (int rX = 0; rX < ceil((float)this->size.x / 16.0f); rX++) {
+		for (int rY = 0; rY < ceil((float)this->size.y / 16.0f); rY++) {
+			for (int rZ = 0; rZ < ceil((float)this->size.z / 16.0f); rZ++) {
+				saveRegion(Vector3<int>(rX, rY, rZ));
 			}
 		}
 	}
-
-	file.close();
 
 	//Cream yml del món
 	std::ofstream info("worlds/" + name + "/info.yml");
@@ -868,4 +833,66 @@ void World::drawMap(float scrAspect, Entity *ent) {
 	glPopMatrix();
 
 	glPopMatrix();
+}
+
+Vector3<int> World::getRegion(Vector3<int> cPos) {
+	return Vector3<int>(floor((float)cPos.x / (float)REGIONSIZE), floor((float)cPos.y / (float)REGIONSIZE), floor((float)cPos.z / (float)REGIONSIZE));
+}
+
+bool World::saveRegion(Vector3<int> rPos) {
+	const int chunkSize = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
+	char buffer[chunkSize];
+	std::fstream file; 
+	std::string path = "worlds/" + this->name + "/chunks/reg" + std::to_string(rPos.x) + "-" + std::to_string(rPos.y) + "-" + std::to_string(rPos.z) + ".cnk";
+	printf("%s\n", path.c_str());
+	file.open(path.c_str(), std::ios::out | std::ios::binary);
+	for (int x = rPos.x * REGIONSIZE; x < (rPos.x+1) * REGIONSIZE; x++) {
+		for (int y = rPos.y * REGIONSIZE; y < (rPos.y + 1) * REGIONSIZE; y++) {
+			for (int z = rPos.z * REGIONSIZE; z < (rPos.z + 1) * REGIONSIZE; z++) {
+				Vector3<int> rPos = getRegion(Vector3<int>(x, y, z));
+				int desp = getDesp(Vector3<int>(x, y, z));
+				if (chunks[desp] != nullptr && desp != -1) {
+					buffer[0] = static_cast<int>(chunks[desp]->getBiome());
+					file.write(buffer, 1);
+					chunks[desp]->getByteData(buffer);
+					file.write(buffer, chunkSize);
+				}
+				else {
+					char zeros[chunkSize + 1];
+					memset(zeros, 0, chunkSize + 1); //+1 per el byte de bioma
+					file.write(zeros, chunkSize + 1);
+				}
+			}
+		}
+	}
+	file.close();
+	return true;
+}
+
+bool World::loadRegion(Vector3<int> rPos) {
+	const int chunkSize = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
+	char buffer[chunkSize];
+	char zeros[chunkSize];
+	memset(zeros, 0, chunkSize);
+	std::fstream file;
+	std::string path = "worlds/" + this->name + "/chunks/reg" + std::to_string(rPos.x) + "-" + std::to_string(rPos.y) + "-" + std::to_string(rPos.z) + ".cnk";
+	printf("%s\n", path.c_str());
+	file.open(path.c_str(), std::ios::in | std::ios::binary);
+	for (int x = rPos.x * REGIONSIZE; x < (rPos.x + 1) * REGIONSIZE; x++) {
+		for (int y = rPos.y * REGIONSIZE; y < (rPos.y + 1) * REGIONSIZE; y++) {
+			for (int z = rPos.z * REGIONSIZE; z < (rPos.z + 1) * REGIONSIZE; z++) {
+				int desp = getDesp(Vector3<int>(x, y, z));
+				file.read(buffer, 1);
+				Bioma bio = static_cast<Bioma>(buffer[0]);
+				file.read(buffer, chunkSize);
+				if (memcmp(buffer, zeros, chunkSize) != 0) { //Si el chunk no és buit, el carregam
+					chunks[desp] = new Chunk(this, Vector3<int>(x, y, z));
+					chunks[desp]->readFromByteData(buffer);
+					chunks[desp]->setBiome(bio);
+				}
+			}
+		}
+	}
+	file.close();
+	return true;
 }

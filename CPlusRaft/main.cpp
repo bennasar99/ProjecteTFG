@@ -357,9 +357,9 @@ int main(int argc, char** argv)
 		}
 		//int seed = std::atoi(sseed.c_str());
 		printf("Seed: %d\n", seed);
-		world = new World(seed, 64, 12, 64, &camera); //Mides per crear mapa de biomes be i que no peti: 100, 6, 100
+		world = new World(wname, seed, 64, 12, 64, &camera); //Mides per crear mapa de biomes be i que no peti: 100, 6, 100
 		ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 10.0f, 0));
-		world->save(wname);
+		world->save();
 	}
 	// Inicialitzam el GLFW
 	glfwInit();
@@ -551,7 +551,7 @@ void movement(int key) {
 		}
 	}
 	else if (key == GLFW_KEY_T) {
-		world->save(wname);
+		world->save();
 	}
 	else if (key == GLFW_KEY_M) { //Mapa biomes
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);

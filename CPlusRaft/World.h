@@ -28,6 +28,7 @@
 #include "lib/FastNoiseLite.h"
 #include "ryml.hpp"
 
+#define REGIONSIZE 16
 
 class Block;
 class LightBlock;
@@ -57,6 +58,7 @@ private:
 	int updTimer = 1000;
 
 	FastNoiseLite noise;
+	std::string name;
 
 public:
 	//Han de ser nombres parells
@@ -105,11 +107,15 @@ public:
 	void update(int delta, Vector3<float> camPos);
 
 	void generate(int seed);
-	void save(std::string file);
+	void save();
 
 	void drawMap(float scrAspect, Entity* ent);
 
-	World(int seed, int sizex, int sizey, int sizez, Camera* camera);
+	Vector3<int> getRegion(Vector3<int> cPos);
+	bool saveRegion(Vector3<int> rPos);
+	bool loadRegion(Vector3<int> rPos);
+
+	World(std::string name, int seed, int sizex, int sizey, int sizez, Camera* camera);
 	World(std::string file, Camera* camera);
 	World();
 };
