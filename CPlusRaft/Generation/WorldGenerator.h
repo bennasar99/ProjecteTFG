@@ -23,8 +23,11 @@ class WorldGenerator {
 private:
 	FastNoiseLite climateNoise;
 	FastNoiseLite biomeNoise;
-	FastNoiseLite heightNoise;
 	FastNoiseLite oceanNoise;
+
+	FastNoiseLite normalNoise;
+	FastNoiseLite oceanGenNoise;
+	FastNoiseLite mountainNoise;
 
 	World *world;
 	

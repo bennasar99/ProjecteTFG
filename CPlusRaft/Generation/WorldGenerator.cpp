@@ -22,9 +22,15 @@ WorldGenerator::WorldGenerator(int seed, World* world) {
 	this->biomeNoise.SetFrequency(0.1f); //0.1
 	this->biomeNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
-	this->heightNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-	this->heightNoise.SetSeed(seed);
-	this->heightNoise.SetFrequency(0.2f); //0.01
+	this->normalNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	this->oceanGenNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	this->mountainNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	this->normalNoise.SetSeed(seed);
+	this->mountainNoise.SetSeed(seed);
+	this->oceanGenNoise.SetSeed(seed);
+	this->normalNoise.SetFrequency(0.01f); //0.01
+	this->mountainNoise.SetFrequency(0.02f);
+	this->oceanGenNoise.SetFrequency(0.002f);
 
 	this->world = world;
 }
@@ -89,7 +95,7 @@ bool WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks de
 	for (pos.x = 0; pos.x < CHUNKSIZE; pos.x++) {
 		for (pos.z = 0; pos.z < CHUNKSIZE; pos.z++) {
 			//Intentar que com més abaix + (molt més) probable que sigui sòlid
-			density = heightNoise.GetNoise((float)pos.x + CHUNKSIZE * (float)cPos.x, CHUNKSIZE * (float)cPos.y, (float)pos.z + CHUNKSIZE * (float)cPos.z);
+			//density = heightNoise->GetNoise((float)pos.x + CHUNKSIZE * (float)cPos.x, CHUNKSIZE * (float)cPos.y, (float)pos.z + CHUNKSIZE * (float)cPos.z);
 			//if (density > threshold) { //Afegim cosa
 				//Agafam la coordenada Y amb un bloc i aire damunt més gran
 				bool trobat = false;
@@ -141,7 +147,7 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 	//chunk->setBiome(getBiomeAt(cX, cZ));
 	chunk->setBiome(getBiomeAt(cPos.x, cPos.z));
 	Bioma bio = chunk->getBiome();
-
+	FastNoiseLite* noise;
 
 	int sealvl = 80;
 	float y = 0;
@@ -149,33 +155,34 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 	float threshold = 1;
 	switch (bio) {
 	case Bioma::MUNTANYA:
-		this->heightNoise.SetFrequency(0.02f);
+		noise = &this->mountainNoise;
 		threshold = 1.4f;
 		break;
 	case Bioma::OCEA:
-		this->heightNoise.SetFrequency(0.002f);
+		noise = &this->oceanGenNoise;
 		threshold = 0.5f;
 		break;
 	default:
-		this->heightNoise.SetFrequency(0.005f);
+		noise = &this->normalNoise;
 		break;
 	}
 	//Vector3<int> cPos = chunk->getPos();
 	//bool block = false;
 	int waterblocksup = 0;
+	int nblocs = 0;
 	for (int x = 0; x < CHUNKSIZE; x++) {
 		for (int z = 0; z < CHUNKSIZE; z++) {
 			for (int y = 0; y < CHUNKSIZE; y++) {
 				Vector3<int> pos = Vector3<int>(x, y, z);
 				//Intentar que com més abaix + (molt més) probable que sigui sòlid
-				density = (float(CHUNKSIZE*cPos.y + y)/80.0f) + heightNoise.GetNoise((float)x + CHUNKSIZE*(float)cPos.x, (float)y + CHUNKSIZE * (float)cPos.y, float(z) + CHUNKSIZE * (float)cPos.z)/1.5f;
+				density = (float(CHUNKSIZE*cPos.y + y)/80.0f) + noise->GetNoise((float)x + CHUNKSIZE*(float)cPos.x, (float)y + CHUNKSIZE * (float)cPos.y, float(z) + CHUNKSIZE * (float)cPos.z)/1.5f;
 				if (density < threshold) {
 					if (CHUNKSIZE * cPos.y + y > sealvl) {
 						if (bio == Bioma::MAR || bio == Bioma::OCEA) {
 							continue;
 						}
 					}
-					//printf("TERRA\n");
+					nblocs++;
 					if (bio == Bioma::MUNTANYA) {
 						chunk->setBlock(new SolidBlock(Bloc::PEDRA), pos);
 					}
@@ -194,6 +201,7 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 						else {
 							chunk->setBlock(new LiquidBlock(Bloc::AIGUA, pos), pos);
 						}
+						nblocs++;
 					}
 					if ((CHUNKSIZE * cPos.y + y) == sealvl) {
 						waterblocksup++;
@@ -209,6 +217,9 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 		else {
 			chunk->setBiome(Bioma::GEL);
 		}
+	}
+	if (nblocs == 0) {
+		//return nullptr;
 	}
 	return chunk;
 }

@@ -30,20 +30,31 @@
 #include "ryml.hpp"
 
 #define REGIONSIZE 16
+#define CORES 8
 
 class Block;
 class LightBlock;
 class Pendul;
 enum class Bloc;
 
+enum class ChunkState {
+	READY,
+	TERRAIN,
+	PENDENT,
+	EMPTY
+};
+
 class World {
 private:
 
-	std::future<Chunk*> cnk;
+	std::future<Chunk*> cnk[CORES];
 
 	WorldGenerator wGen;
 
 	Chunk **chunks;
+	ChunkState *estat;
+	short pendents = 0;
+
 	int sol = 0;
 	float daytime = 0;
 	Vector3<float> solpos;

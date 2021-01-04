@@ -21,10 +21,11 @@ World::World(std::string name, int seed, int sizex, int sizey, int sizez, Camera
 
 	//NOU CODI CHUNKS:
 	this->chunks = new Chunk * [(size_t)size.x * (size_t)size.y * (size_t)size.z];
+	this->estat = new ChunkState[(size_t)size.x * (size_t)size.y * (size_t)size.z];
 	for (int i = 0; i < size.x * size.y * size.z; i++) {
 		this->chunks[i] = nullptr;
+		this->estat[i] = ChunkState::EMPTY;
 	}
-
 	this->generate(seed);
 
 	//Col·locam càmera
@@ -120,67 +121,6 @@ void World::generate(int seed) {
 	srand(seed); //Seed? xD
 	noise.SetSeed(seed);
 	Vector3<int> pos = Vector3<int>(0, 0, 0);
-	//int sealvl = 100;//(int)floorf(((float)this->size.y * CHUNKSIZE) / 2.0f);
-	//float lasty = 0; // = (this->size.y * CHUNKSIZE) / 2.0f;
-	//for (pos.x = 0; pos.x < (this->size.x * CHUNKSIZE); pos.x++) {
-	//	for (pos.z = 0; pos.z < (this->size.z * CHUNKSIZE); pos.z++) {
-	//		//printf("gen %d %d %d\n", pos.x, pos.z);
-	//		lasty = sealvl + noise.GetNoise((float)pos.x, (float)pos.z) * ((this->size.y*CHUNKSIZE)/3);
-	//		lasty = std::min(lasty, (float)this->size.y * CHUNKSIZE); //No ha de superar l'altura del món
-	//		lasty = std::max(lasty, 0.0f); // Ni ser menor que 0
-	//		//printf("last: %f\n", lasty);
-	//		for (pos.y = 0; pos.y < lasty; pos.y++) {
-	//			//("terra %d %d %d\n", pos.x, pos.z);
-	//			this->setBlock(Bloc::TERRA, pos, nullptr, false);
-	//			if (pos.y == (int)lasty) {
-	//				if (lasty > sealvl) { //Elements superfície
-	//					int random = rand() % 128;
-	//					if (random == 1 || random == 5) {
-	//						this->setBlock(Bloc::HERBA, pos + Vector3<int>(0, 1, 0), 0, false);
-	//					}
-	//					else if (random == 2 || random == 6) {
-	//						this->setBlock(Bloc::HERBAFULL, pos + Vector3<int>(0, 1, 0), 0, false);
-	//						this->setBlock(Bloc::HERBA, pos + Vector3<int>(0, 2, 0), 0, false);
-	//					}
-	//					else if (random == 3) {
-	//						this->setBlock(Bloc::AIGUA, pos, 0, false);
-	//					}
-	//					else if (random == 4) {
-	//						//Tronc
-	//						this->setBlock(Bloc::FUSTAARBRE, pos, 0, false);
-	//						int rand2 = rand() % 5 + 1;
-	//						for (int i = 1; i <= rand2; i++) {
-	//							this->setBlock(Bloc::FUSTAARBRE, pos + Vector3<int>(0, i, 0), 0, false);
-	//						}
-	//						//Fulles
-	//						int altura = rand() % 3 + 1;
-	//						int amplada = (rand() % (rand2)) + 1;
-	//						for (int y = 0; y < altura; y++) {
-	//							for (int x = -amplada; x <= amplada; x++) {
-	//								for (int z = -amplada; z <= amplada; z++) {
-	//									Vector3<int> lpos = pos + Vector3<int>(0, rand2 + y, 0)
-	//										+ Vector3<int>(x, 0, 0) + Vector3<int>(0, 0, z);
-	//									if (lpos.z >= 0 && lpos.z < this->size.z * CHUNKSIZE && lpos.x >= 0 && lpos.x < this->size.x * CHUNKSIZE) {
-	//										this->setBlock(Bloc::FULLAARBRE, lpos, 0, false);
-	//									}
-	//								}
-	//							}
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//		//Oceans
-	//		for (pos.y = (int)lasty; pos.y <= sealvl; pos.y++) {
-	//			this->setBlock(Bloc::AIGUA, pos, nullptr, false);
-	//		}
-	//		if (lasty <= sealvl+1) {
-	//			pos.y = sealvl + 1;
-	//			this->setBlock(Bloc::AIGUA, pos, nullptr, false);
-	//		}
-	//	}
-	//}
-
 	for (pos.x = 0; pos.x < this->size.x; pos.x++) {
 		for (pos.y = 0; pos.y < this->size.y; pos.y++) {
 			for (pos.z = 0; pos.z < this->size.z; pos.z++) {
@@ -527,25 +467,14 @@ void World::draw(Vector3<float> pos, float dist) {
 				}
 				if (chunks[desp] == nullptr) {
 					//std::future<Chunk*> cnk = std::async(is_prime, 1);
-					if (!cnk.valid()) {
-						cnk = std::async(std::launch::async, &WorldGenerator::generateTerrain, &wGen, cPos);
-					}
-					else if (cnk.wait_for(std::chrono::nanoseconds(0)) == std::future_status::ready) {
-						Chunk* ch = cnk.get();
-						Vector3 cpos = ch->getPos();
-						int desp = getDesp(cpos);
-						if (ch != nullptr) {
-							chunks[desp] = ch;
-							for (int nX = cpos.x - 1; nX <= cpos.x + 1; nX++) {
-								for (int nY = cpos.y - 1; nY <= cpos.y + 1; nY++) {
-									for (int nZ = cpos.z - 1; nZ <= cpos.z + 1; nZ++) {
-										int desp = getDesp(Vector3<int>((int)nX, (int)nY, (int)nZ));
-										if (desp == -1 || chunks[desp] == nullptr) {
-											continue;
-										}
-										chunks[desp]->updateMesh();
-									}
-								}
+					if (estat[desp] == ChunkState::EMPTY && pendents < CORES) {
+						bool trobat = false;
+						for (int i = 0; (i < CORES) && !trobat; i++) {
+							if (!cnk[i].valid()) {
+								cnk[i] = std::async(std::launch::async, &WorldGenerator::generateTerrain, &wGen, cPos);
+								estat[desp] = ChunkState::PENDENT;
+								trobat = true;
+								pendents++;
 							}
 						}
 					}
@@ -593,6 +522,33 @@ void World::draw(Vector3<float> pos, float dist) {
 					chunks[desp]->drawT();
 					glPopMatrix();
 					nchunks++;
+				}
+			}
+		}
+	}
+	if (pendents > 0) {
+		for (int i = 0; i < CORES && pendents>0; i++) {
+			if (cnk[i].valid()) {
+				if (cnk[i].wait_for(std::chrono::nanoseconds(0)) == std::future_status::ready) {
+					Chunk* ch = cnk[i].get();
+					Vector3 cpos = ch->getPos();
+					int desp = getDesp(cpos);
+					if (ch != nullptr) {
+						estat[desp] = ChunkState::TERRAIN;
+						pendents--;
+						chunks[desp] = ch;
+						for (int nX = cpos.x - 1; nX <= cpos.x + 1; nX++) {
+							for (int nY = cpos.y - 1; nY <= cpos.y + 1; nY++) {
+								for (int nZ = cpos.z - 1; nZ <= cpos.z + 1; nZ++) {
+									int desp = getDesp(Vector3<int>((int)nX, (int)nY, (int)nZ));
+									if (desp == -1 || chunks[desp] == nullptr) {
+										continue;
+									}
+									chunks[desp]->updateMesh();
+								}
+							}
+						}
+					}
 				}
 			}
 		}

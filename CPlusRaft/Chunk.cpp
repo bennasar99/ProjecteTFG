@@ -102,7 +102,7 @@ void Chunk::destroy() {
 
 //TODO actualitzar display list
 bool Chunk::delBlock(Vector3<int> bpos, bool destroy) {
-  	if (this->blocs[bpos.x][bpos.y][bpos.z] != 0) {
+  	if (this->blocs[bpos.x][bpos.y][bpos.z] != 0) {      
 		if (destroy) {
 			this->blocs[bpos.x][bpos.y][bpos.z]->destroy(this->world);
 		}
