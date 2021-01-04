@@ -24,7 +24,7 @@ World::World(std::string name, int seed, int sizex, int sizey, int sizez, Camera
 	this->estat = new ChunkState[(size_t)size.x * (size_t)size.y * (size_t)size.z];
 	for (int i = 0; i < size.x * size.y * size.z; i++) {
 		this->chunks[i] = nullptr;
-		this->estat[i] = ChunkState::EMPTY;
+		this->estat[i] = ChunkState::BUIT;
 	}
 	this->generate(seed);
 
@@ -467,7 +467,7 @@ void World::draw(Vector3<float> pos, float dist) {
 				}
 				if (chunks[desp] == nullptr) {
 					//std::future<Chunk*> cnk = std::async(is_prime, 1);
-					if (estat[desp] == ChunkState::EMPTY && pendents < CORES) {
+					if (estat[desp] == ChunkState::BUIT && pendents < CORES) {
 						bool trobat = false;
 						for (int i = 0; (i < CORES) && !trobat; i++) {
 							if (!cnk[i].valid()) {
@@ -534,8 +534,13 @@ void World::draw(Vector3<float> pos, float dist) {
 					Vector3 cpos = ch->getPos();
 					int desp = getDesp(cpos);
 					if (ch != nullptr) {
-						estat[desp] = ChunkState::TERRAIN;
 						pendents--;
+						estat[desp] = ChunkState::TERRENY;
+						if (ch->nblocs <= 0) {
+							ch->destroy();
+							delete ch;
+							continue;
+						}
 						chunks[desp] = ch;
 						for (int nX = cpos.x - 1; nX <= cpos.x + 1; nX++) {
 							for (int nY = cpos.y - 1; nY <= cpos.y + 1; nY++) {

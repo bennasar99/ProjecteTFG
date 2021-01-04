@@ -38,10 +38,10 @@ class Pendul;
 enum class Bloc;
 
 enum class ChunkState {
-	READY,
-	TERRAIN,
+	LLEST,
+	TERRENY,
 	PENDENT,
-	EMPTY
+	BUIT
 };
 
 class World {

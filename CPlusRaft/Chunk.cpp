@@ -98,6 +98,7 @@ void Chunk::destroy() {
 		}
 	}
 	cMesh->erase();
+	delete cMesh;
 }
 
 //TODO actualitzar display list
