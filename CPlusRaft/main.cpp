@@ -16,7 +16,8 @@ GLFWwindow* window;
 
 //Clipping planes
 const float zNear = 0.001f;
-float zFar = 256.0f;
+float zFar = 350.0f;
+float viewDist = 20;
 
 const float axisSize = zFar;
 
@@ -70,6 +71,8 @@ enum class Active {
 	INVENTARI,
 	MAPA
 };
+
+int mapY = 5;
 
 Active act = Active::JOC; //Indica a quin menú / part està l'usuari
 
@@ -128,7 +131,7 @@ void Display(GLFWwindow* window)
 
 	glEnable(GL_LIGHTING); //Ens asseguram que l'il·luminació està activada
 
-	world->draw(camera.getPos(), zFar); //Dibuixam el món
+	world->draw(camera.getPos(), viewDist); //Dibuixam el món
 
 	//Actualitzam les llums del món
 	world->updateLights(camera.getPos(), Vector3<float>::normalize(camera.getFront()), camera.getFov(), camera.getAspect());
@@ -254,7 +257,7 @@ void Display(GLFWwindow* window)
 		glPopMatrix();
 	}
 	else if (act == Active::MAPA){
-		world->drawMap(camera.getAspect(), ent);
+		world->drawMap(camera.getAspect(), ent, mapY);
 	}
 	else {
 		glColor3i(0, 0, 0); 
@@ -342,7 +345,8 @@ int main(int argc, char** argv)
 		//Si el món ja existeix, el carregam
 		printf("Loading world %s... \n", wname.c_str());
 		world = new World(wname, &camera);
-		ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 2.0f, 0));
+		ent = new Player(world, Vector3<float>(400, 80, 400) + Vector3<float>(0, 2.0f, 0));
+		//ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 2.0f, 0));
 		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
 	}
 	else {
@@ -358,7 +362,8 @@ int main(int argc, char** argv)
 		//int seed = std::atoi(sseed.c_str());
 		printf("Seed: %d\n", seed);
 		world = new World(wname, seed, 64, 12, 64, &camera); //Mides per crear mapa de biomes be i que no peti: 100, 6, 100
-		ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 10.0f, 0));
+		//ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 10.0f, 0));
+		ent = new Player(world, Vector3<float>(400, 80, 400) + Vector3<float>(0, 2.0f, 0));
 		world->save();
 	}
 	// Inicialitzam el GLFW
@@ -406,7 +411,7 @@ int main(int argc, char** argv)
 	glLoadIdentity();
 
 	gluPerspective(camera.getFov() , 1, zNear, zFar);
-	camera.setViewDist(zFar); //Establim la distància de visió de la càmera
+	//camera.setViewDist(viewDist); //Establim la distància de visió de la càmera
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -517,6 +522,17 @@ void movement(int key) {
 	if (ent != 0) {
 		ent->control(key);
 	}
+
+	if (act == Active::MAPA) {
+		if (key == GLFW_KEY_W) {
+			mapY++;
+			printf("mapY: %d\n", mapY);
+		}
+		else if (key == GLFW_KEY_S) {
+			mapY--;
+			printf("mapY: %d\n", mapY);
+		}
+	}
 	
 	if (key == GLFW_KEY_F) {
 		llanterna = !llanterna;
@@ -535,20 +551,20 @@ void movement(int key) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 	else if (key == GLFW_KEY_E) { //Attach a una entitat propera
-		if (ent != NULL) { //Si controlam una entitat, la deixam
-			ent->onDeattach();
-			ent = NULL;
-			camera.setFreeLook(true);
-			camera.setFreeMove(true);
-		}
-		else { //Si no, en cercam una de propera i la controlam
-			ent = world->getNearestEntity(camera.getPos(), 4.0f, true);
-			if (ent != 0) {
-				camera.setFreeLook(false);
-				camera.setFreeMove(false);
-				ent->onAttach();
-			}
-		}
+		//if (ent != NULL) { //Si controlam una entitat, la deixam
+		//	ent->onDeattach();
+		//	ent = NULL;
+		//	camera.setFreeLook(true);
+		//	camera.setFreeMove(true);
+		//}
+		//else { //Si no, en cercam una de propera i la controlam
+		//	ent = world->getNearestEntity(camera.getPos(), 4.0f, true);
+		//	if (ent != 0) {
+		//		camera.setFreeLook(false);
+		//		camera.setFreeMove(false);
+		//		ent->onAttach();
+		//	}
+		//}
 	}
 	else if (key == GLFW_KEY_T) {
 		world->save();

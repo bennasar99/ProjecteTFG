@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <future> 
 
 #include "Light.h"
 #include "Blocks/Block.h"
@@ -37,6 +38,8 @@ enum class Bloc;
 
 class World {
 private:
+
+	std::future<Chunk*> cnk;
 
 	WorldGenerator wGen;
 
@@ -109,7 +112,7 @@ public:
 	void generate(int seed);
 	void save();
 
-	void drawMap(float scrAspect, Entity* ent);
+	void drawMap(float scrAspect, Entity* ent, int mapY);
 
 	Vector3<int> getRegion(Vector3<int> cPos);
 	bool saveRegion(Vector3<int> rPos);

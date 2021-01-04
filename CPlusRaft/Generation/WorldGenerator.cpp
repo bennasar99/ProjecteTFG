@@ -9,7 +9,6 @@ WorldGenerator::WorldGenerator(int seed, World* world) {
 	this->oceanNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	this->oceanNoise.SetSeed(seed*4);
 	this->oceanNoise.SetFrequency(0.04f); //0.04
-	//this->oceanNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
 	//Clima (calor, templat, fred)
 	this->climateNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
@@ -140,8 +139,8 @@ bool WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks de
 Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, només terreny
 	Chunk* chunk = new Chunk(this->world, cPos);
 	//chunk->setBiome(getBiomeAt(cX, cZ));
-	Bioma bio = getBiomeAt(cPos.x, cPos.z);
-	chunk->setBiome(bio);
+	chunk->setBiome(getBiomeAt(cPos.x, cPos.z));
+	Bioma bio = chunk->getBiome();
 
 
 	int sealvl = 80;
@@ -154,7 +153,8 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 		threshold = 1.4f;
 		break;
 	case Bioma::OCEA:
-		threshold = 0.7f;
+		this->heightNoise.SetFrequency(0.002f);
+		threshold = 0.5f;
 		break;
 	default:
 		this->heightNoise.SetFrequency(0.005f);
@@ -203,7 +203,7 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 		}
 	}
 	if (waterblocksup > (16 * 16) / 2 && chunk->getBiome() != Bioma::OCEA) {
-		if (chunk->getBiome() != Bioma::ARTIC) {
+		if (bio != Bioma::ARTIC) {
 			chunk->setBiome(Bioma::MAR);
 		}
 		else {
