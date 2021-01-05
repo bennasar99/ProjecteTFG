@@ -39,6 +39,7 @@ public:
 
 	bool isVisible(Vector3<int> bpos);
 	Bloc getBlockWorld(Vector3<int> bpos);
+	bool setBlockWorld(Block* bloc, Vector3<int> bpos);
 
 	bool getByteData(char* arr);
 	bool readFromByteData(char* arr);

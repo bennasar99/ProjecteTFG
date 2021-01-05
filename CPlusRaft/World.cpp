@@ -73,8 +73,12 @@ World::World(std::string name, Camera* camera) { //Càrrega ja existent
 	std::fstream file;
 
 	this->wGen = WorldGenerator(this->seed, this);
-
 	this->chunks = new Chunk * [(size_t)size.x * (size_t)size.y * (size_t)size.z];
+	this->estat = new ChunkState[(size_t)size.x * (size_t)size.y * (size_t)size.z];
+	for (int i = 0; i < size.x * size.y * size.z; i++) {
+		this->chunks[i] = nullptr;
+		this->estat[i] = ChunkState::BUIT;
+	}
 	//Carregam les regions
 	for (int rX = 0; rX < ceil((float)this->size.x / 16.0f); rX++) {
 		for (int rY = 0; rY < ceil((float)this->size.y / 16.0f); rY++) {
@@ -322,7 +326,7 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, Block* parent, bool listUpdat
 		return false;
 	}
 
-	if (chunks[desp] == 0){
+	if (chunks[desp] == nullptr){
 		chunks[desp] = new Chunk(this, cpos);
 	}
 
@@ -374,13 +378,14 @@ bool World::setBlock(Block* bloc, Vector3<int> pos, bool listUpdate) {
 	maxpos.y = std::max(maxpos.y, cpos.y); minpos.y = std::min(minpos.y, cpos.y);
 	maxpos.z = std::max(maxpos.z, cpos.z); minpos.z = std::min(minpos.z, cpos.z);
 
-	return chunks[desp]->setBlock(bloc, bpos);
+	chunks[desp]->setBlock(bloc, bpos);
 
 	if (listUpdate) {
 		//chunks[desp]->updateDL();
 		chunks[desp]->updateMesh();
 		updateNeighborChunks(cpos, bpos);
 	}
+	return true;
 }
 
 //Obtenim el bloc a la posició indicada
@@ -466,7 +471,6 @@ void World::draw(Vector3<float> pos, float dist) {
 					continue;
 				}
 				if (chunks[desp] == nullptr) {
-					//std::future<Chunk*> cnk = std::async(is_prime, 1);
 					if (estat[desp] == ChunkState::BUIT && pendents < CORES) {
 						bool trobat = false;
 						for (int i = 0; (i < CORES) && !trobat; i++) {
@@ -479,6 +483,30 @@ void World::draw(Vector3<float> pos, float dist) {
 						}
 					}
 					continue;
+				}
+				else if (estat[desp] == ChunkState::TERRENY && pendents < CORES) {
+					bool trobat = false;
+					bool possible = true;
+					Vector3<int> nPos;
+					for (nPos.x = cPos.x - 1; nPos.x <= cPos.x + 1 && possible; nPos.x++) {
+						for (nPos.y = cPos.y - 1; nPos.y <= cPos.y + 1 && possible; nPos.y++) {
+							for (nPos.z = cPos.z - 1; nPos.z <= cPos.z + 1 && possible; nPos.z++) {
+								int desp = getDesp(nPos);
+								if (estat[desp] != ChunkState::LLEST && estat[desp] != ChunkState::TERRENY) {
+									possible = false;
+								}
+							}
+						}
+					}
+					if (possible) {
+						for (int i = 0; (i < CORES) && !trobat; i++) {
+							if (!cnk[i].valid()) {
+								trobat = true;
+								cnk[i] = std::async(std::launch::async, &WorldGenerator::generateDetail, &wGen, chunks[desp]);
+								pendents++;
+							}
+						}
+					}
 				}
 				int x = cPos.x; int y = cPos.y; int z = cPos.z;
 				float dist = Vector3<float>::module(camera->getPos() - Vector3<float>(x * CHUNKSIZE + CHUNKSIZE/2, y * CHUNKSIZE + CHUNKSIZE/2, z * CHUNKSIZE + CHUNKSIZE/2));
@@ -535,8 +563,14 @@ void World::draw(Vector3<float> pos, float dist) {
 					int desp = getDesp(cpos);
 					if (ch != nullptr) {
 						pendents--;
-						estat[desp] = ChunkState::TERRENY;
+						if (estat[desp] == ChunkState::PENDENT){
+							estat[desp] = ChunkState::TERRENY;
+						}
+						else if (estat[desp] == ChunkState::TERRENY) {
+							estat[desp] = ChunkState::LLEST;
+						}
 						if (ch->nblocs <= 0) {
+							estat[desp] = ChunkState::LLEST;
 							ch->destroy();
 							delete ch;
 							continue;
@@ -890,6 +924,7 @@ bool World::loadRegion(Vector3<int> rPos) {
 					chunks[desp] = new Chunk(this, Vector3<int>(x, y, z));
 					chunks[desp]->readFromByteData(buffer);
 					chunks[desp]->setBiome(bio);
+					estat[desp] = ChunkState::LLEST;
 				}
 			}
 		}

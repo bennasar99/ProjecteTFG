@@ -38,6 +38,6 @@ public:
 
 	Bioma getBiomeAt(int cX, int cZ);
 	
-	bool generateDetail(Chunk* chunk);
+	Chunk* generateDetail(Chunk* chunk);
 	Chunk* generateTerrain(Vector3<int> cPos);
 };

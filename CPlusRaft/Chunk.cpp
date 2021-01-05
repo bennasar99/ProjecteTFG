@@ -154,6 +154,20 @@ Bloc Chunk::getBlockWorld(Vector3<int> bpos) {
 	}
 }
 
+bool Chunk::setBlockWorld(Block* bloc, Vector3<int> bpos) {
+	/*if (bpos.x >= world->size.x * CHUNKSIZE || bpos.y >= world->size.y * CHUNKSIZE || bpos.z >= world->size.z * CHUNKSIZE ||
+		bpos.x < 0 || bpos.y < 0 || bpos.z < 0) {
+		return false;
+	}*/
+	if (bpos.x >= cpos.x * CHUNKSIZE && bpos.x < (cpos.x + 1) * CHUNKSIZE && bpos.y >= cpos.y * CHUNKSIZE &&
+		bpos.y < (cpos.y + 1) * CHUNKSIZE && bpos.z >= cpos.z * CHUNKSIZE && bpos.z < (cpos.z + 1) * CHUNKSIZE) {
+		return this->setBlock(bloc, bpos % 16);
+	}
+	else {
+		return this->world->setBlock(bloc, bpos, false);
+	}
+}
+
 bool Chunk::getByteData(char* arr) {
 	int desp = 0;
 	for (int x = 0; x < CHUNKSIZE; x++) {

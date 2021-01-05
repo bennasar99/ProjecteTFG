@@ -39,6 +39,7 @@ enum class Bloc;
 
 enum class ChunkState {
 	LLEST,
+	BLOQUEJAT,
 	TERRENY,
 	PENDENT,
 	BUIT

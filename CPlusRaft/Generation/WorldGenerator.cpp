@@ -78,18 +78,19 @@ Bioma WorldGenerator::getBiomeAt(int cX, int cZ) {
 	}
 }
 
-bool WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks dels voltants ja estan generats
+Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks dels voltants ja estan generats
 	Vector3<int> cPos = chunk->getPos();
 	float density = 0;
 	int randmax; //Com més alt, - densitat de coses
 	Bioma bio = chunk->getBiome();
 	switch (bio) {
 	case Bioma::BOSC:
-		randmax = 256;
+		randmax = 20;
 		break;
 	case Bioma::PLANA:
-		randmax = 1024;
+		randmax = 100;
 		break;
+
 	}
 	Vector3<int> pos = Vector3<int>(0, 0, 0);
 	for (pos.x = 0; pos.x < CHUNKSIZE; pos.x++) {
@@ -99,25 +100,28 @@ bool WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks de
 			//if (density > threshold) { //Afegim cosa
 				//Agafam la coordenada Y amb un bloc i aire damunt més gran
 				bool trobat = false;
-				for (pos.y = 14; (pos.y >= 0)/*&&(!trobat)*/; pos.y--) {
-					Vector3<int> tpos = pos + Vector3<int>(0, 1, 0);
+				for (pos.y = 15; (pos.y >= 0)/*&&(!trobat)*/; pos.y--) {
+					Vector3<int> tpos = cPos * CHUNKSIZE + pos + Vector3<int>(0, 1, 0);
 					Bloc b1 = chunk->getBlock(pos);
-					Bloc b2 = chunk->getBlock(tpos);
+					Bloc b2 = chunk->getBlockWorld(tpos);
 					if (b1 == Bloc::TERRA && b2 == Bloc::RES){
 						trobat = true;
 						int random = rand() % randmax;
 						if (random == 4 || random == 5 || random == 6 || random == 7 || random == 8) {
-							chunk->setBlock(new SpreadBlock(Bloc::HERBA, tpos), tpos);
+							//chunk->setBlock(new SpreadBlock(Bloc::HERBA, tpos), tpos);
+							world->setBlock(Bloc::HERBA, tpos, nullptr, false);
 						}
 						else if (random == 9) {
 							//Tronc
-							chunk->setBlock(new SolidBlock(Bloc::FUSTAARBRE), tpos);
+							//chunk->setBlock(new SolidBlock(Bloc::FUSTAARBRE), tpos);
+							world->setBlock(Bloc::FUSTAARBRE, tpos, nullptr, false);
 							int rand2 = rand() % 5 + 1;
 							for (int i = 1; i <= rand2; i++) {
 								Vector3<int> fpos = tpos + Vector3<int>(0, i, 0);
-								if (fpos.y >= 0 && fpos.y < 15) {
+								world->setBlock(Bloc::FUSTAARBRE, fpos, nullptr, false);
+								/*if (fpos.y >= 0 && fpos.y < 15) {
 									chunk->setBlock(new SolidBlock(Bloc::FUSTAARBRE), fpos);
-								}
+								}*/
 							}
 							//Fulles
 							int altura = rand() % 3 + 1;
@@ -127,8 +131,8 @@ bool WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks de
 									for (int z = -amplada; z <= amplada; z++) {
 										Vector3<int> lpos = tpos + Vector3<int>(0, rand2 + y, 0)
 											+ Vector3<int>(x, 0, 0) + Vector3<int>(0, 0, z);
-										if (lpos.z >= 0 && lpos.z < 16 && lpos.x >= 0 && lpos.x < 16 && lpos.y >= 0 && lpos.y < 16) {
-											chunk->setBlock(new SolidBlock(Bloc::FULLAARBRE), lpos);
+										if (chunk->getBlockWorld(lpos) == Bloc::RES) {
+											world->setBlock(Bloc::FULLAARBRE, lpos, nullptr, false);
 										}
 									}
 								}
@@ -139,7 +143,7 @@ bool WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks de
 			//}
 		}
 	}
-	return true;
+	return chunk;
 }
 
 Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, només terreny
