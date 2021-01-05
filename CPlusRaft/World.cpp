@@ -235,11 +235,12 @@ void World::update(int delta, Vector3<float> pos) {
 		glDisable(sol);
 	}
 	
-	//updTimer -= delta;
-	//if (updTimer > 0) {
-	//	return;
-	//}
-	//updTimer = 1000; //10 tps
+	updTimer -= delta;
+	if (updTimer > 0) {
+		return;
+	}
+	updTimer = 1000; //10 tps
+	this->updateVisibility();
 	//Ordenació llums
 	std::list<Light*>::iterator it;
 	for (it = lights.begin(); (it != lights.end()); it++) {
@@ -447,113 +448,69 @@ void World::draw(Vector3<float> pos, float dist) {
 		glPopMatrix();
 	}
 
-	//Obtenim el volum de possible visibilitat de la càmera
-	int xmin = camera->xmin / CHUNKSIZE;	int xmax = camera->xmax / CHUNKSIZE;
-	int ymin = camera->ymin / CHUNKSIZE;	int ymax = camera->ymax / CHUNKSIZE;
-	int zmin = camera->zmin / CHUNKSIZE;	int zmax = camera->zmax / CHUNKSIZE;
-
-	xmin = std::max(xmin, 0);				ymin = std::max(ymin, 0);				zmin = std::max(zmin, 0);
-	xmax = std::min(xmax, this->size.x);		ymax = std::min(ymax, this->size.y);		zmax = std::min(zmax, this->size.z);
-
-	//NOU CODI CHUNKS
-	Vector3<int> cMin = Vector3<int>(xmin, ymin, zmin);
-
-	Vector3<int> cMax = Vector3<int>(xmax, ymax, zmax);
-
-	//printf("%f %f %f, %f %f %f\n", cMin.x, cMin.y, cMin.z, cMax.x, cMax.y, cMax.z);
-	int nchunks = 0;
-	Vector3<int> cPos = Vector3<int>(0, 0, 0);
-	for (cPos.x = cMin.x; cPos.x <= cMax.x; cPos.x++) { //Optimització possible: si els chunks circumdants no son visibles, aquest no ho és
-		for (cPos.z = cMin.z; cPos.z <= cMax.z; cPos.z++) {
-			for (cPos.y = cMin.y; cPos.y <= cMax.y; cPos.y++) {
-				int desp = getDesp(cPos);
-				if (desp == -1) {
-					continue;
-				}
-				if (chunks[desp] == nullptr) {
-					if (estat[desp] == ChunkState::BUIT && pendents < CORES) {
-						bool trobat = false;
-						for (int i = 0; (i < CORES) && !trobat; i++) {
-							if (!cnk[i].valid()) {
-								cnk[i] = std::async(std::launch::async, &WorldGenerator::generateTerrain, &wGen, cPos);
-								estat[desp] = ChunkState::PENDENT;
-								trobat = true;
-								pendents++;
-							}
-						}
+	std::list<Vector3<int>>::iterator chunki;
+	for (chunki = vChunks.begin(); (chunki != vChunks.end()); chunki++) {
+		Vector3<int> cPos = *chunki;
+		int desp = getDesp(cPos);
+		if (chunks[desp] == nullptr) {
+			if (estat[desp] == ChunkState::BUIT && pendents < CORES) {
+				bool trobat = false;
+				for (int i = 0; (i < CORES) && !trobat; i++) {
+					if (!cnk[i].valid()) {
+						cnk[i] = std::async(std::launch::async, &WorldGenerator::generateTerrain, &wGen, cPos);
+						estat[desp] = ChunkState::PENDENT;
+						trobat = true;
+						pendents++;
 					}
-					continue;
 				}
-				else if (estat[desp] == ChunkState::TERRENY && pendents < CORES) {
-					bool trobat = false;
-					bool possible = true;
-					Vector3<int> nPos;
-					for (nPos.x = cPos.x - 1; nPos.x <= cPos.x + 1 && possible; nPos.x++) {
-						for (nPos.y = cPos.y - 1; nPos.y <= cPos.y + 1 && possible; nPos.y++) {
-							for (nPos.z = cPos.z - 1; nPos.z <= cPos.z + 1 && possible; nPos.z++) {
-								int desp = getDesp(nPos);
-								if (estat[desp] != ChunkState::LLEST && estat[desp] != ChunkState::TERRENY) {
-									possible = false;
-								}
-							}
-						}
-					}
-					if (possible) {
-						for (int i = 0; (i < CORES) && !trobat; i++) {
-							if (!cnk[i].valid()) {
-								trobat = true;
-								cnk[i] = std::async(std::launch::async, &WorldGenerator::generateDetail, &wGen, chunks[desp]);
-								pendents++;
-							}
+			}
+			continue;
+		}
+		else if (estat[desp] == ChunkState::TERRENY && pendents < CORES) {
+			bool trobat = false;
+			bool possible = true;
+			Vector3<int> nPos;
+			for (nPos.x = cPos.x - 1; nPos.x <= cPos.x + 1 && possible; nPos.x++) {
+				for (nPos.y = cPos.y - 1; nPos.y <= cPos.y + 1 && possible; nPos.y++) {
+					for (nPos.z = cPos.z - 1; nPos.z <= cPos.z + 1 && possible; nPos.z++) {
+						int desp = getDesp(nPos);
+						if (estat[desp] != ChunkState::LLEST && estat[desp] != ChunkState::TERRENY) {
+							possible = false;
 						}
 					}
 				}
-				int x = cPos.x; int y = cPos.y; int z = cPos.z;
-				float dist = Vector3<float>::module(camera->getPos() - Vector3<float>(x * CHUNKSIZE + CHUNKSIZE/2, y * CHUNKSIZE + CHUNKSIZE/2, z * CHUNKSIZE + CHUNKSIZE/2));
-				if ((dist < CHUNKSIZE) || (camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE), 100) ||
-					camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE), 100) ||
-					camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
-					camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
-					camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE), 100) ||
-					camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE), 100) ||
-					camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
-					camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100))){
-					
-					glPushMatrix();
-					glTranslatef(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE);
-					chunks[desp]->drawO();
-					glPopMatrix();
-					nchunks++;
+			}
+			if (possible) {
+				for (int i = 0; (i < CORES) && !trobat; i++) {
+					if (!cnk[i].valid()) {
+						trobat = true;
+						cnk[i] = std::async(std::launch::async, &WorldGenerator::generateDetail, &wGen, chunks[desp]);
+						pendents++;
+					}
 				}
 			}
 		}
-	}
-	for (float x = (float)cMin.x; x <= (float)cMax.x; x++) { //Optimització possible: si els chunks circumdants no son visibles, aquest no ho és
-		for (float y = (float)cMin.y; y <= (float)cMax.y; y++) {
-			for (float z = (float)cMin.z; z <= (float)cMax.z; z++) {
-				int desp = getDesp(Vector3<int>((int)x, (int)y, (int)z));
-				if (chunks[desp] == nullptr || desp == -1) {
-					continue;
-				}
-				float dist = Vector3<float>::module(camera->getPos() - Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE));
-				if ((dist < 24) || (camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE), 100) ||
-					camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE), 100) ||
-					camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
-					camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
-					camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE), 100) ||
-					camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE), 100) ||
-					camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
-					camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100))) {
-
-					glPushMatrix();
-					glTranslatef(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE);
-					chunks[desp]->drawT();
-					glPopMatrix();
-					nchunks++;
-				}
-			}
+		if (desp == -1 || chunks[desp] == NULL) {
+			continue;
 		}
+		glPushMatrix();
+		glTranslatef(cPos.x * CHUNKSIZE, cPos.y * CHUNKSIZE, cPos.z * CHUNKSIZE);
+		chunks[desp]->drawO();
+		glPopMatrix();
 	}
+
+	for (chunki = vChunks.begin(); (chunki != vChunks.end()); chunki++) {
+		Vector3<int> cPos = *chunki;
+		int desp = getDesp(cPos);
+		if (desp == -1 || chunks[desp] == NULL) {
+			continue;
+		}
+		glPushMatrix();
+		glTranslatef(cPos.x * CHUNKSIZE, cPos.y * CHUNKSIZE, cPos.z * CHUNKSIZE);
+		chunks[desp]->drawT();
+		glPopMatrix();
+	}
+
 	if (pendents > 0) {
 		for (int i = 0; i < CORES && pendents>0; i++) {
 			if (cnk[i].valid()) {
@@ -593,6 +550,49 @@ void World::draw(Vector3<float> pos, float dist) {
 		}
 	}
 	//printf("Chunks: %d\n", nchunks);
+}
+
+void World::updateVisibility() {
+	//camera->setViewDist(dist * CHUNKSIZE);
+	camera->setViewDist(20.0f * CHUNKSIZE);
+
+	//Obtenim el volum de possible visibilitat de la càmera
+	int xmin = camera->xmin / CHUNKSIZE;	int xmax = camera->xmax / CHUNKSIZE;
+	int ymin = camera->ymin / CHUNKSIZE;	int ymax = camera->ymax / CHUNKSIZE;
+	int zmin = camera->zmin / CHUNKSIZE;	int zmax = camera->zmax / CHUNKSIZE;
+
+	xmin = std::max(xmin, 0);				ymin = std::max(ymin, 0);				zmin = std::max(zmin, 0);
+	xmax = std::min(xmax, this->size.x);		ymax = std::min(ymax, this->size.y);		zmax = std::min(zmax, this->size.z);
+
+	//NOU CODI CHUNKS
+	Vector3<int> cMin = Vector3<int>(xmin, ymin, zmin);
+
+	Vector3<int> cMax = Vector3<int>(xmax, ymax, zmax);
+
+	vChunks.clear();
+
+	//printf("%f %f %f, %f %f %f\n", cMin.x, cMin.y, cMin.z, cMax.x, cMax.y, cMax.z);
+	Vector3<int> cPos = Vector3<int>(0, 0, 0);
+	for (cPos.x = cMin.x; cPos.x <= cMax.x; cPos.x++) { //Optimització possible: si els chunks circumdants no son visibles, aquest no ho és
+		for (cPos.z = cMin.z; cPos.z <= cMax.z; cPos.z++) {
+			for (cPos.y = cMin.y; cPos.y <= cMax.y; cPos.y++) {
+				int x = cPos.x; int y = cPos.y; int z = cPos.z;
+				float dist = Vector3<float>::module(camera->getPos() - Vector3<float>(x * CHUNKSIZE + CHUNKSIZE / 2, y * CHUNKSIZE + CHUNKSIZE / 2, z * CHUNKSIZE + CHUNKSIZE / 2));
+				if ((dist < CHUNKSIZE) || (camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE), 100) ||
+						camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE), 100) ||
+						camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
+						camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
+						camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE), 100) ||
+						camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE), 100) ||
+						camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
+						camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100))) {
+					vChunks.push_back(cPos);
+					printf("DFS");
+				}
+			}
+		}
+	}
+	printf("\n");
 }
 
 //Dibuixa un bloc a una posició determinada (Sense guardar-lo al món)

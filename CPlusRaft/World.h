@@ -65,6 +65,7 @@ private:
 
 	std::list<Light*> lights;
 	std::list<Entity*> entities;
+	std::list<Vector3<int>> vChunks; //Llista de chunks visibles
 
 	int getDesp(Vector3<int> pos);
 	Vector3<int> spawn; //Spawn point
@@ -125,6 +126,7 @@ public:
 	void save();
 
 	void drawMap(float scrAspect, Entity* ent, int mapY);
+	void updateVisibility();
 
 	Vector3<int> getRegion(Vector3<int> cPos);
 	bool saveRegion(Vector3<int> rPos);
