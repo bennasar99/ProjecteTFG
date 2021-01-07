@@ -2,7 +2,6 @@
 
 Light::Light(Vector3<float> pos) {
 	this->setPos(pos);
-	this->dist = 10000;
 	this->setColor(1, 1, 1, 1); //Llum blanca per defecte
 }
 
@@ -93,14 +92,6 @@ float Light::getAttenuation(Attenuation at) {
 	return retorn;
 }
 
-float Light::getDist() {
-	return this->dist;
-}
-
-void Light::setDist(float dist) {
-	this->dist = dist;
-}
-
 void Light::setSpreadAngle(float angle) {
 	this->spreadAngle = angle;
 }
@@ -123,9 +114,4 @@ void Light::setEnabled(bool enabled) {
 
 bool Light::getEnabled() {
 	return this->enabled;
-}
-
-//Funció de comparació '<' entre dues llums, segons distància a la càmera
-bool Light::operator<(const Light& other) {
-	return this->dist < other.dist;
 }

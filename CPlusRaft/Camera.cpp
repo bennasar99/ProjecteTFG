@@ -23,6 +23,7 @@ void Camera::setPos(Vector3<float> pos) {
 
 	//Actualitzam la posició de l'escoltador OpenAL
 	alListener3f(AL_POSITION, this->pos.x, this->pos.y, this->pos.z);
+	this->updateCorners();
 }
 
 Vector3<float> Camera::getFront() {
@@ -179,6 +180,12 @@ void Camera::display() {
 		(double)this->pos.x + (double)this->front.x, (double)this->pos.y + (double)this->front.y, (double)this->pos.z + (double)this->front.z,
 		(double)this->up.x, (double)this->up.y, (double)this->up.z);
 
+	glGetDoublev(GL_MODELVIEW_MATRIX, model_view);
+
+	glGetDoublev(GL_PROJECTION_MATRIX, projection);
+
+	glGetIntegerv(GL_VIEWPORT, viewport); //viewport[2] = width, viewport[3] = height
+
 	if (this->drawMove) {
 		if (this->punts.size() > 0) {
 			glPushMatrix();
@@ -260,19 +267,11 @@ void Camera::lookAt(Vector3<float> pos) {
 
 //Indica si un punt és visible per la càmera
 bool Camera::isVisible(Vector3<float> pos, float marge) {
+	//printf("%f %f %f\n", pos.x, pos.y, pos.z);
 	float dist = Vector3<float>::module(pos - this->pos);
 	if (dist < aspect) { //Abans 4 * aspect
 		return true;
 	}
-
-	GLdouble model_view[16];
-	glGetDoublev(GL_MODELVIEW_MATRIX, model_view);
-
-	GLdouble projection[16];
-	glGetDoublev(GL_PROJECTION_MATRIX, projection);
-
-	GLint viewport[4];
-	glGetIntegerv(GL_VIEWPORT, viewport); //viewport[2] = width, viewport[3] = height
 
 	double min = floor(marge*100/fov); //Abans marge*100
 	double max = ceil(marge*100/fov);

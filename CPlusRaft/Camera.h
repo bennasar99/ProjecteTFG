@@ -29,6 +29,11 @@ private:
 
 	std::list< Vector3<float> > punts; //Posicions anteriors
 
+	//Matrius
+	GLdouble model_view[16];
+	GLdouble projection[16];
+	GLint viewport[4];
+
 public:
 	int xmin, ymin, zmin, xmax, ymax, zmax; //Punts de l'àrea visible definida per la càmera
 

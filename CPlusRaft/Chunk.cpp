@@ -14,16 +14,14 @@ Chunk::Chunk(World* world, Vector3<int> pos) {
 	this->nblocs = 0;
 
 	this->cMesh = new ChunkMesh();
-
-	this->firstdraw = false;
 }
 
 void Chunk::drawO() {
 	if (nblocs == 0) {
 		return;
 	}
-	if (firstdraw == false) {
-		firstdraw = true;
+	if (firstdraw == true) {
+		firstdraw = false;
 		this->updateMesh();
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
@@ -37,8 +35,8 @@ void Chunk::drawT() {
 	if (nblocs == 0) {
 		return;
 	}
-	if (firstdraw == false) {
-		firstdraw = true;
+	if (firstdraw == true) {
+		firstdraw = false;
 		this->updateMesh();
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
@@ -103,7 +101,8 @@ void Chunk::destroy() {
 
 //TODO actualitzar display list
 bool Chunk::delBlock(Vector3<int> bpos, bool destroy) {
-  	if (this->blocs[bpos.x][bpos.y][bpos.z] != 0) {      
+	printf("%d %d %d\n", bpos.x, bpos.y, bpos.z);
+  	if (this->blocs[bpos.x][bpos.y][bpos.z] != nullptr) {      
 		if (destroy) {
 			this->blocs[bpos.x][bpos.y][bpos.z]->destroy(this->world);
 		}

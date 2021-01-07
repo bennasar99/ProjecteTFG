@@ -19,6 +19,7 @@
 #include "Blocks/SolidBlock.h"
 #include "Blocks/LiquidBlock.h"
 #include "Blocks/SpreadBlock.h"
+#include "Entities/Player.h"
 #include <algorithm>
 #include "Utils.h"
 #include "Camera.h"
@@ -30,7 +31,7 @@
 #include "ryml.hpp"
 
 #define REGIONSIZE 16
-#define CORES 8
+#define CORES 4
 
 class Block;
 class LightBlock;
@@ -71,10 +72,12 @@ private:
 	Vector3<int> spawn; //Spawn point
 
 	int seed;
-	int updTimer = 1000;
+	int updTimer = 200;
 
 	FastNoiseLite noise;
 	std::string name;
+
+	void updateGeneration();
 
 public:
 	//Han de ser nombres parells
@@ -103,7 +106,7 @@ public:
 	void draw(Vector3<float> pos, float dist);
 
 	//Llums
-	void updateLights(Vector3<float> camPos, Vector3<float> front, float camFov, float aspect);
+	void drawLights();
 	void setLight(int lightnum, Light* light);
 	Light* addLight(Vector3<float> pos);
 	void delLight(Light* light);
@@ -122,7 +125,7 @@ public:
 
 	void update(int delta, Vector3<float> camPos);
 
-	void generate(int seed);
+	//void generate(int seed);
 	void save();
 
 	void drawMap(float scrAspect, Entity* ent, int mapY);

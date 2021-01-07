@@ -26,7 +26,6 @@ World::World(std::string name, int seed, int sizex, int sizey, int sizez, Camera
 		this->chunks[i] = nullptr;
 		this->estat[i] = ChunkState::BUIT;
 	}
-	this->generate(seed);
 
 	//Col·locam càmera
 	int x = rand() % (size.x * CHUNKSIZE);
@@ -120,50 +119,19 @@ void World::save() {
 	info.close();
 }
 
-void World::generate(int seed) {
-	//Generador del món
-	srand(seed); //Seed? xD
-	noise.SetSeed(seed);
-	Vector3<int> pos = Vector3<int>(0, 0, 0);
-	for (pos.x = 0; pos.x < this->size.x; pos.x++) {
-		for (pos.y = 0; pos.y < this->size.y; pos.y++) {
-			for (pos.z = 0; pos.z < this->size.z; pos.z++) {
-				//chunks[getDesp(pos)] = wGen.generateTerrain(pos);
-					/*if (!cnk.valid()) {
-						cnk = std::async(std::launch::async, &WorldGenerator::generateTerrain, wGen, pos);
-						break;
-					}
-					else if (cnk.wait_for(std::chrono::nanoseconds(0)) == std::future_status::ready) {
-						Chunk* ch = cnk.get();
-					}*/
-
-
-			}
-		}
-	}
-	for (pos.x = 0; pos.x < this->size.x; pos.x++) {
-		for (pos.y = 0; pos.y < this->size.y; pos.y++) {
-			for (pos.z = 0; pos.z < this->size.z; pos.z++) {
-				//wGen.generateDetail(chunks[getDesp(pos)]);
-			}
-		}
-	}
-
-}
-
-//Actualitzam els llums del món
-void World::updateLights(Vector3<float> camPos, Vector3<float> front, float camFovY, float aspect) {
+void World::drawLights(){
 	std::list<Light*>::iterator it;
 	unsigned int currentLight = GL_LIGHT2;
 	for (unsigned int i = GL_LIGHT2; i <= GL_LIGHT7; i++) {
 		glDisable(i);
 	}
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
+	//glMatrixMode(GL_MODELVIEW);
+	//glPushMatrix();
 	std::list <Light*> segonapas;
 	for (it = lights.begin(); (it != lights.end() && currentLight <= GL_LIGHT7); it++) {
 		if ((*it)->getEnabled()) {
-			if ((camera->isVisible((*it)->getPosVec(), 0)) || ((*it)->getDist() <= 1.0f)) { //Mostram només les llums visibles o molt properes
+			float dist = Vector3<float>::module((*it)->getPosVec() - camera->getPos());
+			if ((camera->isVisible((*it)->getPosVec(), 0)) || (dist <= 1.0f)) { //Mostram només les llums visibles o molt properes
 				setLight(currentLight, *it);
 				currentLight++;
 			}
@@ -174,7 +142,7 @@ void World::updateLights(Vector3<float> camPos, Vector3<float> front, float camF
 	}
 
 	//2a passada, només tenim en compte la distància
-	for (it = segonapas.begin(); (it != segonapas.end() && currentLight <= GL_LIGHT7); it++) { 
+	for (it = segonapas.begin(); (it != segonapas.end() && currentLight <= GL_LIGHT7); it++) {
 		setLight(currentLight, *it);
 		currentLight++;
 	}
@@ -213,11 +181,6 @@ void World::delLight(Light* light) {
 	delete light;
 }
 
-//Comparador per la llista de llums
-static bool compareLights(Light* a, Light* b) {
-	return a->getDist() < b->getDist();
-}
-
 /**
  * Actualització del món a cada frame (Idle)
  * @param delta temps des de la darrera actualització en ms
@@ -225,7 +188,6 @@ static bool compareLights(Light* a, Light* b) {
  * Actualitza l'estat intern de les estructures del món, a més de la distància de les llums
  */
 void World::update(int delta, Vector3<float> pos) {
-
 	daytime += ((float)delta);
 	if (daytime >= 86400.0f) {
 		daytime = 0; //Reiniciam el temps del dia
@@ -235,18 +197,19 @@ void World::update(int delta, Vector3<float> pos) {
 		glDisable(sol);
 	}
 	
+	updateGeneration();
+
 	updTimer -= delta;
 	if (updTimer > 0) {
 		return;
 	}
-	updTimer = 1000; //10 tps
+	updTimer = 200; //5 tps
 	this->updateVisibility();
+
 	//Ordenació llums
-	std::list<Light*>::iterator it;
-	for (it = lights.begin(); (it != lights.end()); it++) {
-		(*it)->setDist(Vector3<float>::module(pos - (*it)->getPosVec())); //Actualitzam la distància de les llums
-	}
-	lights.sort(compareLights); //Ordenam les llums per distància
+	lights.sort([this](Light* l1, Light* l2) {
+		return (Vector3<float>::module(l1->getPosVec() - camera->getPos()) < Vector3<float>::module(l2->getPosVec() - camera->getPos()));
+	}); //Ordenam les llums per distància
 
 	//NOU CODI CHUNKS
 	pos = pos / CHUNKSIZE;
@@ -267,6 +230,92 @@ void World::update(int delta, Vector3<float> pos) {
 	std::list<Entity*>::iterator ent;
 	for (ent = entities.begin(); (ent != entities.end()); ent++) {
 		(*ent)->update(delta);
+	}
+}
+
+void World::updateGeneration() {
+	if (pendents > 0) {
+		for (int i = 0; i < CORES && pendents>0; i++) {
+			if (cnk[i].valid()) {
+				if (cnk[i].wait_for(std::chrono::nanoseconds(0)) == std::future_status::ready) {
+					Chunk* ch = cnk[i].get();
+					Vector3 cpos = ch->getPos();
+					int desp = getDesp(cpos);
+					if (ch != nullptr) {
+						pendents--;
+						if (estat[desp] == ChunkState::PENDENT) {
+							estat[desp] = ChunkState::TERRENY;
+						}
+						else if (estat[desp] == ChunkState::TERRENY) {
+							estat[desp] = ChunkState::LLEST;
+						}
+						if (ch->nblocs <= 0) {
+							estat[desp] = ChunkState::LLEST;
+							ch->destroy();
+							delete ch;
+							continue;
+						}
+						chunks[desp] = ch;
+						for (int nX = cpos.x - 1; nX <= cpos.x + 1; nX++) {
+							for (int nY = cpos.y - 1; nY <= cpos.y + 1; nY++) {
+								for (int nZ = cpos.z - 1; nZ <= cpos.z + 1; nZ++) {
+									int desp = getDesp(Vector3<int>((int)nX, (int)nY, (int)nZ));
+									if (desp == -1 || chunks[desp] == nullptr) {
+										continue;
+									}
+									chunks[desp]->firstdraw = true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	else if (pendents < CORES) {
+		std::list<Vector3<int>>::iterator chunki;
+		for (chunki = vChunks.begin(); (chunki != vChunks.end()); chunki++) {
+			Vector3<int> cPos = *chunki;
+			int desp = getDesp(cPos);
+			if (chunks[desp] == nullptr) {
+				if (estat[desp] == ChunkState::BUIT && pendents < CORES) {
+					bool trobat = false;
+					for (int i = 0; (i < CORES) && !trobat; i++) {
+						if (!cnk[i].valid()) {
+							cnk[i] = std::async(std::launch::async, &WorldGenerator::generateTerrain, &wGen, cPos);
+							estat[desp] = ChunkState::PENDENT;
+							trobat = true;
+							pendents++;
+						}
+					}
+				}
+				continue;
+			}
+			else if (estat[desp] == ChunkState::TERRENY && pendents < CORES) {
+				bool trobat = false;
+				bool possible = true;
+				Vector3<int> nPos;
+				for (nPos.x = cPos.x - 1; nPos.x <= cPos.x + 1 && possible; nPos.x++) {
+					for (nPos.y = cPos.y - 1; nPos.y <= cPos.y + 1 && possible; nPos.y++) {
+						for (nPos.z = cPos.z - 1; nPos.z <= cPos.z + 1 && possible; nPos.z++) {
+							int desp = getDesp(nPos);
+							if (estat[desp] != ChunkState::LLEST && estat[desp] != ChunkState::TERRENY) {
+								possible = false;
+							}
+						}
+					}
+				}
+				if (possible) {
+					for (int i = 0; (i < CORES) && !trobat; i++) {
+						if (!cnk[i].valid()) {
+							trobat = true;
+							cnk[i] = std::async(std::launch::async, &WorldGenerator::generateDetail, &wGen, chunks[desp]);
+							pendents++;
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -308,7 +357,7 @@ bool World::deleteBlock(Vector3<int> pos, bool destroy) { //Eliminar Bloc::RES?
 	//cpos.floor();
 	Vector3<int> bpos = pos % CHUNKSIZE;
 	int desp = getDesp(cpos);
-	if (desp == -1) {
+	if (desp == -1 || chunks[desp] == nullptr) {
 		return false;
 	}
 	return this->chunks[desp]->delBlock(bpos, destroy);
@@ -351,7 +400,7 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, Block* parent, bool listUpdat
 	chunks[desp]->setBlock(bloc, bpos);
 	if (listUpdate) {
 		//chunks[desp]->updateDL();
-		chunks[desp]->updateMesh();
+		chunks[desp]->firstdraw = true;;
 		updateNeighborChunks(cpos, bpos);
 	}
 
@@ -383,7 +432,7 @@ bool World::setBlock(Block* bloc, Vector3<int> pos, bool listUpdate) {
 
 	if (listUpdate) {
 		//chunks[desp]->updateDL();
-		chunks[desp]->updateMesh();
+		chunks[desp]->firstdraw = true;
 		updateNeighborChunks(cpos, bpos);
 	}
 	return true;
@@ -428,16 +477,9 @@ Block* World::getBlockPointer(Vector3<int> pos, bool remove) {
 	return nullptr;
 }
 
-Chunk* generateTerrain(int x) {
-	return nullptr;
-}
-
-
 
 //Dibuixa el món visible
 void World::draw(Vector3<float> pos, float dist) {
-
-	camera->setViewDist(dist * CHUNKSIZE);
 
 	std::list<Entity*>::iterator ent;
 	for (ent = entities.begin(); (ent != entities.end()); ent++) {
@@ -452,44 +494,6 @@ void World::draw(Vector3<float> pos, float dist) {
 	for (chunki = vChunks.begin(); (chunki != vChunks.end()); chunki++) {
 		Vector3<int> cPos = *chunki;
 		int desp = getDesp(cPos);
-		if (chunks[desp] == nullptr) {
-			if (estat[desp] == ChunkState::BUIT && pendents < CORES) {
-				bool trobat = false;
-				for (int i = 0; (i < CORES) && !trobat; i++) {
-					if (!cnk[i].valid()) {
-						cnk[i] = std::async(std::launch::async, &WorldGenerator::generateTerrain, &wGen, cPos);
-						estat[desp] = ChunkState::PENDENT;
-						trobat = true;
-						pendents++;
-					}
-				}
-			}
-			continue;
-		}
-		else if (estat[desp] == ChunkState::TERRENY && pendents < CORES) {
-			bool trobat = false;
-			bool possible = true;
-			Vector3<int> nPos;
-			for (nPos.x = cPos.x - 1; nPos.x <= cPos.x + 1 && possible; nPos.x++) {
-				for (nPos.y = cPos.y - 1; nPos.y <= cPos.y + 1 && possible; nPos.y++) {
-					for (nPos.z = cPos.z - 1; nPos.z <= cPos.z + 1 && possible; nPos.z++) {
-						int desp = getDesp(nPos);
-						if (estat[desp] != ChunkState::LLEST && estat[desp] != ChunkState::TERRENY) {
-							possible = false;
-						}
-					}
-				}
-			}
-			if (possible) {
-				for (int i = 0; (i < CORES) && !trobat; i++) {
-					if (!cnk[i].valid()) {
-						trobat = true;
-						cnk[i] = std::async(std::launch::async, &WorldGenerator::generateDetail, &wGen, chunks[desp]);
-						pendents++;
-					}
-				}
-			}
-		}
 		if (desp == -1 || chunks[desp] == NULL) {
 			continue;
 		}
@@ -497,6 +501,7 @@ void World::draw(Vector3<float> pos, float dist) {
 		glTranslatef(cPos.x * CHUNKSIZE, cPos.y * CHUNKSIZE, cPos.z * CHUNKSIZE);
 		chunks[desp]->drawO();
 		glPopMatrix();
+
 	}
 
 	for (chunki = vChunks.begin(); (chunki != vChunks.end()); chunki++) {
@@ -511,50 +516,12 @@ void World::draw(Vector3<float> pos, float dist) {
 		glPopMatrix();
 	}
 
-	if (pendents > 0) {
-		for (int i = 0; i < CORES && pendents>0; i++) {
-			if (cnk[i].valid()) {
-				if (cnk[i].wait_for(std::chrono::nanoseconds(0)) == std::future_status::ready) {
-					Chunk* ch = cnk[i].get();
-					Vector3 cpos = ch->getPos();
-					int desp = getDesp(cpos);
-					if (ch != nullptr) {
-						pendents--;
-						if (estat[desp] == ChunkState::PENDENT){
-							estat[desp] = ChunkState::TERRENY;
-						}
-						else if (estat[desp] == ChunkState::TERRENY) {
-							estat[desp] = ChunkState::LLEST;
-						}
-						if (ch->nblocs <= 0) {
-							estat[desp] = ChunkState::LLEST;
-							ch->destroy();
-							delete ch;
-							continue;
-						}
-						chunks[desp] = ch;
-						for (int nX = cpos.x - 1; nX <= cpos.x + 1; nX++) {
-							for (int nY = cpos.y - 1; nY <= cpos.y + 1; nY++) {
-								for (int nZ = cpos.z - 1; nZ <= cpos.z + 1; nZ++) {
-									int desp = getDesp(Vector3<int>((int)nX, (int)nY, (int)nZ));
-									if (desp == -1 || chunks[desp] == nullptr) {
-										continue;
-									}
-									chunks[desp]->updateMesh();
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
 	//printf("Chunks: %d\n", nchunks);
+
+	this->drawLights();
 }
 
 void World::updateVisibility() {
-	//camera->setViewDist(dist * CHUNKSIZE);
-	camera->setViewDist(20.0f * CHUNKSIZE);
 
 	//Obtenim el volum de possible visibilitat de la càmera
 	int xmin = camera->xmin / CHUNKSIZE;	int xmax = camera->xmax / CHUNKSIZE;
@@ -570,29 +537,31 @@ void World::updateVisibility() {
 	Vector3<int> cMax = Vector3<int>(xmax, ymax, zmax);
 
 	vChunks.clear();
-
-	//printf("%f %f %f, %f %f %f\n", cMin.x, cMin.y, cMin.z, cMax.x, cMax.y, cMax.z);
+	//printf("%d %d %d, %d %d %d\n", cMin.x, cMin.y, cMin.z, cMax.x, cMax.y, cMax.z);
+	int chunk = 0;
 	Vector3<int> cPos = Vector3<int>(0, 0, 0);
 	for (cPos.x = cMin.x; cPos.x <= cMax.x; cPos.x++) { //Optimització possible: si els chunks circumdants no son visibles, aquest no ho és
 		for (cPos.z = cMin.z; cPos.z <= cMax.z; cPos.z++) {
 			for (cPos.y = cMin.y; cPos.y <= cMax.y; cPos.y++) {
-				int x = cPos.x; int y = cPos.y; int z = cPos.z;
-				float dist = Vector3<float>::module(camera->getPos() - Vector3<float>(x * CHUNKSIZE + CHUNKSIZE / 2, y * CHUNKSIZE + CHUNKSIZE / 2, z * CHUNKSIZE + CHUNKSIZE / 2));
-				if ((dist < CHUNKSIZE) || (camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE), 100) ||
-						camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE), 100) ||
-						camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
-						camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
-						camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE), 100) ||
-						camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE), 100) ||
-						camera->isVisible(Vector3<float>(x * CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100) ||
-						camera->isVisible(Vector3<float>(x * CHUNKSIZE + CHUNKSIZE, y * CHUNKSIZE + CHUNKSIZE, z * CHUNKSIZE + CHUNKSIZE), 100))) {
-					vChunks.push_back(cPos);
-					printf("DFS");
+				Vector3<float> pos = Vector3<float>(cPos.x, cPos.y, cPos.z) * CHUNKSIZE;
+				float dist = Vector3<float>::module(camera->getPos() - (pos + Vector3<float>(CHUNKSIZE/2,CHUNKSIZE/2, CHUNKSIZE/2)));
+				if ((dist < CHUNKSIZE * 4) || (camera->isVisible(pos, 100) ||
+						camera->isVisible(pos + Vector3<float>(CHUNKSIZE, 0, 0), 100) ||
+						camera->isVisible(pos + Vector3<float>(0, 0, CHUNKSIZE), 100) ||
+						camera->isVisible(pos + Vector3<float>(CHUNKSIZE, 0, CHUNKSIZE), 100) ||
+						camera->isVisible(pos + Vector3<float>(0, CHUNKSIZE, 0), 100) ||
+						camera->isVisible(pos + Vector3<float>(CHUNKSIZE, CHUNKSIZE, 0), 100) ||
+						camera->isVisible(pos + Vector3<float>(0, CHUNKSIZE, CHUNKSIZE), 100) ||
+						camera->isVisible(pos + Vector3<float>(CHUNKSIZE, CHUNKSIZE, CHUNKSIZE), 100))) {
+					vChunks.push_front(cPos);
+					chunk++;
 				}
 			}
 		}
 	}
-	printf("\n");
+	vChunks.sort([this](Vector3<int> a, Vector3<int> b) {
+		return (Vector3<int>::module(a*CHUNKSIZE - camera->getPos()) < Vector3<int>::module(b*CHUNKSIZE - camera->getPos())); }
+	);
 }
 
 //Dibuixa un bloc a una posició determinada (Sense guardar-lo al món)
@@ -725,7 +694,8 @@ void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
 		if (chunks[desp] == nullptr) {
 			chunks[desp] = new Chunk(this, ncpos);
 		}
-		chunks[desp]->updateMesh();
+		//chunks[desp]->updateMesh();
+		chunks[desp]->firstdraw = true;
 	}
 	if (bpos.y == 15) {
 		ncpos = cpos + Vector3<int>(0, 1, 0);
@@ -738,7 +708,8 @@ void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
 		if (chunks[desp] == nullptr) {
 			chunks[desp] = new Chunk(this, ncpos);
 		}
-		chunks[desp]->updateMesh();
+		//chunks[desp]->updateMesh();
+		chunks[desp]->firstdraw = true;
 	}
 	if (bpos.z == 15) {
 		ncpos = cpos + Vector3<int>(0, 0, 1);
@@ -751,7 +722,8 @@ void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
 		if (chunks[desp] == nullptr) {
 			chunks[desp] = new Chunk(this, ncpos);
 		}
-		chunks[desp]->updateMesh();
+		//chunks[desp]->updateMesh();
+		chunks[desp]->firstdraw = true;
 	}
 }
 

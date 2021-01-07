@@ -19,7 +19,6 @@ private:
 	float specular[4] = { 0,0,0,0 };
 	float attenuation[3] = { 1, 1, 1 }; //Atenuació (3 tipus)
 	float spreadAngle = 180; //Spot cuttoff
-	float dist = 1000; //Distància de la llum a la càmera
 	float concentration = 0; //Concentració de la llum
 	float specularExponent = 0.1f; //Specular = color * exponent
 
@@ -37,9 +36,6 @@ public:
 	void setAttenuation(Attenuation at, float value);
 	float getAttenuation(Attenuation at);
 
-	float getDist();
-	void setDist(float dist);
-
 	void setSpreadAngle(float angle);
 	float getSpreadAngle();
 
@@ -53,8 +49,6 @@ public:
 	void setColor(float color[4]);
 	float* getColor();
 	float* getSpecular();
-
-	bool operator<(const Light& other);
 
 	Light(Vector3<float> pos);
 };

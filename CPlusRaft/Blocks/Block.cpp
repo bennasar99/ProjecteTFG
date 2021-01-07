@@ -111,7 +111,7 @@ void Block::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 			for (int j = 0; j < 4; j++) {
 				float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
 				vPos[0] += (float)relPos.x; vPos[1] += (float)relPos.y; vPos[2] += (float)relPos.z;
-				cM->addVertexO(vPos, normals[i][j], color, text[i][j], Primitiva::QUAD);
+				//cM->addVertexO(vPos, normals[i][j], color, text[i][j], Primitiva::QUAD);
 			}
 		}
 	}

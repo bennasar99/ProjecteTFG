@@ -9,6 +9,7 @@
 #include "SoundManager.h"
 #include "Entities/Player.h"
 #include <sys/stat.h>
+#include <thread>  
 
 int w_width = 500;
 int w_height = 500;
@@ -16,8 +17,8 @@ GLFWwindow* window;
 
 //Clipping planes
 const float zNear = 0.001f;
-float zFar = 350.0f;
-float viewDist = 20;
+float zFar = 280.0f;
+float viewDist = 16;
 
 const float axisSize = zFar;
 
@@ -65,6 +66,7 @@ void updatePlayerBlock();
 void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 int fpsc = 0;
+bool run = false;
 
 enum class Active {
 	JOC,
@@ -86,7 +88,7 @@ void Display(GLFWwindow* window)
 
 	fpsc++;
 	if (fpsc > 20) { //Contador fps
-		//printf("%f\n", fps);
+		printf("%f\n", fps);
 		fpsc = 0;
 	}
 	//if (fps < 26) {
@@ -132,9 +134,6 @@ void Display(GLFWwindow* window)
 	glEnable(GL_LIGHTING); //Ens asseguram que l'il·luminació està activada
 
 	world->draw(camera.getPos(), viewDist); //Dibuixam el món
-
-	//Actualitzam les llums del món
-	world->updateLights(camera.getPos(), Vector3<float>::normalize(camera.getFront()), camera.getFov(), camera.getAspect());
 
 	//Dibuixam el bloc seleccionat
 	if (Block::isSolid(world->getBlock(ba))) {
@@ -285,8 +284,8 @@ void Display(GLFWwindow* window)
 	glFlush();
 }
 
-// Funcion que se ejecuta cuando el sistema no esta ocupado
-void Idle(void)
+// Update joc
+void Update(void)
 {
 	//Solució temporal shift i ctrl
 	if (GetKeyState(VK_SHIFT) & 0x8000) {
@@ -312,6 +311,7 @@ void Idle(void)
 
 
 	//Actualitzam el món
+	//std::async(&World::update, world, delta, camera.getPos());
 	world->update(delta, camera.getPos());
 
 	if (ent != nullptr) { //TEMPORAL: se n'ha d'encarregar el món
@@ -324,6 +324,18 @@ void Idle(void)
 		ent->control(delta, &camera); //Actualitzam el seu estat intern
 		Vector3 pos = ent->getPos();
 		alListener3f(AL_POSITION, pos.x, pos.y, pos.z); //Actualitzam la posició de l'escoltador a l'entitat
+	}
+}
+void Idle() {
+	while (run) {
+		Update();
+	}
+}
+
+void Draw() {
+	glfwMakeContextCurrent(window);
+	while (run) {
+
 	}
 }
 
@@ -411,7 +423,7 @@ int main(int argc, char** argv)
 	glLoadIdentity();
 
 	gluPerspective(camera.getFov() , 1, zNear, zFar);
-	//camera.setViewDist(viewDist); //Establim la distància de visió de la càmera
+	camera.setViewDist(viewDist * CHUNKSIZE); //Establim la distància de visió de la càmera
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -447,14 +459,19 @@ int main(int argc, char** argv)
 
 	setLighting();
 
+	//std::thread upd(Idle);
+	run = true;
 	// Comienza la ejecucion del core de GLUT
 	while (!glfwWindowShouldClose(window))
 	{
+		Update(); //GLFW no té funcio Idle pròpia
+		//std::async(std::launch::async, Update);
 		Display(window);
-		Idle(); //GLFW no té funcio Idle pròpia
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+	run = false;
+	//upd.join();
 	glfwTerminate();
 	return 0;
 }

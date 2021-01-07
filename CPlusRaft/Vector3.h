@@ -13,8 +13,8 @@ public:
 
 	template <class U>
 	Vector3<T> operator+(const Vector3<U>& b);
-	//Vector3<float> operator+(const Vector3<float>& b);
-	Vector3 operator-(const Vector3<T>& b);
+	template <class U>
+	Vector3<T> operator-(const Vector3<U>& b);
 	float operator*(const Vector3<T>& b);
 	Vector3 operator*(T b);
 	Vector3 operator/(T b);
@@ -72,7 +72,8 @@ inline Vector3<T> Vector3<T>::operator+(const Vector3<U>& b) {
 
 //Resta de vectors
 template <class T>
-inline Vector3<T> Vector3<T>::operator-(const Vector3<T>& b) {
+template <class U>
+inline Vector3<T> Vector3<T>::operator-(const Vector3<U>& b) {
 	return Vector3(this->x - b.x, this->y - b.y, this->z - b.z);
 }
 

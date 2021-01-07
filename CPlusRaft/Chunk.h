@@ -17,13 +17,13 @@ private:
 
 	World* world;
 
-	bool firstdraw;
-
 	ChunkMesh *cMesh;
 
 	int lastYupd = 0;
 
 public:
+	bool firstdraw = true;
+
 	void drawO();
 	void drawT();
 
