@@ -2,7 +2,6 @@
 #include <GL/glut.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "Vector3.h"
 #include <stdlib.h>  
 #include <string.h>
 #include <list>
@@ -29,9 +28,10 @@
 #include "Generation/WorldGenerator.h"
 #include "lib/FastNoiseLite.h"
 #include "ryml.hpp"
+#include "Utils/Vector3.h"
+#include "Utils/ThreadManager.h"
 
 #define REGIONSIZE 16
-#define CORES 4
 
 class Block;
 class LightBlock;
@@ -43,13 +43,16 @@ enum class ChunkState {
 	BLOQUEJAT,
 	TERRENY,
 	PENDENT,
+	CARREGAT,
 	BUIT
 };
 
 class World {
 private:
 
-	std::future<Chunk*> cnk[CORES];
+	int genCores;
+	std::vector< std::future<Chunk*> > cnk;
+	std::future<bool> sorting;
 
 	WorldGenerator wGen;
 
@@ -74,12 +77,13 @@ private:
 	int seed;
 	int updTimer = 200;
 
-	FastNoiseLite noise;
 	std::string name;
 
 	void updateGeneration();
 
 public:
+	bool checkthreads = false;
+
 	//Han de ser nombres parells
 	Vector3<int> size;
 

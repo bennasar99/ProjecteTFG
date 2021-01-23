@@ -2,7 +2,7 @@
 
 #include "Blocks/Block.h"
 #include "Render/ChunkMesh.h"
-#include "Vector3.h"
+#include "Utils/Vector3.h"
 #include "Generation/WorldGenerator.h"
 #define CHUNKSIZE 16
 

@@ -4,9 +4,11 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "Utils.h"
-#include "Vector3.h"
-#include "TextureManager.h"
-#include "SoundManager.h"
+#include "Utils/Vector3.h"
+#include "Utils/TextureManager.h"
+#include "Utils/SoundManager.h"
+#include "Utils/KeyboardManager.h"
+#include "Utils/ThreadManager.h"
 #include "Entities/Player.h"
 #include <sys/stat.h>
 #include <thread>  
@@ -23,10 +25,9 @@ float viewDist = 16;
 const float axisSize = zFar;
 
 Vector3<float> ba; //Bloc actual (posició)
+Vector3<float> bp; //Bloc a posar posició)
 
 int btipus = 1; //Bloc actual (tipus)
-
-#include "KeyboardManager.h"
 
 #include "Camera.h"
 Camera camera = Camera(Vector3<float>(64, 66, 64), Vector3<float>(64, 66, 60));
@@ -349,6 +350,10 @@ int main(int argc, char** argv)
 	camera.setFreeMove(true);
 	camera.setDrawMove(true);
 
+	//Fils (detecció num)
+	ThreadManager::initialize();
+	TextureManager::initialize();
+
 	printf("World name: ");
 	std::cin >> wname;
 	std::string path = "worlds/" + wname;
@@ -442,7 +447,6 @@ int main(int argc, char** argv)
 
 	//Textures
 	glEnable(GL_TEXTURE_2D); //Activació
-	TextureManager::initialize();
 	TextureManager::LoadTexture("Textures/texture.png", Textura::BLOC);
 
 	//Sons
@@ -464,11 +468,11 @@ int main(int argc, char** argv)
 	// Comienza la ejecucion del core de GLUT
 	while (!glfwWindowShouldClose(window))
 	{
+		glfwPollEvents();
 		Update(); //GLFW no té funcio Idle pròpia
 		//std::async(std::launch::async, Update);
 		Display(window);
 		glfwSwapBuffers(window);
-		glfwPollEvents();
 	}
 	run = false;
 	//upd.join();
@@ -512,19 +516,17 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 			btipus = (btipus + 1) % 22;
 		}
 		else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) { //Botó dret, col·locar bloc / interactuar
-			Vector3 front = camera.getFront();
+			Vector3 front = Vector3<float>::normalize(camera.getFront());
 			Bloc tipusbloc = static_cast<Bloc>(btipus);
-			if (world->getBlock(ba - front * 0.1f) == Bloc::RES && tipusbloc != Bloc::RES) { //Només deixam posar un bloc si no n'hi ha un ja
-				Vector3 bpos = ba - front * 0.1f;
-				Vector3 epos;
+			if (!Block::isSolid(world->getBlock(bp)) && tipusbloc != Bloc::RES) { //Només deixam posar un bloc si no n'hi ha un ja
+				Vector3<float> epos;
 				if (ent != nullptr) {
 					epos = ent->getPos() - Vector3<float>(0,1,0);
-					epos.floor();
+					//epos.floor();
 				}
-				bpos.floor();
-				if (ent == nullptr || epos != bpos) {
-					world->setBlock(tipusbloc, Vector3<int>((int)bpos.x, (int)bpos.y, (int)bpos.z));
-					SoundManager::playSound(So::COLOCA, ba, true);
+				if (ent == nullptr || epos != bp) {
+					world->setBlock(tipusbloc, Vector3<int>((int)bp.x, (int)bp.y, (int)bp.z));
+					SoundManager::playSound(So::COLOCA, bp, true);
 				}
 			}
 			else {
@@ -561,7 +563,7 @@ void movement(int key) {
 		}
 	}
 	else if (key == GLFW_KEY_P) {
-		printf("x:%f y:%f z:%f b:%d r:%f\n", ent->getPos().x, ent->getPos().y, ent->getPos().z, world->getBlock(ent->getPos()), ent->getRot());
+		printf("x:%f y:%f z:%f b:%d r:%f\n", ent->getPos().x, ent->getPos().y, ent->getPos().z, world->getBlock(ba), ent->getRot());
 	}
 	else if (key == GLFW_KEY_TAB) { //Tab: obrir inventari
 		act = Active::INVENTARI;
@@ -702,15 +704,18 @@ void centerPointer() {
 
 //Actualitzam el bloc seleccionat (posició) segons on miri el jugador
 void updatePlayerBlock() {
-	ba = camera.getPos() + camera.getFront();
+	Vector3<float> front = camera.getFront();
+	bp = camera.getPos();
+	ba = camera.getPos() + front;
 	int i = 0;
 	while (world->getBlock(ba) == Bloc::RES && i < 100) { //Traçam una línia cap a la direcció del front de la càmera
-		Vector3<float> front = camera.getFront();
-		ba = ba + camera.getFront() * 0.1f;
+		bp = ba;
+		ba = ba + front * 0.1f;
 		i++;
 	}
 	if (i == 100) { //Si no hem trobat cap bloc, no es veurà la selecció
 		ba = Vector3<float>(0, 0, 0);
+		bp = Vector3<float>(0, 0, 0);
 	}
 }
 

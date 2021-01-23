@@ -27,7 +27,7 @@ void ChunkMesh::addVertexT(float* vert, float* norm, float* col, float* text) {
 void ChunkMesh::drawO() {
 	oMesh->draw();
 	glLineWidth(2.5f);
-	lMesh->draw();
+	//lMesh->draw();
 	glLineWidth(1.0f);
 }
 

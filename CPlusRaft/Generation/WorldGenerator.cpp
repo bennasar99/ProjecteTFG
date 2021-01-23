@@ -3,6 +3,8 @@
 #include "../Chunk.h"
 
 WorldGenerator::WorldGenerator(int seed, World* world) {
+	this->seed = seed;
+
 	srand(seed);
 
 	//Oceans
@@ -43,6 +45,13 @@ Bioma WorldGenerator::getBiomeAt(int cX, int cZ) {
 	float ocean = oceanNoise.GetNoise((float)cX, (float)cZ);
 	float climate = climateNoise.GetNoise((float)cX, (float)cZ);
 	float biome = biomeNoise.GetNoise((float)cX, (float)cZ);
+	/*GLfloat ocean[16*16];
+	GLfloat climate[16*16];
+	GLfloat biome[16*16];
+
+	biomeGen->GenUniformGrid2D(biome, cX, cZ, 16, 16, 0.1f, this->seed);
+	climateGen->GenUniformGrid2D(climate, cX, cZ, 16, 16, 0.1f, this->seed);
+	oceanGen->GenUniformGrid2D(ocean, cX, cZ, 16, 16, 0.04f, this->seed);*/
 
 	if (ocean < -0.1f) {
 		return Bioma::OCEA;
@@ -143,15 +152,18 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 			//}
 		}
 	}
+	chunk->updateMesh();
 	return chunk;
 }
 
 Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, només terreny
+
 	Chunk* chunk = new Chunk(this->world, cPos);
-	//chunk->setBiome(getBiomeAt(cX, cZ));
+
 	chunk->setBiome(getBiomeAt(cPos.x, cPos.z));
 	Bioma bio = chunk->getBiome();
-	FastNoiseLite* noise;
+	
+	FastNoiseLite* noise = &this->normalNoise; //Deixar a null
 
 	int sealvl = 80;
 	float y = 0;
@@ -170,8 +182,9 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 		noise = &this->normalNoise;
 		break;
 	}
-	//Vector3<int> cPos = chunk->getPos();
-	//bool block = false;
+	
+
+	bool block = false;
 	int waterblocksup = 0;
 	int nblocs = 0;
 	for (int x = 0; x < CHUNKSIZE; x++) {

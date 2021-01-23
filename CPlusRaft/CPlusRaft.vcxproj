@@ -140,7 +140,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\GL\freeglut\include;C:\GL\glfw\include;C:\GL\glew\include;C:\Program Files %28x86%29\OpenAL\include;lib\ryml;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>lib;C:\GL\freeglut\include;C:\GL\glfw\include;C:\GL\glew\include;C:\Program Files %28x86%29\OpenAL\include;lib\ryml;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -166,16 +166,17 @@
     <ClInclude Include="Entities\Entity.h" />
     <ClInclude Include="Entities\Player.h" />
     <ClInclude Include="Generation\WorldGenerator.h" />
-    <ClInclude Include="KeyboardManager.h" />
     <ClInclude Include="lib\stb_image.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Render\ChunkMesh.h" />
     <ClInclude Include="Render\Mesh.h" />
-    <ClInclude Include="SoundManager.h" />
-    <ClInclude Include="TextureAtlas.h" />
-    <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Utils.h" />
-    <ClInclude Include="Vector3.h" />
+    <ClInclude Include="Utils\KeyboardManager.h" />
+    <ClInclude Include="Utils\SoundManager.h" />
+    <ClInclude Include="Utils\TextureAtlas.h" />
+    <ClInclude Include="Utils\TextureManager.h" />
+    <ClInclude Include="Utils\ThreadManager.h" />
+    <ClInclude Include="Utils\Vector3.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
@@ -192,16 +193,17 @@
     <ClCompile Include="Entities\Entity.cpp" />
     <ClCompile Include="Entities\Player.cpp" />
     <ClCompile Include="Generation\WorldGenerator.cpp" />
-    <ClCompile Include="KeyboardManager.cpp" />
     <ClCompile Include="lib\stb_image.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Render\ChunkMesh.cpp" />
     <ClCompile Include="Render\Mesh.cpp" />
-    <ClCompile Include="SoundManager.cpp" />
-    <ClCompile Include="TextureAtlas.cpp" />
-    <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="Utils\KeyboardManager.cpp" />
+    <ClCompile Include="Utils\SoundManager.cpp" />
+    <ClCompile Include="Utils\TextureAtlas.cpp" />
+    <ClCompile Include="Utils\TextureManager.cpp" />
+    <ClCompile Include="Utils\ThreadManager.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

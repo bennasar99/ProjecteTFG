@@ -1,6 +1,6 @@
 #pragma once
 #include <list>
-#include "Utils.h"
+#include "../Utils.h"
 #include "TextureAtlas.h"
 
 #define NTEXT 7 //Nombre de textures

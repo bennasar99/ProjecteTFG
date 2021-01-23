@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Vector3.h"
+#include "Utils/Vector3.h"
 #include <string>
 #include "lib/stb_image.h"
 #include <GL/glut.h>
@@ -10,7 +10,7 @@
 #include <fstream>
 #include <cstring>
 #include <math.h>
-#include "TextureManager.h"
+#include "Utils/TextureManager.h"
 
 # define M_PI           3.14159265358979323846
 

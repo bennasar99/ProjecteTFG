@@ -1,9 +1,9 @@
 #pragma once
-#include "../Vector3.h"
+#include "../Utils/Vector3.h"
 #include "Entity.h"
 #include <list>
-#include "../KeyboardManager.h"
-#include "../SoundManager.h"
+#include "../Utils/KeyboardManager.h"
+#include "../Utils/SoundManager.h"
 #include "../Light.h"
 
 class Block;

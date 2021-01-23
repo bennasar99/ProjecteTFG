@@ -22,7 +22,7 @@ void Chunk::drawO() {
 	}
 	if (firstdraw == true) {
 		firstdraw = false;
-		this->updateMesh();
+		cMesh->update();
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	glTranslatef(0.5f, 0.5f, 0.5f);
@@ -37,7 +37,7 @@ void Chunk::drawT() {
 	}
 	if (firstdraw == true) {
 		firstdraw = false;
-		this->updateMesh();
+		cMesh->update();
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	glFrontFace(GL_CCW);
@@ -109,7 +109,6 @@ bool Chunk::delBlock(Vector3<int> bpos, bool destroy) {
 		delete this->blocs[bpos.x][bpos.y][bpos.z];
 		this->blocs[bpos.x][bpos.y][bpos.z] = 0;
 		nblocs--;
-		printf("%d, %d %d %d \n", bpos.y, cpos.x, cpos.y, cpos.z);
 		this->updateMesh();
 		world->updateNeighborChunks(this->cpos, bpos);
 	}
@@ -192,6 +191,7 @@ bool Chunk::readFromByteData(char* arr) {
 			}
 		}
 	}
+	this->updateMesh();
 	return true;
 }
 
@@ -238,7 +238,7 @@ void Chunk::updateMesh() {
 			}
 		}
 	}
-	cMesh->update();
+	this->firstdraw = true;
 }
 
 Bioma Chunk::getBiome() {

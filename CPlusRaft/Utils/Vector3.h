@@ -20,6 +20,7 @@ public:
 	Vector3 operator/(T b);
 	Vector3 operator%(int b);
 	bool operator!=(const Vector3<T>& b);
+	bool operator==(const Vector3<T>& b);
 
 	static Vector3 cross(Vector3 a, Vector3 b);
 	static float angle(Vector3 a, Vector3 b);
@@ -111,6 +112,11 @@ inline Vector3<T> Vector3<T>::operator%(int b) {
 template <class T>
 inline bool Vector3<T>::operator!=(const Vector3<T>& b) {
 	return(this->x != b.x || this->y != b.y || this->z != b.z);
+}
+
+template <class T>
+inline bool Vector3<T>::operator==(const Vector3<T>& b) {
+	return(this->x == b.x && this->y == b.y && this->z == b.z);
 }
 
 //Producte escalar

@@ -43,21 +43,21 @@
     <Filter Include="Source Files\Generation">
       <UniqueIdentifier>{220c5328-22d9-4fbf-ab78-e2f5f454a6f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Utils">
+      <UniqueIdentifier>{361909bf-3490-4130-975d-63aaf6e61811}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{815d00b5-2ff0-486d-9d94-56c0d81df8b1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KeyboardManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Vector3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="World.h">
@@ -72,14 +72,8 @@
     <ClInclude Include="lib\stb_image.h">
       <Filter>Header Files\lib</Filter>
     </ClInclude>
-    <ClInclude Include="TextureManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Entities\Entity.h">
       <Filter>Header Files\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="SoundManager.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Blocks\Jukebox.h">
       <Filter>Header Files\Blocks</Filter>
@@ -92,9 +86,6 @@
     </ClInclude>
     <ClInclude Include="Entities\Player.h">
       <Filter>Header Files\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureAtlas.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Blocks\BlockRenderer.h">
       <Filter>Header Files\Blocks</Filter>
@@ -117,12 +108,27 @@
     <ClInclude Include="Generation\WorldGenerator.h">
       <Filter>Header Files\Generation</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\KeyboardManager.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\SoundManager.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\TextureAtlas.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\TextureManager.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\ThreadManager.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Vector3.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KeyboardManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Light.cpp">
@@ -146,9 +152,6 @@
     <ClCompile Include="lib\stb_image.cpp">
       <Filter>Source Files\lib</Filter>
     </ClCompile>
-    <ClCompile Include="TextureManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Entities\Entity.cpp">
       <Filter>Source Files\Entities</Filter>
     </ClCompile>
@@ -164,9 +167,6 @@
     <ClCompile Include="Entities\Player.cpp">
       <Filter>Source Files\Entities</Filter>
     </ClCompile>
-    <ClCompile Include="TextureAtlas.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Blocks\BlockRenderer.cpp">
       <Filter>Source Files\Blocks</Filter>
     </ClCompile>
@@ -175,9 +175,6 @@
     </ClCompile>
     <ClCompile Include="Render\ChunkMesh.cpp">
       <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="SoundManager.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Blocks\SolidBlock.cpp">
       <Filter>Source Files\Blocks</Filter>
@@ -190,6 +187,21 @@
     </ClCompile>
     <ClCompile Include="Generation\WorldGenerator.cpp">
       <Filter>Source Files\Generation</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\KeyboardManager.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\SoundManager.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\TextureAtlas.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\TextureManager.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\ThreadManager.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

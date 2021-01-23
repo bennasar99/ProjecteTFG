@@ -1,6 +1,6 @@
 #pragma once
-#include "../TextureManager.h"
-#include "../TextureAtlas.h"
+#include "../Utils/TextureManager.h"
+#include "../Utils/TextureAtlas.h"
 #include "Block.h"
 
 class BlockRenderer {

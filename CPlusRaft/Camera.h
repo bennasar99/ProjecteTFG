@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Vector3.h"
+#include "Utils/Vector3.h"
 #include <GL/freeglut.h>
 #include <list>
 #include "Utils.h"

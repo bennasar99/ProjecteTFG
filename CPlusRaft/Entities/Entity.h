@@ -1,5 +1,5 @@
 #pragma once
-#include "../TextureManager.h"
+#include "../Utils/TextureManager.h"
 #include "../Camera.h"
 
 class World;

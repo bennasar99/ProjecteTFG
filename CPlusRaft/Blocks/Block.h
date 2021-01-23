@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Render/ChunkMesh.h"
-#include "../Vector3.h"
+#include "../Utils/Vector3.h"
 
 enum class Bloc {
 	RES,

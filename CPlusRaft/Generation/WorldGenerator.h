@@ -1,8 +1,7 @@
 #pragma once
 
-#include "../Vector3.h"
+#include "../Utils/Vector3.h"
 #include "../lib/FastNoiseLite.h"
-
 
 enum class Bioma {
 	MUNTANYA,
@@ -31,6 +30,8 @@ private:
 
 	World *world;
 	
+	int seed;
+
 public:
 
 	WorldGenerator();

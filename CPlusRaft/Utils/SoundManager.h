@@ -2,7 +2,7 @@
 #include "al.h" 
 #include "alc.h" 
 #include <stdio.h>
-#include "Utils.h"
+#include "../Utils.h"
 
 
 #define NSONS 5 //Nombre de sons

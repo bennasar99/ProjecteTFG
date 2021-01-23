@@ -1,7 +1,7 @@
 #pragma once
-#include "../Vector3.h"
+#include "../Utils/Vector3.h"
 #include "Block.h"
-#include "../SoundManager.h"
+#include "../Utils/SoundManager.h"
 
 /*
 	Altaveu

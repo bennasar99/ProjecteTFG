@@ -1,8 +1,8 @@
 #pragma once
 #include "Block.h"
 #include "../Light.h"
-#include "../SoundManager.h"
-#include "../Vector3.h"
+#include "../Utils/SoundManager.h"
+#include "../Utils/Vector3.h"
 
 class World;
 

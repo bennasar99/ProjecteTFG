@@ -1,5 +1,5 @@
 #pragma once
-#include "Vector3.h"
+#include "Utils/Vector3.h"
 #include <string.h>
 
 enum class Attenuation { //Tipus d'atenuació
