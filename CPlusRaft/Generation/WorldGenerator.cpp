@@ -157,22 +157,25 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 }
 
 float WorldGenerator::getDensity(Bioma bio, Vector3<int> pos) {
-	FastNoiseLite* noise = &this->normalNoise; //Deixar a null
-	float sealvl = 80;
+	float terlvl = 100;
+	FastNoiseLite* noise;
 	switch(bio){
 	case Bioma::MUNTANYA:
-		sealvl = 120;
+		terlvl = 140;
 		noise = &this->mountainNoise;
-		break;
+		return (pos.y / terlvl + noise->GetNoise((float)pos.x, (float)pos.y, (float)pos.z));
 	case Bioma::OCEA:
-		sealvl = 50;
+		terlvl = 60;
 		noise = &this->oceanGenNoise;
-		break;
+		return (pos.y / terlvl + noise->GetNoise((float)pos.x, (float)pos.y, (float)pos.z) / 4.0f);
+	case Bioma::MAR: case Bioma::GEL:
+		terlvl = 80;
+		noise = &this->oceanGenNoise;
+		return (pos.y / terlvl + noise->GetNoise((float)pos.x, (float)pos.y, (float)pos.z)/3.0f);
 	default:
 		noise = &this->normalNoise;
-		break;
+		return (pos.y / terlvl + noise->GetNoise((float)pos.x, (float)pos.y, (float)pos.z)/4.0f);
 	}
-	return (pos.y / sealvl + noise->GetNoise((float)pos.x, (float)pos.y, (float)pos.z));
 
 }
 
@@ -200,17 +203,15 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 	Bioma bio = chunk->getBiome();
 
 	bool transition = false;
-	for (int nX = cPos.x - 1; nX <= cPos.x + 1; nX++) {
-		for (int nZ = cPos.z - 1; nZ <= cPos.z + 1; nZ++) {
+	for (int nX = cPos.x - 1; (nX <= cPos.x + 1) && !transition; nX++) {
+		for (int nZ = cPos.z - 1; (nZ <= cPos.z + 1) && !transition; nZ++) {
 			if (getBiomeAt(nX, nZ) != bio) {
 				transition = true;
 			}
 		}
 	}
 	
-	FastNoiseLite* noise = &this->normalNoise; //Deixar a null
-
-	int sealvl = 80;
+	int sealvl = 90;
 	
 	//Bioma bioN[8];
 
@@ -221,33 +222,32 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 		for (int z = 0; z < CHUNKSIZE; z++) {
 			for (int y = 0; y < CHUNKSIZE; y++) {
 
-				//float threshold = getThreshold(bio);
-
 				Vector3<int> pos = Vector3<int>(x, y, z);
-				
-				float threshold = 1;
+				Vector3<int> bpos = cPos * CHUNKSIZE + pos;
+				float threshold = 0;
 				//Intentar que com més abaix + (molt més) probable que sigui sòlid
-				float density = getDensity(bio, cPos * CHUNKSIZE + pos);
-
+				float density = 0;
 				if (transition) {
-					int range = 8;
-					float index = 0;
-					Vector3<int> bpos = cPos * CHUNKSIZE + pos;
+					float bioDen[NBIOMES] = {};
+					int range = 4;
 					for (int nX = bpos.x - range; nX <= bpos.x + range; nX++) {
 						for (int nZ = bpos.z - range; nZ <= bpos.z + range; nZ++) {
-							Vector3<int> nbPos = Vector3<int>(nX, cPos.y, nZ);
+							Vector3<int> nbPos = Vector3<int>(nX, y, nZ);
 							Bioma nBio = getBiomeAt(nX / CHUNKSIZE, nZ / CHUNKSIZE);
-							//float dist = Vector3<int>::module((cPos*CHUNKSIZE + pos) - (ncPos * CHUNKSIZE + Vector3(CHUNKSIZE/2, CHUNKSIZE/2, CHUNKSIZE/2)));
-							//dist = std::min(dist/CHUNKSIZE, 1.0f);
-							//dist /= CHUNKSIZE;
-							//dist = abs(nX - cPos.x);
-							//printf("density %f threshold %f\n", density, threshold);
-							//threshold += getThreshold(nBio);
-							density += getDensity(nBio, bpos);// / dist;
-							threshold += 1.0f;// / dist;
-							index++;
+							float dist = Vector3<int>::module(bpos - nbPos);
+							dist = std::max(1.0f, dist);
+							int bI = static_cast<int>(nBio);
+							if (bioDen[bI] == 0) {
+								bioDen[bI] = getDensity(nBio, bpos);
+							}
+							density += bioDen[bI] / dist;
+							threshold += 1.0f / dist;
 						}
 					}
+				}
+				else {
+					density += getDensity(bio, bpos);// / dist;
+					threshold += 1.0f;// / dist;
 				}
 			
 				//printf("density %f threshold %f\n", density, threshold);
@@ -287,10 +287,10 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 	}
 	if (waterblocksup > (16 * 16) / 2 && chunk->getBiome() != Bioma::OCEA) {
 		if (bio != Bioma::ARTIC) {
-			chunk->setBiome(Bioma::MAR);
+			//chunk->setBiome(Bioma::MAR);
 		}
 		else {
-			chunk->setBiome(Bioma::GEL);
+			//chunk->setBiome(Bioma::GEL);
 		}
 	}
 	if (nblocs == 0) {

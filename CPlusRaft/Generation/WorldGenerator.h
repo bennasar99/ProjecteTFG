@@ -3,6 +3,8 @@
 #include "../Utils/Vector3.h"
 #include "../lib/FastNoiseLite.h"
 
+#define NBIOMES 9
+
 enum class Bioma {
 	MUNTANYA,
 	BOSC,
