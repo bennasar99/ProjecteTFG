@@ -38,7 +38,10 @@ public:
 	WorldGenerator(int seed, World* world);
 
 	Bioma getBiomeAt(int cX, int cZ);
-	
+
+	float getDensity(Bioma bio, Vector3<int> pos);
+	float getThreshold(Bioma bio);
+
 	Chunk* generateDetail(Chunk* chunk);
 	Chunk* generateTerrain(Vector3<int> cPos);
 };

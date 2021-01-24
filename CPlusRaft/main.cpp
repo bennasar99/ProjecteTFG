@@ -362,7 +362,7 @@ int main(int argc, char** argv)
 		//Si el món ja existeix, el carregam
 		printf("Loading world %s... \n", wname.c_str());
 		world = new World(wname, &camera);
-		ent = new Player(world, Vector3<float>(400, 80, 400) + Vector3<float>(0, 2.0f, 0));
+		ent = new Player(world, Vector3<float>(400, 120, 400) + Vector3<float>(0, 2.0f, 0));
 		//ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 2.0f, 0));
 		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
 	}
@@ -708,7 +708,7 @@ void updatePlayerBlock() {
 	bp = camera.getPos();
 	ba = camera.getPos() + front;
 	int i = 0;
-	while (world->getBlock(ba) == Bloc::RES && i < 100) { //Traçam una línia cap a la direcció del front de la càmera
+	while (!Block::isSolid(world->getBlock(ba)) && i < 100) { //Traçam una línia cap a la direcció del front de la càmera
 		bp = ba;
 		ba = ba + front * 0.1f;
 		i++;

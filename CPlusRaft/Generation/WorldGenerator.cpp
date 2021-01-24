@@ -15,13 +15,13 @@ WorldGenerator::WorldGenerator(int seed, World* world) {
 	//Clima (calor, templat, fred)
 	this->climateNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
 	this->climateNoise.SetSeed(seed*3);
-	this->climateNoise.SetFrequency(0.1f); //0.01
+	this->climateNoise.SetFrequency(0.05f); //0.01
 	this->climateNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
 	//Bioma (depen del clima)
 	this->biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
 	this->biomeNoise.SetSeed(seed*2);
-	this->biomeNoise.SetFrequency(0.1f); //0.1
+	this->biomeNoise.SetFrequency(0.05f); //0.1
 	this->biomeNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
 	this->normalNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
@@ -156,33 +156,63 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 	return chunk;
 }
 
+float WorldGenerator::getDensity(Bioma bio, Vector3<int> pos) {
+	FastNoiseLite* noise = &this->normalNoise; //Deixar a null
+	float sealvl = 80;
+	switch(bio){
+	case Bioma::MUNTANYA:
+		sealvl = 120;
+		noise = &this->mountainNoise;
+		break;
+	case Bioma::OCEA:
+		sealvl = 50;
+		noise = &this->oceanGenNoise;
+		break;
+	default:
+		noise = &this->normalNoise;
+		break;
+	}
+	return (pos.y / sealvl + noise->GetNoise((float)pos.x, (float)pos.y, (float)pos.z));
+
+}
+
+float WorldGenerator::getThreshold(Bioma bio) {
+	float threshold = 0;
+	switch (bio) {
+	case Bioma::MUNTANYA:
+		threshold = 1.4f;
+		break;
+	case Bioma::OCEA:
+		threshold = 0.5f;
+		break;
+	default:
+		threshold = 1.0f;
+		break;
+	}
+	return threshold;
+}
+
 Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, només terreny
 
 	Chunk* chunk = new Chunk(this->world, cPos);
 
 	chunk->setBiome(getBiomeAt(cPos.x, cPos.z));
 	Bioma bio = chunk->getBiome();
+
+	bool transition = false;
+	for (int nX = cPos.x - 1; nX <= cPos.x + 1; nX++) {
+		for (int nZ = cPos.z - 1; nZ <= cPos.z + 1; nZ++) {
+			if (getBiomeAt(nX, nZ) != bio) {
+				transition = true;
+			}
+		}
+	}
 	
 	FastNoiseLite* noise = &this->normalNoise; //Deixar a null
 
 	int sealvl = 80;
-	float y = 0;
-	float density = 0;
-	float threshold = 1;
-	switch (bio) {
-	case Bioma::MUNTANYA:
-		noise = &this->mountainNoise;
-		threshold = 1.4f;
-		break;
-	case Bioma::OCEA:
-		noise = &this->oceanGenNoise;
-		threshold = 0.5f;
-		break;
-	default:
-		noise = &this->normalNoise;
-		break;
-	}
 	
+	//Bioma bioN[8];
 
 	bool block = false;
 	int waterblocksup = 0;
@@ -190,13 +220,41 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 	for (int x = 0; x < CHUNKSIZE; x++) {
 		for (int z = 0; z < CHUNKSIZE; z++) {
 			for (int y = 0; y < CHUNKSIZE; y++) {
+
+				//float threshold = getThreshold(bio);
+
 				Vector3<int> pos = Vector3<int>(x, y, z);
+				
+				float threshold = 1;
 				//Intentar que com més abaix + (molt més) probable que sigui sòlid
-				density = (float(CHUNKSIZE*cPos.y + y)/80.0f) + noise->GetNoise((float)x + CHUNKSIZE*(float)cPos.x, (float)y + CHUNKSIZE * (float)cPos.y, float(z) + CHUNKSIZE * (float)cPos.z)/1.5f;
+				float density = getDensity(bio, cPos * CHUNKSIZE + pos);
+
+				if (transition) {
+					int range = 8;
+					float index = 0;
+					Vector3<int> bpos = cPos * CHUNKSIZE + pos;
+					for (int nX = bpos.x - range; nX <= bpos.x + range; nX++) {
+						for (int nZ = bpos.z - range; nZ <= bpos.z + range; nZ++) {
+							Vector3<int> nbPos = Vector3<int>(nX, cPos.y, nZ);
+							Bioma nBio = getBiomeAt(nX / CHUNKSIZE, nZ / CHUNKSIZE);
+							//float dist = Vector3<int>::module((cPos*CHUNKSIZE + pos) - (ncPos * CHUNKSIZE + Vector3(CHUNKSIZE/2, CHUNKSIZE/2, CHUNKSIZE/2)));
+							//dist = std::min(dist/CHUNKSIZE, 1.0f);
+							//dist /= CHUNKSIZE;
+							//dist = abs(nX - cPos.x);
+							//printf("density %f threshold %f\n", density, threshold);
+							//threshold += getThreshold(nBio);
+							density += getDensity(nBio, bpos);// / dist;
+							threshold += 1.0f;// / dist;
+							index++;
+						}
+					}
+				}
+			
+				//printf("density %f threshold %f\n", density, threshold);
 				if (density < threshold) {
 					if (CHUNKSIZE * cPos.y + y > sealvl) {
 						if (bio == Bioma::MAR || bio == Bioma::OCEA) {
-							continue;
+							//continue;
 						}
 					}
 					nblocs++;
