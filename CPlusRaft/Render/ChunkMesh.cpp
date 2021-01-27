@@ -27,7 +27,7 @@ void ChunkMesh::addVertexT(float* vert, float* norm, float* col, float* text) {
 void ChunkMesh::drawO() {
 	oMesh->draw();
 	glLineWidth(2.5f);
-	//lMesh->draw();
+	lMesh->draw();
 	glLineWidth(1.0f);
 }
 
@@ -43,8 +43,31 @@ void ChunkMesh::erase() {
 	lMesh->erase();
 }
 
+void ChunkMesh::eraseT() {
+	tMesh->erase();
+}
+
+void ChunkMesh::eraseO() {
+	oMesh->erase();
+	lMesh->erase();
+}
+
+
+ChunkMesh::~ChunkMesh() {
+	this->erase();
+}
+
 void ChunkMesh::update() {
 	oMesh->update();
 	tMesh->update();
 	lMesh->update();
+}
+
+void ChunkMesh::updateO() {
+	oMesh->update();
+	lMesh->update();
+}
+
+void ChunkMesh::updateT() {
+	tMesh->update();
 }

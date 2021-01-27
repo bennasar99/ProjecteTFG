@@ -101,6 +101,18 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 		break;
 
 	}
+
+	//Minerals
+	int num = rand() % ((CHUNKSIZE*4) / (cPos.y+1)); //Com + abaix més probable
+	for (int i = 0; i < num; i++) {
+		Vector3<int> pos = Vector3<int>(rand() % CHUNKSIZE, rand() % CHUNKSIZE, rand() % CHUNKSIZE);
+		Bloc bt = world->getBlock(cPos * CHUNKSIZE + pos);
+		if (Block::isSolid(bt)) {
+			Bloc ores[3] = { Bloc::OR, Bloc::FERRO, Bloc::CARBO };
+			chunk->setBlock(new SolidBlock(ores[rand() % 3]), pos);
+		}
+	}
+
 	Vector3<int> pos = Vector3<int>(0, 0, 0);
 	for (pos.x = 0; pos.x < CHUNKSIZE; pos.x++) {
 		for (pos.z = 0; pos.z < CHUNKSIZE; pos.z++) {
@@ -165,7 +177,7 @@ float WorldGenerator::getDensity(Bioma bio, Vector3<int> pos) {
 		noise = &this->mountainNoise;
 		return (pos.y / terlvl + noise->GetNoise((float)pos.x, (float)pos.y, (float)pos.z));
 	case Bioma::OCEA:
-		terlvl = 60;
+		terlvl = 50;
 		noise = &this->oceanGenNoise;
 		return (pos.y / terlvl + noise->GetNoise((float)pos.x, (float)pos.y, (float)pos.z) / 4.0f);
 	case Bioma::MAR: case Bioma::GEL:
@@ -264,6 +276,9 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 					else if (bio == Bioma::ARTIC) {
 						chunk->setBlock(new SolidBlock(Bloc::NEU), pos);
 					}
+					else if (bio == Bioma::DESERT) {
+						chunk->setBlock(new SolidBlock(Bloc::ARENA), pos);
+					}
 					else {
 						chunk->setBlock(new SolidBlock(Bloc::TERRA), pos);
 					}
@@ -272,6 +287,9 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 					if ((CHUNKSIZE*cPos.y + y) <= sealvl) {
 						if ((CHUNKSIZE * cPos.y + y) == sealvl && bio == Bioma::ARTIC) {
 							chunk->setBlock(new SolidBlock(Bloc::GEL), pos);
+							if (rand() % CHUNKSIZE == 0) {
+								chunk->setBlock(new LiquidBlock(Bloc::AIGUA, pos), pos);
+							}
 						}
 						else {
 							chunk->setBlock(new LiquidBlock(Bloc::AIGUA, pos), pos);

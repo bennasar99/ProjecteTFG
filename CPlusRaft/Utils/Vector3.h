@@ -32,6 +32,7 @@ public:
 	bool equals(Vector3<T> other);
 	void print();
 	void floor();
+	Vector3<int> toInt();
 };
 
 template <class T>
@@ -151,6 +152,10 @@ inline void Vector3<float>::floor() {
 	this->x = floorf(this->x);
 	this->y = floorf(this->y);
 	this->z = floorf(this->z);
+}
+
+inline Vector3<int> Vector3<float>::toInt() {
+	return Vector3<int>(int(x), int(y), int(z));
 }
 
 //Escriu l'informació del vector

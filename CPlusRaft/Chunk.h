@@ -4,6 +4,7 @@
 #include "Render/ChunkMesh.h"
 #include "Utils/Vector3.h"
 #include "Generation/WorldGenerator.h"
+#include <list>
 #define CHUNKSIZE 16
 
 class Chunk {
@@ -21,6 +22,16 @@ private:
 
 	int lastYupd = 0;
 
+	class dT {
+	public:
+		Vector3<float> pos;
+		bool visible[6] = { false, false, false, false, false, false };
+		dT(Vector3<float> pos) {
+			this->pos = pos;
+		};
+	};
+	std::list<dT> transparent;
+
 public:
 	bool firstdraw = true;
 
@@ -35,7 +46,6 @@ public:
 
 	void interact(Vector3<int> bpos);
 	void update(int delta);
-	void destroy();
 
 	bool isVisible(Vector3<int> bpos);
 	Bloc getBlockWorld(Vector3<int> bpos);
@@ -48,8 +58,10 @@ public:
 	void setBiome(Bioma biome);
 
 	void updateMesh();
+	void updateTransparency(Vector3<float> pPos);
 
 	int nblocs;
 
 	Chunk(World* world, Vector3<int> pos);
+	~Chunk();
 };

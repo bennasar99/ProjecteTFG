@@ -20,7 +20,12 @@ public:
 	void drawT();
 
 	void update();
+	void updateO();
+	void updateT();
 	void erase();
+	void eraseT();
+	void eraseO();
 
 	ChunkMesh();
+	~ChunkMesh();
 };

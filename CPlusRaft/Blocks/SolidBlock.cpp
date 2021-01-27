@@ -68,6 +68,30 @@ void SolidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 			texNum = 7;
 			color[0] = 0; color[1] = 0; color[2] = 1; color[3] = 0.8f;
 			break;
+		case Bloc::ARENA:
+			color[0] = 0.929f; color[1] = 0.788f; color[2] = 0.686f; color[3] = 1;
+			texNum = 18;
+			break;
+		case Bloc::OR:
+			color[0] = 1; color[1] = 0.843f; color[2] = 0; color[3] = 1;
+			texNum = 12;
+			break;
+		case Bloc::FANG:
+			color[0] = 0.5f; color[1] = 0.35f; color[2] = 0.05f; color[3] = 1;
+			texNum = 8;
+			break;
+		case Bloc::FERRO:
+			color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
+			texNum = 9;
+			break;
+		case Bloc::GRAVILLA:
+			color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
+			texNum = 14;
+			break;
+		case Bloc::CARBO:
+			color[0] = 0.21f; color[1] = 0.271f; color[2] = 0.31f; color[3] = 1;
+			texNum = 10;
+			break;
 	}
 
 	float* texCoords = TextureManager::getTexCoords(texNum);

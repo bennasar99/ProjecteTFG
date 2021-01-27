@@ -218,7 +218,7 @@ void World::update(int delta, Vector3<float> pos) {
 		for (int y = (int)(pos.y - dist); y < pos.y + dist; y++) {
 			for (int z = (int)(pos.z - dist); z < pos.z + dist; z++) {
 				int desp = getDesp(Vector3<int>(x, y, z));
-				if (desp != -1 && chunks[desp] != 0) {
+				if (desp != -1 && chunks[desp] != 0 && estat[desp] == ChunkState::LLEST) {
 					chunks[desp]->update(delta);
 				}
 			}
@@ -246,6 +246,7 @@ void World::updateGeneration() {
 							estat[desp] = ChunkState::TERRENY;
 						}
 						else if (estat[desp] == ChunkState::TERRENY) {
+							chunks[desp]->updateMesh();
 							estat[desp] = ChunkState::LLEST;
 						}
 						else if (estat[desp] == ChunkState::CARREGAT) {
@@ -254,7 +255,6 @@ void World::updateGeneration() {
 						}
 						if (ch->nblocs <= 0) {
 							estat[desp] = ChunkState::LLEST;
-							ch->destroy();
 							delete ch;
 							continue;
 						}
@@ -330,7 +330,7 @@ void World::destroy() {
 
 	//NOU CODI CHUNKS
 	for (int i = 0; i < this->size.x * this->size.y * this->size.z; i++) {
-		this->chunks[i]->destroy();
+		delete this->chunks[i];
 	}
 
 	std::list<Entity*>::iterator ent;
@@ -496,22 +496,29 @@ void World::draw(Vector3<float> pos, float dist) {
 		glPopMatrix();
 	}
 
+
 	std::list<Vector3<int>>::iterator chunki;
+
+	int nchunk = 0;
 	for (chunki = vChunks.begin(); (chunki != vChunks.end()); chunki++) {
 		Vector3<int> cPos = *chunki;
 		int desp = getDesp(cPos);
-		if (desp == -1 || chunks[desp] == NULL) {
+		if (desp == -1 || chunks[desp] == NULL || estat[desp] != ChunkState::LLEST) {
 			continue;
 		}
 		glPushMatrix();
 		glTranslatef(cPos.x * CHUNKSIZE, cPos.y * CHUNKSIZE, cPos.z * CHUNKSIZE);
 		chunks[desp]->drawO();
 		glPopMatrix();
-
+		if (nchunk < 5) {
+			chunks[desp]->updateTransparency(camera->getPos());
+		}
+		nchunk++;
 	}
 
-	for (chunki = vChunks.begin(); (chunki != vChunks.end()); chunki++) {
-		Vector3<int> cPos = *chunki;
+	std::list<Vector3<int>>::reverse_iterator rchunki;
+	for (rchunki = vChunks.rbegin(); (rchunki != vChunks.rend()); ++rchunki) {
+		Vector3<int> cPos = *rchunki;
 		int desp = getDesp(cPos);
 		if (desp == -1 || chunks[desp] == NULL) {
 			continue;
@@ -521,6 +528,20 @@ void World::draw(Vector3<float> pos, float dist) {
 		chunks[desp]->drawT();
 		glPopMatrix();
 	}
+
+
+
+	//for (chunki = vChunks.begin(); (chunki != vChunks.end()); chunki++) { //Transparència 2a passada
+	//	Vector3<int> cPos = *chunki;
+	//	int desp = getDesp(cPos);
+	//	if (desp == -1 || chunks[desp] == NULL) {
+	//		continue;
+	//	}
+	//	glPushMatrix();
+	//	glTranslatef(cPos.x * CHUNKSIZE, cPos.y * CHUNKSIZE, cPos.z * CHUNKSIZE);
+	//	chunks[desp]->drawT();
+	//	glPopMatrix();
+	//}
 
 	//printf("Chunks: %d\n", nchunks);
 
@@ -566,7 +587,8 @@ void World::updateVisibility() {
 		}
 	}
 	vChunks.sort([this](Vector3<int> a, Vector3<int> b) {
-		return (Vector3<int>::module(a*CHUNKSIZE - camera->getPos()) < Vector3<int>::module(b*CHUNKSIZE - camera->getPos())); }
+		Vector3<int> half = Vector3<int>(CHUNKSIZE / 2, CHUNKSIZE / 2, CHUNKSIZE / 2);
+		return (Vector3<int>::module((a*CHUNKSIZE + half) - camera->getPos()) < Vector3<int>::module((b * CHUNKSIZE + half) - camera->getPos())); }
 	);
 }
 

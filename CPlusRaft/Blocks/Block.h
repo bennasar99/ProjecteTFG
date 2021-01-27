@@ -22,6 +22,12 @@ enum class Bloc {
 	ALTAVEU,
 	NEU,
 	GEL,
+	ARENA,
+	OR,
+	FANG,
+	FERRO,
+	GRAVILLA,
+	CARBO,
 	LIMIT //SEMPRE DARRER
 };
 

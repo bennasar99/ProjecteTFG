@@ -31,12 +31,13 @@
 #include "Utils/Vector3.h"
 #include "Utils/ThreadManager.h"
 
+
+using namespace std;
 #define REGIONSIZE 16
 
 class Block;
 class LightBlock;
 class Pendul;
-enum class Bloc;
 
 enum class ChunkState {
 	LLEST,
@@ -52,11 +53,10 @@ private:
 
 	int genCores;
 	std::vector< std::future<Chunk*> > cnk;
-	std::future<bool> sorting;
 
 	WorldGenerator wGen;
 
-	Chunk **chunks;
+	Chunk** chunks;
 	ChunkState *estat;
 	short pendents = 0;
 

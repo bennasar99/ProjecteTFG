@@ -2,7 +2,7 @@
 #include "../World.h"
 #include <iostream>
 
-TextureAtlas blockAtlas = TextureAtlas(1, 7);
+TextureAtlas blockAtlas = TextureAtlas(1, 22);
 
 Block::Block(Bloc id) {
 	//this->world = world;
@@ -119,7 +119,7 @@ void Block::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 
 bool Block::isTransparent(Bloc tipus) {
 	if (tipus == Bloc::RES || tipus == Bloc::AIRE || tipus == Bloc::HERBA || tipus == Bloc::VIDRE || tipus == Bloc::TORXA
-		|| tipus == Bloc::HERBAFULL || tipus == Bloc::AIGUA || tipus == Bloc::GEL) {
+	|| tipus == Bloc::HERBAFULL || tipus == Bloc::AIGUA || tipus == Bloc::GEL) {
 		return true;
 	}
 	return false;

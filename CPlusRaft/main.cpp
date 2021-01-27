@@ -240,7 +240,7 @@ void Display(GLFWwindow* window)
 
 		glEnable(GL_TEXTURE_2D);
 		glTranslatef(0.5f * aspect - 0.3f, 0.8f, -1);
-		for (int i = 0; i < 16; i++) { //Objectes de l'inventari
+		for (int i = 0; i <= 25; i++) { //Objectes de l'inventari
 			glPushMatrix();
 			glScalef(0.1f, 0.1f, 0.1f);
 			Block bsel = Block(static_cast<Bloc>(i + 2)); //+2 perque botam aire i null
@@ -458,7 +458,7 @@ int main(int argc, char** argv)
 	SoundManager::loadSound("Sons/passes/mud02.wav", So::CAMINA);
 
 	//Antialising
-	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_SAMPLES, 8);
 	glEnable(GL_MULTISAMPLE);
 
 	setLighting();
@@ -670,7 +670,7 @@ void setLighting() {
 
 	//Llanterna
 	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 1.0f);
-	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 30.0f);
+	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.0f);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.1f);
 	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.1f);
 

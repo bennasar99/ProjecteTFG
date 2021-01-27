@@ -23,6 +23,7 @@ void Chunk::drawO() {
 	if (firstdraw == true) {
 		firstdraw = false;
 		cMesh->update();
+		this->updateTransparency(Vector3<float>(100, 100, 100));
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	glTranslatef(0.5f, 0.5f, 0.5f);
@@ -84,7 +85,7 @@ void Chunk::update(int delta) {
 	lastYupd %= CHUNKSIZE;
 }
 
-void Chunk::destroy() {
+Chunk::~Chunk() {
 	for (int x = 0; x < CHUNKSIZE; x++) {
 		for (int y = 0; y < CHUNKSIZE; y++) {
 			for (int z = 0; z < CHUNKSIZE; z++) {
@@ -95,7 +96,6 @@ void Chunk::destroy() {
 			}
 		}
 	}
-	cMesh->erase();
 	delete cMesh;
 }
 
@@ -196,8 +196,8 @@ bool Chunk::readFromByteData(char* arr) {
 }
 
 void Chunk::updateMesh() {
-	cMesh->erase();
-
+	cMesh->eraseO();
+	transparent.clear();
 	int nb = 0;
 	for (int x = 0; x < CHUNKSIZE; x++) { //1a Passada: OPACS
 		for (int z = 0; z < CHUNKSIZE; z++) {
@@ -211,12 +211,19 @@ void Chunk::updateMesh() {
 
 					bool qualcun = false;
 					bool visible[6] = { false, false, false, false, false, false };
-					if (Block::isTransparent(blocs[x][y][z]->getId())) {
+					Bloc bt = blocs[x][y][z]->getId();
+					bool solid = Block::isSolid(bt);
+					if (Block::isTransparent(bt)) {
+						dT info = dT(Vector3<float>(pos.x, pos.y, pos.z));
 						for (int i = 0; i < 6; i++) {
-							if (Block::isTransparent(getBlockWorld(toCheck[i])) && getBlockWorld(toCheck[i]) != blocs[x][y][z]->getId()) {
-								visible[i] = true;
+							Bloc bo = getBlockWorld(toCheck[i]);
+							if (bo != bt && Block::isTransparent(bo) && !Block::isSolid(bo)) {
+								info.visible[i] = true;
 								qualcun = true;
 							}
+						}
+						if (qualcun) {
+							transparent.push_back(info);
 						}
 					} else {
 						for (int i = 0; i < 6; i++) {
@@ -225,9 +232,9 @@ void Chunk::updateMesh() {
 								qualcun = true;
 							}
 						}
-					}
-					if (qualcun) {
-						blocs[x][y][z]->draw(cMesh, visible, Vector3<int>(x, y, z));
+						if (qualcun) {
+							blocs[x][y][z]->draw(cMesh, visible, Vector3<int>(x, y, z));
+						}
 					}
 					nb++;
 
@@ -239,6 +246,40 @@ void Chunk::updateMesh() {
 		}
 	}
 	this->firstdraw = true;
+}
+
+void Chunk::updateTransparency(Vector3<float> pPos){
+	cMesh->eraseT();
+	transparent.sort([this,pPos](dT b1, dT b2) {
+		//printf("dist %f\n", Vector3<float>::module(b1.pos - pPos));
+		return (Vector3<float>::module(b1.pos - pPos) > Vector3<float>::module(b2.pos - pPos)); //de més enfora a + aprop
+		});
+	std::list<dT>::iterator it;
+	Vector3<float> first;
+	Vector3<float> last;
+	for (it = transparent.begin(); it != transparent.end(); it++) {
+		dT info = *it;
+		if (it == transparent.begin()) {
+			first = info.pos;
+		}
+		last = info.pos;
+		int count = 0;
+		for (int i = 0; i < 6; i++) {
+			if (info.visible[i]) {
+				count++;
+			}
+		}
+		//printf("info %d %d %d count %d \n", info.pos.x, info.pos.y, info.pos.z, count);
+		Vector3<int> bpos = Vector3<int>(info.pos.x, info.pos.y, info.pos.z) % CHUNKSIZE;
+		if (blocs[bpos.x][bpos.y][bpos.z] != nullptr) {
+			//printf("%d %d %d, ", bpos.y, bpos.y, bpos.z);
+			blocs[bpos.x][bpos.y][bpos.z]->draw(cMesh, info.visible, bpos);
+		}
+	}
+	cMesh->updateT();
+	//if ((pPos / CHUNKSIZE).toInt() == this->getPos()) {
+		//printf("first %d %d last %d %d pPos %d %d\n", (int)first.x, (int)first.z, (int)last.x, (int)last.z, (int)pPos.x, (int)pPos.z);
+	//}
 }
 
 Bioma Chunk::getBiome() {
