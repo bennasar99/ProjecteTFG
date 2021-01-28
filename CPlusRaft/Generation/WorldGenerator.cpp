@@ -10,18 +10,18 @@ WorldGenerator::WorldGenerator(int seed, World* world) {
 	//Oceans
 	this->oceanNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	this->oceanNoise.SetSeed(seed*4);
-	this->oceanNoise.SetFrequency(0.04f); //0.04
+	this->oceanNoise.SetFrequency(0.004f); //0.04
 
 	//Clima (calor, templat, fred)
 	this->climateNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
 	this->climateNoise.SetSeed(seed*3);
-	this->climateNoise.SetFrequency(0.05f); //0.01
+	this->climateNoise.SetFrequency(0.005f); //0.01
 	this->climateNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
 	//Bioma (depen del clima)
 	this->biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
 	this->biomeNoise.SetSeed(seed*2);
-	this->biomeNoise.SetFrequency(0.05f); //0.1
+	this->biomeNoise.SetFrequency(0.005f); //0.1
 	this->biomeNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
 	this->normalNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
@@ -41,10 +41,10 @@ WorldGenerator::WorldGenerator() {
 	
 }
 
-Bioma WorldGenerator::getBiomeAt(int cX, int cZ) {
-	float ocean = oceanNoise.GetNoise((float)cX, (float)cZ);
-	float climate = climateNoise.GetNoise((float)cX, (float)cZ);
-	float biome = biomeNoise.GetNoise((float)cX, (float)cZ);
+Bioma WorldGenerator::getBiomeAt(int bX, int bZ) {
+	float ocean = oceanNoise.GetNoise((float)bX, (float)bZ);
+	float climate = climateNoise.GetNoise((float)bX, (float)bZ);
+	float biome = biomeNoise.GetNoise((float)bX, (float)bZ);
 	/*GLfloat ocean[16*16];
 	GLfloat climate[16*16];
 	GLfloat biome[16*16];
@@ -53,7 +53,7 @@ Bioma WorldGenerator::getBiomeAt(int cX, int cZ) {
 	climateGen->GenUniformGrid2D(climate, cX, cZ, 16, 16, 0.1f, this->seed);
 	oceanGen->GenUniformGrid2D(ocean, cX, cZ, 16, 16, 0.04f, this->seed);*/
 
-	if (ocean < -0.1f) {
+	if (ocean < -0.25f) {
 		return Bioma::OCEA;
 	}
 	else if (ocean < 0) {
@@ -211,13 +211,13 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 
 	Chunk* chunk = new Chunk(this->world, cPos);
 
-	chunk->setBiome(getBiomeAt(cPos.x, cPos.z));
+	chunk->setBiome(getBiomeAt(cPos.x * CHUNKSIZE + CHUNKSIZE/2, cPos.z * CHUNKSIZE + CHUNKSIZE / 2));
 	Bioma bio = chunk->getBiome();
 
 	bool transition = false;
 	for (int nX = cPos.x - 1; (nX <= cPos.x + 1) && !transition; nX++) {
 		for (int nZ = cPos.z - 1; (nZ <= cPos.z + 1) && !transition; nZ++) {
-			if (getBiomeAt(nX, nZ) != bio) {
+			if (getBiomeAt(nX * CHUNKSIZE + CHUNKSIZE / 2, nZ * CHUNKSIZE + CHUNKSIZE / 2) != bio) {
 				transition = true;
 			}
 		}
@@ -232,6 +232,9 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 	int nblocs = 0;
 	for (int x = 0; x < CHUNKSIZE; x++) {
 		for (int z = 0; z < CHUNKSIZE; z++) {
+			if (transition) { //si és un chunk de transició entre biomes, cada bloc pot ser d'un bioma diferent
+				bio = getBiomeAt(cPos.x * CHUNKSIZE + x, cPos.z * CHUNKSIZE + z);
+			}
 			for (int y = 0; y < CHUNKSIZE; y++) {
 
 				Vector3<int> pos = Vector3<int>(x, y, z);
@@ -245,7 +248,7 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 					for (int nX = bpos.x - range; nX <= bpos.x + range; nX++) {
 						for (int nZ = bpos.z - range; nZ <= bpos.z + range; nZ++) {
 							Vector3<int> nbPos = Vector3<int>(nX, y, nZ);
-							Bioma nBio = getBiomeAt(nX / CHUNKSIZE, nZ / CHUNKSIZE);
+							Bioma nBio = getBiomeAt(nX, nZ);
 							float dist = Vector3<int>::module(bpos - nbPos);
 							dist = std::max(1.0f, dist);
 							int bI = static_cast<int>(nBio);
