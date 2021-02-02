@@ -217,7 +217,7 @@ void Chunk::updateMesh() {
 						dT info = dT(Vector3<float>(pos.x, pos.y, pos.z));
 						for (int i = 0; i < 6; i++) {
 							Bloc bo = getBlockWorld(toCheck[i]);
-							if (bo != bt && Block::isTransparent(bo) && !Block::isSolid(bo)) {
+							if (bo != bt && Block::canSeeThrough(bo) && !Block::isSolid(bo)) {
 								info.visible[i] = true;
 								qualcun = true;
 							}
@@ -227,7 +227,7 @@ void Chunk::updateMesh() {
 						}
 					} else {
 						for (int i = 0; i < 6; i++) {
-							if (Block::isTransparent(getBlockWorld(toCheck[i]))) {
+							if (Block::canSeeThrough(getBlockWorld(toCheck[i]))) {
 								visible[i] = true;
 								qualcun = true;
 							}

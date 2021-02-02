@@ -116,12 +116,6 @@ void Camera::move(Camera::direction dir, int delta) {
 
 		this->updateCorners();
 	}
-	if (this->drawMove) { //Guardam la nova posició de la càmera
-		this->punts.push_front(this->pos);
-		if (this->punts.size() > 1000) {
-			this->punts.pop_back();
-		}
-	}
 }
 
 //Modifica la càmera perquè l'escena es vegi amb l'angle que correspongui
@@ -186,22 +180,6 @@ void Camera::display() {
 
 	glGetIntegerv(GL_VIEWPORT, viewport); //viewport[2] = width, viewport[3] = height
 
-	if (this->drawMove) {
-		if (this->punts.size() > 0) {
-			glPushMatrix();
-			glDisable(GL_LIGHTING);
-			std::list< Vector3<float> >::iterator it = this->punts.begin();
-			glBegin(GL_LINE_LOOP);
-			for (int i = 0; i < (int)this->punts.size(); i++) {
-				Vector3 p = *it;
-				glVertex3f(p.x, p.y, p.z);
-				it++;
-			}
-			glEnd();
-			glEnable(GL_LIGHTING);
-			glPopMatrix();
-		}
-	}
 }
 
 //Augmenta o disminuix el FOV segons calgui
@@ -248,13 +226,6 @@ void Camera::setFreeLook(bool set) {
 	this->freeLook = set;
 }
 
-bool Camera::getDrawMove() {
-	return this->drawMove;
-}
-
-void Camera::setDrawMove(bool set) {
-	this->drawMove = set;
-}
 //Actualitzam 'estat de la càmera perque miri on s'indica
 
 void Camera::lookAt(Vector3<float> pos) {

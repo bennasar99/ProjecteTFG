@@ -51,6 +51,7 @@ public:
 
 	static bool isTransparent(Bloc tipus);
 	static bool isSolid(Bloc tipus);
+	static bool canSeeThrough(Bloc tipus);
 
 	Block(Bloc id);
 	Block();

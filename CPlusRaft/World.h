@@ -9,6 +9,7 @@
 #include <fstream>
 #include <filesystem>
 #include <future> 
+#include <algorithm>
 
 #include "Light.h"
 #include "Blocks/Block.h"
@@ -19,7 +20,6 @@
 #include "Blocks/LiquidBlock.h"
 #include "Blocks/SpreadBlock.h"
 #include "Entities/Player.h"
-#include <algorithm>
 #include "Utils.h"
 #include "Camera.h"
 #include "Entities/Entity.h"

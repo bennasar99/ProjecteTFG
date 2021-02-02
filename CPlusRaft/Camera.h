@@ -25,9 +25,6 @@ private:
 
 	bool freeMove = true; //Moviment (posició) lliure permés
 	bool freeLook = true; //Orientació lliure permesa
-	bool drawMove = true; //Dibuix del camí de la càmera activat
-
-	std::list< Vector3<float> > punts; //Posicions anteriors
 
 	//Matrius
 	GLdouble model_view[16];
@@ -87,9 +84,6 @@ public:
 
 	bool getFreeLook();
 	void setFreeLook(bool set);
-
-	bool getDrawMove();
-	void setDrawMove(bool set);
 
 	void lookAt(Vector3<float> pos);
 	void zoom(float zoom);

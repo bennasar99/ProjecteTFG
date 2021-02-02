@@ -10,6 +10,7 @@
 #include "Utils/KeyboardManager.h"
 #include "Utils/ThreadManager.h"
 #include "Entities/Player.h"
+#include "Render/Shader.h"
 #include <sys/stat.h>
 #include <thread>  
 
@@ -47,7 +48,7 @@ bool smoothlight = true;
 #include "Entities/Entity.h"
 Entity* ent; //Entitat controlada
 
-bool axisVisible = true; //Eixos ON/OFF
+bool axisVisible = false; //Eixos ON/OFF
 
 //Nom del món
 std::string wname;
@@ -348,7 +349,6 @@ int main(int argc, char** argv)
 	camera.setPos(Vector3<float>(64, 66, 64));
 	camera.setFreeLook(true);
 	camera.setFreeMove(true);
-	camera.setDrawMove(true);
 
 	//Fils (detecció num)
 	ThreadManager::initialize();
@@ -378,7 +378,7 @@ int main(int argc, char** argv)
 		}
 		//int seed = std::atoi(sseed.c_str());
 		printf("Seed: %d\n", seed);
-		world = new World(wname, seed, 64, 12, 64, &camera); //Mides per crear mapa de biomes be i que no peti: 100, 6, 100
+		world = new World(wname, seed, 64, 16, 64, &camera); //Mides per crear mapa de biomes be i que no peti: 100, 6, 100
 		//ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 10.0f, 0));
 		ent = new Player(world, Vector3<float>(400, 80, 400) + Vector3<float>(0, 2.0f, 0));
 		world->save();
@@ -462,6 +462,12 @@ int main(int argc, char** argv)
 	glEnable(GL_MULTISAMPLE);
 
 	setLighting();
+
+	//Prova shader
+	Shader fShader = Shader(GL_FRAGMENT_SHADER, "fragment.glsl");
+	//fShader.use();
+	//Shader vShader = Shader(GL_VERTEX_SHADER, "vertex.glsl");
+	//vShader.use();
 
 	//std::thread upd(Idle);
 	run = true;
@@ -647,7 +653,6 @@ void onKeyboardUp(unsigned char key, int x, int y) {
 
 void toggleAxis() { //Axis i trajectòria càmera ON/OFF
 	axisVisible = !axisVisible;
-	camera.setDrawMove(!camera.getDrawMove());
 }
 
 /**

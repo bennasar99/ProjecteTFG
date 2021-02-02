@@ -170,6 +170,7 @@
     <ClInclude Include="Light.h" />
     <ClInclude Include="Render\ChunkMesh.h" />
     <ClInclude Include="Render\Mesh.h" />
+    <ClInclude Include="Render\Shader.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Utils\KeyboardManager.h" />
     <ClInclude Include="Utils\SoundManager.h" />
@@ -198,6 +199,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Render\ChunkMesh.cpp" />
     <ClCompile Include="Render\Mesh.cpp" />
+    <ClCompile Include="Render\Shader.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Utils\KeyboardManager.cpp" />
     <ClCompile Include="Utils\SoundManager.cpp" />

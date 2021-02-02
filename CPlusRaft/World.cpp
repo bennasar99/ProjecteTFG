@@ -250,7 +250,7 @@ void World::updateGeneration() {
 							estat[desp] = ChunkState::LLEST;
 						}
 						else if (estat[desp] == ChunkState::CARREGAT) {
-							chunks[desp]->updateMesh();
+							ch->updateMesh();
 							estat[desp] = ChunkState::LLEST;
 						}
 						if (ch->nblocs <= 0) {
@@ -267,7 +267,6 @@ void World::updateGeneration() {
 										if (desp == -1 || chunks[desp] == nullptr || estat[desp] != ChunkState::LLEST) {
 											continue;
 										}
-										//chunks[desp]->firstdraw = true;
 										chunks[desp]->updateMesh();
 									}
 								}
@@ -708,6 +707,8 @@ Entity* World::getNearestEntity(Vector3<float> pos, float range, bool controllab
 	return entitat;
 }
 
+
+//TODO: que faci una llista amb els chunks a actualitzar
 void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
 	int desp;
 	Vector3<int> ncpos;
@@ -921,9 +922,22 @@ bool World::loadRegion(Vector3<int> rPos) {
 				Bioma bio = static_cast<Bioma>(buffer[0]);
 				file.read(buffer, chunkSize);
 				if (memcmp(buffer, zeros, chunkSize) != 0) { //Si el chunk no és buit, el carregam
-					chunks[desp] = new Chunk(this, Vector3<int>(x, y, z));
+					Vector3<int> cpos = Vector3<int>(x, y, z);
+					chunks[desp] = new Chunk(this, cpos);
 					chunks[desp]->readFromByteData(buffer);
 					chunks[desp]->setBiome(bio);
+					chunks[desp]->updateMesh();
+					for (int nX = cpos.x - 1; nX <= cpos.x + 1; nX++) {
+						for (int nY = cpos.y - 1; nY <= cpos.y + 1; nY++) {
+							for (int nZ = cpos.z - 1; nZ <= cpos.z + 1; nZ++) {
+								int desp = getDesp(Vector3<int>((int)nX, (int)nY, (int)nZ));
+								if (desp == -1 || chunks[desp] == nullptr || estat[desp] != ChunkState::LLEST) {
+									continue;
+								}
+								chunks[desp]->updateMesh();
+							}
+						}
+					}
 					estat[desp] = ChunkState::LLEST;
 				}
 			}

@@ -118,11 +118,14 @@ void Block::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 }
 
 bool Block::isTransparent(Bloc tipus) {
-	if (tipus == Bloc::RES || tipus == Bloc::AIRE || tipus == Bloc::HERBA || tipus == Bloc::VIDRE || tipus == Bloc::TORXA
-	|| tipus == Bloc::HERBAFULL || tipus == Bloc::AIGUA || tipus == Bloc::GEL) {
+	if (tipus == Bloc::VIDRE || tipus == Bloc::AIGUA || tipus == Bloc::GEL) {
 		return true;
 	}
 	return false;
+}
+
+bool Block::canSeeThrough(Bloc tipus) {
+	return (Block::isTransparent(tipus) || tipus == Bloc::TORXA || tipus == Bloc::HERBA || tipus == Bloc::HERBAFULL || tipus == Bloc::AIRE || tipus == Bloc::RES);
 }
 
 bool Block::isSolid(Bloc tipus) {
