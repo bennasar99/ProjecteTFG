@@ -41,7 +41,7 @@ protected:
 							//espai (que no s'hi puguin col·locar blocs) i que en destruir-lo es destrueixi tota l'estructura */
 public:
 
-	virtual void update(int delta, World* world);
+	virtual void update(float delta, World* world);
 	virtual void destroy(World* world);
 	virtual void interact(World* world);
 	virtual void draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos);

@@ -16,7 +16,7 @@ Block::Block() {
 	//this->parent = 0;
 }
 
-void Block::update(int delta, World* world) {
+void Block::update(float delta, World* world) {
 
 }
 

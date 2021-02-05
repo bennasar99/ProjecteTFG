@@ -34,6 +34,7 @@
 
 using namespace std;
 #define REGIONSIZE 16
+#define DAYTIME 120 //Durada del dia (segons)
 
 class Block;
 class LightBlock;
@@ -50,6 +51,8 @@ enum class ChunkState {
 
 class World {
 private:
+
+	double lastTime;
 
 	int genCores;
 	std::vector< std::future<Chunk*> > cnk;
@@ -78,6 +81,7 @@ private:
 	int updTimer = 200;
 
 	std::string name;
+	std::mutex mutex;
 
 	void updateGeneration();
 
@@ -127,7 +131,7 @@ public:
 	//Chunks
 	void updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos);
 
-	void update(int delta, Vector3<float> camPos);
+	void update(float delta, Vector3<float> camPos);
 
 	//void generate(int seed);
 	void save();

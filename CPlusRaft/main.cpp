@@ -14,6 +14,8 @@
 #include <sys/stat.h>
 #include <thread>  
 
+#define TPS 60 //Actualitzacions del món per segon
+
 int w_width = 500;
 int w_height = 500;
 GLFWwindow* window;
@@ -67,6 +69,8 @@ void centerPointer();
 void updatePlayerBlock();
 void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
 
+double lastTime;
+float lastTimeW;
 int fpsc = 0;
 bool run = false;
 
@@ -115,6 +119,13 @@ void Display(GLFWwindow* window)
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	if (llanterna) {
+		glEnable(GL_LIGHT0);
+	}
+	else {
+		glDisable(GL_LIGHT0);
+	}
 
 	//Llanterna
 	if (llanterna && ent == 0) {
@@ -304,19 +315,23 @@ void Update(void)
 	}
 
 	//Gestió del temps
-	//int temps = glutGet(GLUT_ELAPSED_TIME);
-	int temps = int(glfwGetTime() * 1000);
-	int delta = temps - darrerIdle;
-	darrerIdle = temps;
+	float time = (float)glfwGetTime();
+	float delta = time - lastTime;
+	lastTime = time;
 
 	updatePlayerBlock();
 
 
 	//Actualitzam el món
 	//std::async(&World::update, world, delta, camera.getPos());
-	world->update(delta, camera.getPos());
+	time = (float)glfwGetTime();
+	float deltaW = time - lastTimeW;
+	if (deltaW > 1.0f / (float)TPS) {
+		lastTimeW = time;
+		world->update(deltaW, camera.getPos());
+	}
 
-	if (ent != nullptr) { //TEMPORAL: se n'ha d'encarregar el món
+	if (ent != nullptr) { //L'entitat que controlam s'ha d'actualitzar quan l'ordinador ho permeti
 		ent->update(delta);
 		ent->setRot(camera.yaw);
 	}
@@ -336,9 +351,13 @@ void Idle() {
 
 void Draw() {
 	glfwMakeContextCurrent(window);
-	while (run) {
-
+	glfwSwapInterval(1); //Activar VSYNC
+	while (!glfwWindowShouldClose(window))
+	{
+		Display(window);
+		glfwSwapBuffers(window);
 	}
+	run = false;
 }
 
 // Funcion principal
@@ -469,16 +488,16 @@ int main(int argc, char** argv)
 	//Shader vShader = Shader(GL_VERTEX_SHADER, "vertex.glsl");
 	//vShader.use();
 
-	//std::thread upd(Idle);
+	std::thread drw(Draw);
+	glfwMakeContextCurrent(NULL);
 	run = true;
 	// Comienza la ejecucion del core de GLUT
-	while (!glfwWindowShouldClose(window))
-	{
+	double time;
+	lastTime = (float)glfwGetTime();
+	lastTimeW = lastTime;
+	while (run) {
 		glfwPollEvents();
-		Update(); //GLFW no té funcio Idle pròpia
-		//std::async(std::launch::async, Update);
-		Display(window);
-		glfwSwapBuffers(window);
+		Update();
 	}
 	run = false;
 	//upd.join();
@@ -561,12 +580,6 @@ void movement(int key) {
 	
 	if (key == GLFW_KEY_F) {
 		llanterna = !llanterna;
-		if (llanterna) {
-			glEnable(GL_LIGHT0);
-		}
-		else {
-			glDisable(GL_LIGHT0);
-		}
 	}
 	else if (key == GLFW_KEY_P) {
 		printf("x:%f y:%f z:%f b:%d r:%f\n", ent->getPos().x, ent->getPos().y, ent->getPos().z, world->getBlock(ba), ent->getRot());

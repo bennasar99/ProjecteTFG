@@ -14,7 +14,7 @@ void SpreadBlock::destroy(World* world) {
 
 }
 
-void SpreadBlock::update(int delta, World* world) {
+void SpreadBlock::update(float delta, World* world) {
 	//if (world->getBlock(this->pos + Vector3<int>(0, -1, 0)) == Bloc::RES) {
 	//	world->deleteBlock(this->pos, true);
 	//	return;

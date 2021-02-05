@@ -23,7 +23,7 @@ void LiquidBlock::interact(World* world) {
 
 }
 
-void LiquidBlock::update(int delta, World* world) {
+void LiquidBlock::update(float delta, World* world) {
 	//Vector3<int> toCheck[4] = { pos + Vector3<int>(1,0,0), pos + Vector3<int>(-1,0,0) , pos + Vector3<int>(0,0,1), pos + Vector3<int>(0,0,-1) };
 	//for (int i = 0; i < 4; i++) {
 	//	if ((toCheck[i].x > 0) && (toCheck[i].x < (world->sizex * CHUNKSIZE - 1)) && 

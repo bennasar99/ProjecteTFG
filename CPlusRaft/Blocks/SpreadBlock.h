@@ -22,6 +22,6 @@ public:
 
 	void interact(World* world);
 
-	void update(int delta, World* world);
+	void update(float delta, World* world);
 
 };

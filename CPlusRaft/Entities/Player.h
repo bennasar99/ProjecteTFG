@@ -15,7 +15,8 @@ class World;
 class Player : public Entity {
 private:
 	float grav = 1;
-	float speed = 2; 
+	float gravmax = 100;
+	float speed = 16.0f;
 
 	int health;
 	float rot = 0;
@@ -29,9 +30,9 @@ private:
 public:
 	Player(World* world, Vector3<float> pos);
 
-	void update(int delta);
+	void update(float delta);
 	void control(int key);
-	void control(int delta, Camera *cam);
+	void control(float delta, Camera *cam);
 
 	void draw();
 	void destroy();

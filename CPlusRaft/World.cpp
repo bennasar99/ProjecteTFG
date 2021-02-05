@@ -147,7 +147,7 @@ void World::drawLights(){
 	glPopMatrix();
 
 	//Sol, establim la seva posició segons el moment del dia
-	this->solpos = Vector3<float>(cosf((daytime / 43200.0f) * 3.1416f), sinf((daytime / 43200.0f) * 3.1416f), 0.0f);
+	this->solpos = Vector3<float>(cosf((daytime / (DAYTIME/2)) * 3.1416f), sinf((daytime / (DAYTIME/2)) * 3.1416f), 0.0f);
 	GLfloat spos[4] = { solpos.x, solpos.y, solpos.z, 0.0f };
 	glLightfv(sol, GL_POSITION, spos);
 }
@@ -185,13 +185,14 @@ void World::delLight(Light* light) {
  * @param Vector3<float> posicio
  * Actualitza l'estat intern de les estructures del món, a més de la distància de les llums
  */
-void World::update(int delta, Vector3<float> pos) {
+void World::update(float delta, Vector3<float> pos) {
+
 	daytime += ((float)delta);
-	if (daytime >= 86400.0f) {
+	if (daytime >= DAYTIME) {
 		daytime = 0; //Reiniciam el temps del dia
 		glEnable(sol); //Tornam activar el sol
 	}
-	else if (daytime > 43200.0f) { //Si es de vespre, desactivam el sol
+	else if (daytime > (DAYTIME/2)) { //Si es de vespre, desactivam el sol
 		glDisable(sol);
 	}
 	
@@ -495,6 +496,11 @@ void World::draw(Vector3<float> pos, float dist) {
 		glPopMatrix();
 	}
 
+	std::list<Vector3<int>> vChunks;
+	{
+		const std::lock_guard<std::mutex> lock(mutex);
+		vChunks = std::list<Vector3<int>>(this->vChunks);
+	}
 
 	std::list<Vector3<int>>::iterator chunki;
 
@@ -509,7 +515,7 @@ void World::draw(Vector3<float> pos, float dist) {
 		glTranslatef(cPos.x * CHUNKSIZE, cPos.y * CHUNKSIZE, cPos.z * CHUNKSIZE);
 		chunks[desp]->drawO();
 		glPopMatrix();
-		if (nchunk < 5) {
+		if (nchunk < 5 && estat[desp] == ChunkState::LLEST) {
 			chunks[desp]->updateTransparency(camera->getPos());
 		}
 		nchunk++;
@@ -562,6 +568,8 @@ void World::updateVisibility() {
 
 	Vector3<int> cMax = Vector3<int>(xmax, ymax, zmax);
 
+
+	const std::lock_guard<std::mutex> lock(mutex);
 	vChunks.clear();
 	//printf("%d %d %d, %d %d %d\n", cMin.x, cMin.y, cMin.z, cMax.x, cMax.y, cMax.z);
 	int chunk = 0;
@@ -627,7 +635,7 @@ void World::drawAxis(Vector3<float> pos, float axisSize) {
 
 //Dibuixa l'esfera del sol i modifica el color del cel
 void World::drawSol(Vector3<float> pos, float dist) {
-	if (daytime >= 0.0f && daytime <= 43200.0f) {
+	if (daytime >= 0.0f && daytime <= DAYTIME) {
 		glPushMatrix();
 
 		//El sol no s'ha de veure afectat per la boira o l'il·luminació

@@ -5,6 +5,7 @@
 #include "Utils/Vector3.h"
 #include "Generation/WorldGenerator.h"
 #include <list>
+#include <mutex>
 #define CHUNKSIZE 16
 
 class Chunk {
@@ -32,6 +33,8 @@ private:
 	};
 	std::list<dT> transparent;
 
+	std::mutex mutex;
+
 public:
 	bool firstdraw = true;
 
@@ -45,7 +48,7 @@ public:
 	Bloc getBlock(Vector3<int> bpos);
 
 	void interact(Vector3<int> bpos);
-	void update(int delta);
+	void update(float delta);
 
 	bool isVisible(Vector3<int> bpos);
 	Bloc getBlockWorld(Vector3<int> bpos);

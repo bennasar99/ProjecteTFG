@@ -73,7 +73,7 @@ Bloc Chunk::getBlock(Vector3<int> pos) {
 	return blocs[pos.x][pos.y][pos.z]->getId();
 }
 
-void Chunk::update(int delta) {
+void Chunk::update(float delta) {
 	for (int x = 0; x < CHUNKSIZE; x++) {
 			for (int z = 0; z < CHUNKSIZE; z++) {
 				if (blocs[x][lastYupd][z] != 0) {
@@ -197,6 +197,7 @@ bool Chunk::readFromByteData(char* arr) {
 
 void Chunk::updateMesh() {
 	cMesh->eraseO();
+	const std::lock_guard<std::mutex> lock(mutex);
 	transparent.clear();
 	int nb = 0;
 	for (int x = 0; x < CHUNKSIZE; x++) { //1a Passada: OPACS
@@ -245,10 +246,16 @@ void Chunk::updateMesh() {
 			}
 		}
 	}
+	//const std::lock_guard<std::mutex> unlock(mutex);
 	this->firstdraw = true;
 }
 
 void Chunk::updateTransparency(Vector3<float> pPos){
+	std::list<dT> transparent;
+	{
+		const std::lock_guard<std::mutex> lock(mutex);
+		transparent = std::list<dT>(this->transparent);
+	}
 	cMesh->eraseT();
 	transparent.sort([this,pPos](dT b1, dT b2) {
 		//printf("dist %f\n", Vector3<float>::module(b1.pos - pPos));

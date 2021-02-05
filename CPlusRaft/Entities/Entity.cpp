@@ -14,7 +14,7 @@ Entity::Entity() {
 
 void Entity::draw() {}
 
-void Entity::update(int delta) {}
+void Entity::update(float delta) {}
 
 void Entity::destroy() {}
 
@@ -40,11 +40,11 @@ float Entity::getRot() {
 	return this->rot;
 }
 
-void Entity::control(unsigned char key) {}
+void Entity::control(int key) {}
 
-void Entity::control(int delta) {}
+void Entity::control(float delta) {}
 
-void Entity::control(int delta, Camera* cam)
+void Entity::control(float delta, Camera* cam)
 {
 }
 
