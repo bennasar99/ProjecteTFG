@@ -43,7 +43,9 @@ void Chunk::drawT() {
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	glFrontFace(GL_CCW);
 	glTranslatef(0.5f, 0.5f, 0.5f);
+	glDepthMask(GL_FALSE);
 	this->cMesh->drawT();
+	glDepthMask(GL_TRUE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -159,7 +161,7 @@ bool Chunk::setBlockWorld(Block* bloc, Vector3<int> bpos) {
 	}*/
 	if (bpos.x >= cpos.x * CHUNKSIZE && bpos.x < (cpos.x + 1) * CHUNKSIZE && bpos.y >= cpos.y * CHUNKSIZE &&
 		bpos.y < (cpos.y + 1) * CHUNKSIZE && bpos.z >= cpos.z * CHUNKSIZE && bpos.z < (cpos.z + 1) * CHUNKSIZE) {
-		return this->setBlock(bloc, bpos % 16);
+		return this->setBlock(bloc, bpos % CHUNKSIZE);
 	}
 	else {
 		return this->world->setBlock(bloc, bpos, false);
@@ -197,8 +199,7 @@ bool Chunk::readFromByteData(char* arr) {
 
 void Chunk::updateMesh() {
 	cMesh->eraseO();
-	const std::lock_guard<std::mutex> lock(mutex);
-	transparent.clear();
+	std::list<dT> transparent;
 	int nb = 0;
 	for (int x = 0; x < CHUNKSIZE; x++) { //1a Passada: OPACS
 		for (int z = 0; z < CHUNKSIZE; z++) {
@@ -245,6 +246,11 @@ void Chunk::updateMesh() {
 				}
 			}
 		}
+	}
+	{
+		const std::lock_guard<std::mutex> lock(mutex);
+		this->transparent.clear();
+		this->transparent = transparent;
 	}
 	//const std::lock_guard<std::mutex> unlock(mutex);
 	this->firstdraw = true;

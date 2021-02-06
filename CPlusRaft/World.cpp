@@ -1,8 +1,8 @@
 #include "World.h"
 
-
 World::World(std::string name, int seed, int sizex, int sizey, int sizez, Camera* camera) //Nou
 {
+
 	this->genCores = ThreadManager::getCoreCount() - 2;
 	this->genCores = std::max(this->genCores, 1);
 
@@ -77,9 +77,9 @@ World::World(std::string name, Camera* camera) { //Càrrega ja existent
 		this->estat[i] = ChunkState::BUIT;
 	}
 	//Carregam les regions
-	for (int rX = 0; rX < ceil((float)this->size.x / 16.0f); rX++) {
-		for (int rY = 0; rY < ceil((float)this->size.y / 16.0f); rY++) {
-			for (int rZ = 0; rZ < ceil((float)this->size.z / 16.0f); rZ++) {
+	for (int rX = 0; rX < ceil((float)this->size.x / REGIONSIZE); rX++) {
+		for (int rY = 0; rY < ceil((float)this->size.y / REGIONSIZE); rY++) {
+			for (int rZ = 0; rZ < ceil((float)this->size.z / REGIONSIZE); rZ++) {
 				loadRegion(Vector3<int>(rX, rY, rZ));
 			}
 		}
@@ -95,9 +95,9 @@ void World::save() {
 	path += "/chunks";
 	std::filesystem::create_directory(path.c_str());
 
-	for (int rX = 0; rX < ceil((float)this->size.x / 16.0f); rX++) {
-		for (int rY = 0; rY < ceil((float)this->size.y / 16.0f); rY++) {
-			for (int rZ = 0; rZ < ceil((float)this->size.z / 16.0f); rZ++) {
+	for (int rX = 0; rX < ceil((float)this->size.x / REGIONSIZE); rX++) {
+		for (int rY = 0; rY < ceil((float)this->size.y / REGIONSIZE); rY++) {
+			for (int rZ = 0; rZ < ceil((float)this->size.z / REGIONSIZE); rZ++) {
 				saveRegion(Vector3<int>(rX, rY, rZ));
 			}
 		}
@@ -568,9 +568,7 @@ void World::updateVisibility() {
 
 	Vector3<int> cMax = Vector3<int>(xmax, ymax, zmax);
 
-
-	const std::lock_guard<std::mutex> lock(mutex);
-	vChunks.clear();
+	std::list<Vector3<int>> vChunks;
 	//printf("%d %d %d, %d %d %d\n", cMin.x, cMin.y, cMin.z, cMax.x, cMax.y, cMax.z);
 	int chunk = 0;
 	Vector3<int> cPos = Vector3<int>(0, 0, 0);
@@ -597,6 +595,11 @@ void World::updateVisibility() {
 		Vector3<int> half = Vector3<int>(CHUNKSIZE / 2, CHUNKSIZE / 2, CHUNKSIZE / 2);
 		return (Vector3<int>::module((a*CHUNKSIZE + half) - camera->getPos()) < Vector3<int>::module((b * CHUNKSIZE + half) - camera->getPos())); }
 	);
+	{
+		const std::lock_guard<std::mutex> lock(mutex);
+		this->vChunks.clear();
+		this->vChunks = vChunks;
+	}
 }
 
 //Dibuixa un bloc a una posició determinada (Sense guardar-lo al món)
@@ -720,7 +723,7 @@ Entity* World::getNearestEntity(Vector3<float> pos, float range, bool controllab
 void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
 	int desp;
 	Vector3<int> ncpos;
-	if (bpos.x == 15) {
+	if (bpos.x == CHUNKSIZE-1) {
 		ncpos = cpos + Vector3<int>(1, 0, 0);
 	}
 	else if (bpos.x == 0) {
@@ -734,7 +737,7 @@ void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
 		chunks[desp]->updateMesh();
 		//chunks[desp]->firstdraw = true;
 	}
-	if (bpos.y == 15) {
+	if (bpos.y == CHUNKSIZE-1) {
 		ncpos = cpos + Vector3<int>(0, 1, 0);
 	}
 	else if (bpos.y == 0) {
@@ -748,7 +751,7 @@ void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
 		chunks[desp]->updateMesh();
 		//chunks[desp]->firstdraw = true;
 	}
-	if (bpos.z == 15) {
+	if (bpos.z == CHUNKSIZE-1) {
 		ncpos = cpos + Vector3<int>(0, 0, 1);
 	}
 	else if (bpos.z == 0) {
@@ -895,16 +898,33 @@ bool World::saveRegion(Vector3<int> rPos) {
 			for (int z = rPos.z * REGIONSIZE; z < (rPos.z + 1) * REGIONSIZE; z++) {
 				Vector3<int> rPos = getRegion(Vector3<int>(x, y, z));
 				int desp = getDesp(Vector3<int>(x, y, z));
-				if (chunks[desp] != nullptr && desp != -1) {
+				if (chunks[desp] != nullptr && desp != -1 && estat[desp] == ChunkState::LLEST && chunks[desp]->nblocs > 0) {
 					buffer[0] = static_cast<int>(chunks[desp]->getBiome());
 					file.write(buffer, 1);
 					chunks[desp]->getByteData(buffer);
-					file.write(buffer, chunkSize);
+					//Comprimir buffer
+					Byte compr[CHUNKSIZE*CHUNKSIZE*CHUNKSIZE];
+					uLong comprLen = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
+					uLong srcLen = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
+					int err = compress(reinterpret_cast<Bytef*>(compr), &comprLen, reinterpret_cast<Bytef*>(buffer), srcLen);
+					/*if (err == Z_OK) {
+						printf("OKC ");
+					}
+					else if (err == Z_MEM_ERROR) {
+						printf("Mem error ");
+					}
+					else if (err == Z_BUF_ERROR) {
+						printf("Buf error ");
+					}*/
+					//printf("size compress: %lu\n", comprLen);
+					int size = (int)comprLen;
+					file.write(reinterpret_cast<char*>(&size), sizeof(size));
+					file.write(reinterpret_cast<char*>(compr), comprLen * sizeof(Byte));
 				}
 				else {
-					char zeros[chunkSize + 1];
-					memset(zeros, 0, chunkSize + 1); //+1 per el byte de bioma
-					file.write(zeros, chunkSize + 1);
+					buffer[0] = -1;
+					file.write(buffer, 1);
+					//file.write(zeros, chunkSize + 1);
 				}
 			}
 		}
@@ -915,7 +935,7 @@ bool World::saveRegion(Vector3<int> rPos) {
 
 bool World::loadRegion(Vector3<int> rPos) {
 	const int chunkSize = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
-	char buffer[chunkSize];
+	char buffer[chunkSize] = {};
 	char zeros[chunkSize];
 	memset(zeros, 0, chunkSize);
 	std::fstream file;
@@ -925,11 +945,28 @@ bool World::loadRegion(Vector3<int> rPos) {
 	for (int x = rPos.x * REGIONSIZE; x < (rPos.x + 1) * REGIONSIZE; x++) {
 		for (int y = rPos.y * REGIONSIZE; y < (rPos.y + 1) * REGIONSIZE; y++) {
 			for (int z = rPos.z * REGIONSIZE; z < (rPos.z + 1) * REGIONSIZE; z++) {
+
 				int desp = getDesp(Vector3<int>(x, y, z));
-				file.read(buffer, 1);
+				file.read(buffer, 1); //bioma
+				if (static_cast<int>(buffer[0]) == -1) {
+					continue;
+				}
 				Bioma bio = static_cast<Bioma>(buffer[0]);
-				file.read(buffer, chunkSize);
-				if (memcmp(buffer, zeros, chunkSize) != 0) { //Si el chunk no és buit, el carregam
+				int size;
+				file.read(reinterpret_cast<char*>(&size), sizeof(int)); //Mida dades
+				//printf("%d\n", size);
+
+				char compr[CHUNKSIZE * CHUNKSIZE * CHUNKSIZE];
+				file.read(compr, size);
+				//Descomprimir buffer
+				uLong comprLen = (long)size;
+				uLong destLen = CHUNKSIZE*CHUNKSIZE*CHUNKSIZE;
+				//printf("size: %lu\n", comprLen);
+				if (uncompress(reinterpret_cast<Bytef*>(buffer), &destLen, reinterpret_cast<Bytef*>(compr), comprLen) == Z_DATA_ERROR) {
+					//printf(":(\n");
+				}
+
+				//if (memcmp(buffer, zeros, chunkSize) != 0) { //Si el chunk no és buit, el carregam
 					Vector3<int> cpos = Vector3<int>(x, y, z);
 					chunks[desp] = new Chunk(this, cpos);
 					chunks[desp]->readFromByteData(buffer);
@@ -947,7 +984,7 @@ bool World::loadRegion(Vector3<int> rPos) {
 						}
 					}
 					estat[desp] = ChunkState::LLEST;
-				}
+				//}
 			}
 		}
 	}

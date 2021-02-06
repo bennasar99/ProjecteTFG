@@ -47,7 +47,7 @@ void Player::update(float delta) {
 //Control per teclat
 void Player::control(int key) {
 	if (key == GLFW_KEY_SPACE && Block::isSolid(world->getBlock(this->pos - Vector3<float>(0, 2, 0))) && grav >= 0.01f && this->gamemode == 1) {
-		grav = -0.2f;
+		grav = -1.0f;
 	}
 	if (key == GLFW_KEY_G) {
 		if (gamemode == 0) {
@@ -65,9 +65,9 @@ void Player::control(int key) {
 void Player::control(float delta, Camera *cam) {
 	//Actualitzam la posició del jugador
 	Vector3<float> add = Vector3<float>(0, 0, 0);
-	Vector3<float> forward = Vector3<float>::normalize(Vector3<float>(cam->getFront().x, 0, cam->getFront().z)) * this->speed;
-	Vector3<float> right = Vector3<float>::normalize(Vector3<float>(cam->getRight().x, 0, cam->getRight().z)) * this->speed;
-	Vector3<float> up = Vector3<float>(0, 1, 0) * this->speed;
+	Vector3<float> forward = Vector3<float>::normalize(Vector3<float>(cam->getFront().x, 0, cam->getFront().z));
+	Vector3<float> right = Vector3<float>::normalize(Vector3<float>(cam->getRight().x, 0, cam->getRight().z));
+	Vector3<float> up = Vector3<float>(0, 1, 0);
 	if (KeyboardManager::isPressed(GLFW_KEY_W)) {
 		add = add + forward;
 	}
@@ -83,7 +83,7 @@ void Player::control(float delta, Camera *cam) {
 	if ((KeyboardManager::isPressed(GLFW_KEY_SPACE) && this->gamemode==0) || (grav < 0)) { //Creatiu o acabam de botar
 		add = add + up;
 	}
-	else if (KeyboardManager::isPressed('{') && this->gamemode == 0) {
+	else if (KeyboardManager::isPressed('}') && this->gamemode == 0) {
 		add = add - up;
 	}
 	if (KeyboardManager::isPressed('}')) { //Crouch
@@ -93,11 +93,10 @@ void Player::control(float delta, Camera *cam) {
 		this->eyesOffset = 0.5f;
 	}
 	float speed = this->speed;
-	if (KeyboardManager::isPressed('{') && this->gamemode == 0) { //Si sprinta
+	if (KeyboardManager::isPressed('{')) { //Si sprinta
 		speed*=2.0f;
 	}
-	printf("%f\n", delta);
-	Vector3<float> newPos = this->pos + add * delta;
+	Vector3<float> newPos = this->pos + add * delta * speed;
 	if (newPos != this->pos) {
 		if (Block::isSolid(world->getBlock(newPos + add * ((float)delta) - Vector3<float>(0, 1, 0))) ||
 			Block::isSolid(world->getBlock(newPos + add * ((float)delta)))) {

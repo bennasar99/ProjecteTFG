@@ -30,7 +30,7 @@
 #include "ryml.hpp"
 #include "Utils/Vector3.h"
 #include "Utils/ThreadManager.h"
-
+#include "lib/zlib/zlib.h"
 
 using namespace std;
 #define REGIONSIZE 16
