@@ -1,6 +1,12 @@
 #include <GL/glew.h>
 #include "Mesh.h"
 
+Mesh::Mesh() {
+	this->prim = Primitiva::TRIANGLE;
+	this->vbo = 0;
+	this->vao = 0;
+}
+
 Mesh::Mesh(Primitiva prim) {
 	this->prim = prim;
 	this->vbo = 0;
@@ -39,7 +45,7 @@ void Mesh::update() {
 
 	//Preparació VBO
 	glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
-	glBufferData(GL_ARRAY_BUFFER, vS, 0, GL_STATIC_DRAW); // reserve space
+	glBufferData(GL_ARRAY_BUFFER, vS, 0, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, vS, this->vert.data());
 	
 	//Punters VAO
@@ -51,7 +57,7 @@ void Mesh::update() {
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glVertexPointer(3, GL_FLOAT, sizeof(float) * 12, 0);
-	glNormalPointer(GL_FLOAT, sizeof(float) * 12, nO); //MAY NEED A HOLE ARRAY :3
+	glNormalPointer(GL_FLOAT, sizeof(float) * 12, nO);
 	glColorPointer(4, GL_FLOAT, sizeof(float) * 12, cO);
 	glTexCoordPointer(2, GL_FLOAT, sizeof(float) * 12, tO);
 

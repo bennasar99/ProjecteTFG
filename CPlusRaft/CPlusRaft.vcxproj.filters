@@ -176,9 +176,6 @@
     <ClCompile Include="Render\Mesh.cpp">
       <Filter>Source Files\Render</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ChunkMesh.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
     <ClCompile Include="Blocks\SolidBlock.cpp">
       <Filter>Source Files\Blocks</Filter>
     </ClCompile>
@@ -207,6 +204,9 @@
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
     <ClCompile Include="Render\Shader.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ChunkMesh.cpp">
       <Filter>Source Files\Render</Filter>
     </ClCompile>
   </ItemGroup>

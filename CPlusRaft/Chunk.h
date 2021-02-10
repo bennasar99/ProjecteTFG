@@ -10,7 +10,7 @@
 
 class Chunk {
 private:
-	Block* blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE];
+	Block* blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE] = {};
 	//int height[CHUNKSIZE][CHUNKSIZE]; //Heightmap
 
 	Bioma bio;
@@ -19,7 +19,7 @@ private:
 
 	World* world;
 
-	ChunkMesh *cMesh;
+	ChunkMesh cMesh;
 
 	int lastYupd = 0;
 

@@ -107,9 +107,9 @@ void World::save() {
 	std::ofstream info("worlds/" + name + "/info.yml");
 	info << "seed: " << seed << "\n";
 	info << "spawn:\n";
-	info << " x: " << this->spawn.x << "\n";
-	info << " y: " << this->spawn.y << "\n";
-	info << " z: " << this->spawn.z << "\n";
+	info << " x: " << this->camera->getPos().x << "\n";
+	info << " y: " << this->camera->getPos().y << "\n";
+	info << " z: " << this->camera->getPos().z << "\n";
 	info << "size:\n";
 	info << " x: " << this->size.x << "\n";
 	info << " y: " << this->size.y << "\n";
@@ -118,6 +118,7 @@ void World::save() {
 }
 
 void World::drawLights(){
+	glPushMatrix();
 	std::list<Light*>::iterator it;
 	unsigned int currentLight = GL_LIGHT2;
 	for (unsigned int i = GL_LIGHT2; i <= GL_LIGHT7; i++) {
@@ -144,12 +145,13 @@ void World::drawLights(){
 		setLight(currentLight, *it);
 		currentLight++;
 	}
-	glPopMatrix();
+	//glPopMatrix();
 
 	//Sol, establim la seva posició segons el moment del dia
 	this->solpos = Vector3<float>(cosf((daytime / (DAYTIME/2)) * 3.1416f), sinf((daytime / (DAYTIME/2)) * 3.1416f), 0.0f);
 	GLfloat spos[4] = { solpos.x, solpos.y, solpos.z, 0.0f };
 	glLightfv(sol, GL_POSITION, spos);
+	glPopMatrix();
 }
 
 //Establim les propietats d'una llum determinada
@@ -239,8 +241,8 @@ void World::updateGeneration() {
 			if (cnk[i].valid()) {
 				if (cnk[i].wait_for(std::chrono::nanoseconds(0)) == std::future_status::ready) {
 					Chunk* ch = cnk[i].get();
-					Vector3 cpos = ch->getPos();
-					int desp = getDesp(cpos);
+					Vector3 cPos = ch->getPos();
+					int desp = getDesp(cPos);
 					if (ch != nullptr) {
 						pendents--;
 						if (estat[desp] == ChunkState::PENDENT) {
@@ -261,17 +263,7 @@ void World::updateGeneration() {
 						}
 						chunks[desp] = ch;
 						if (estat[desp] == ChunkState::LLEST) {
-							for (int nX = cpos.x - 1; nX <= cpos.x + 1; nX++) {
-								for (int nY = cpos.y - 1; nY <= cpos.y + 1; nY++) {
-									for (int nZ = cpos.z - 1; nZ <= cpos.z + 1; nZ++) {
-										int desp = getDesp(Vector3<int>((int)nX, (int)nY, (int)nZ));
-										if (desp == -1 || chunks[desp] == nullptr || estat[desp] != ChunkState::LLEST) {
-											continue;
-										}
-										chunks[desp]->updateMesh();
-									}
-								}
-							}
+							updateNeighborChunks(cPos);
 						}
 					}
 				}
@@ -332,6 +324,7 @@ void World::destroy() {
 	for (int i = 0; i < this->size.x * this->size.y * this->size.z; i++) {
 		delete this->chunks[i];
 	}
+	delete[] this->chunks;
 
 	std::list<Entity*>::iterator ent;
 	for (ent = entities.begin(); (ent != entities.end()); ent++) {
@@ -515,7 +508,7 @@ void World::draw(Vector3<float> pos, float dist) {
 		glTranslatef(cPos.x * CHUNKSIZE, cPos.y * CHUNKSIZE, cPos.z * CHUNKSIZE);
 		chunks[desp]->drawO();
 		glPopMatrix();
-		if (nchunk < 5 && estat[desp] == ChunkState::LLEST) {
+		if (nchunk < 5) {
 			chunks[desp]->updateTransparency(camera->getPos());
 		}
 		nchunk++;
@@ -525,7 +518,7 @@ void World::draw(Vector3<float> pos, float dist) {
 	for (rchunki = vChunks.rbegin(); (rchunki != vChunks.rend()); ++rchunki) {
 		Vector3<int> cPos = *rchunki;
 		int desp = getDesp(cPos);
-		if (desp == -1 || chunks[desp] == NULL) {
+		if (desp == -1 || chunks[desp] == NULL || estat[desp] != ChunkState::LLEST) {
 			continue;
 		}
 		glPushMatrix();
@@ -533,20 +526,6 @@ void World::draw(Vector3<float> pos, float dist) {
 		chunks[desp]->drawT();
 		glPopMatrix();
 	}
-
-
-
-	//for (chunki = vChunks.begin(); (chunki != vChunks.end()); chunki++) { //Transparència 2a passada
-	//	Vector3<int> cPos = *chunki;
-	//	int desp = getDesp(cPos);
-	//	if (desp == -1 || chunks[desp] == NULL) {
-	//		continue;
-	//	}
-	//	glPushMatrix();
-	//	glTranslatef(cPos.x * CHUNKSIZE, cPos.y * CHUNKSIZE, cPos.z * CHUNKSIZE);
-	//	chunks[desp]->drawT();
-	//	glPopMatrix();
-	//}
 
 	//printf("Chunks: %d\n", nchunks);
 
@@ -718,52 +697,51 @@ Entity* World::getNearestEntity(Vector3<float> pos, float range, bool controllab
 	return entitat;
 }
 
+void World::updateNeighborChunks(Vector3<int> cPos) {
+	Vector3<int> oPos;
+	for (oPos.x = cPos.x - 1; oPos.x <= (cPos.x + 1); oPos.x++) {
+		for (oPos.y = cPos.y - 1; oPos.y <= (cPos.y + 1); oPos.y++) {
+			for (oPos.z = cPos.z - 1; oPos.z <= (cPos.z + 1); oPos.z++) {
+				if (oPos == cPos) {
+					continue;
+				}
+				int desp = getDesp(oPos);
+				if (desp == -1 || chunks[desp] == nullptr || estat[desp] != ChunkState::LLEST) {
+					continue;
+				}
+				chunks[desp]->updateMesh();
+			}
+		}
+	}
+}
 
-//TODO: que faci una llista amb els chunks a actualitzar
 void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
-	int desp;
-	Vector3<int> ncpos;
+	std::list<Vector3<int>> toUpdate;
 	if (bpos.x == CHUNKSIZE-1) {
-		ncpos = cpos + Vector3<int>(1, 0, 0);
+		toUpdate.push_front(cpos + Vector3<int>(1, 0, 0));
 	}
 	else if (bpos.x == 0) {
-		ncpos = cpos - Vector3<int>(1, 0, 0);
-	}
-	desp = getDesp(ncpos);
-	if (desp != -1) {
-		if (chunks[desp] == nullptr) {
-			chunks[desp] = new Chunk(this, ncpos);
-		}
-		chunks[desp]->updateMesh();
-		//chunks[desp]->firstdraw = true;
+		toUpdate.push_front(cpos - Vector3<int>(1, 0, 0));
 	}
 	if (bpos.y == CHUNKSIZE-1) {
-		ncpos = cpos + Vector3<int>(0, 1, 0);
+		toUpdate.push_front(cpos + Vector3<int>(0, 1, 0));
 	}
 	else if (bpos.y == 0) {
-		ncpos = cpos - Vector3<int>(0, 1, 0);
-	}
-	desp = getDesp(ncpos);
-	if (desp != -1) {
-		if (chunks[desp] == nullptr) {
-			chunks[desp] = new Chunk(this, ncpos);
-		}
-		chunks[desp]->updateMesh();
-		//chunks[desp]->firstdraw = true;
+		toUpdate.push_front(cpos - Vector3<int>(0, 1, 0));
 	}
 	if (bpos.z == CHUNKSIZE-1) {
-		ncpos = cpos + Vector3<int>(0, 0, 1);
+		toUpdate.push_front(cpos + Vector3<int>(0, 0, 1));
 	}
 	else if (bpos.z == 0) {
-		ncpos = cpos - Vector3<int>(0, 0, 1);
+		toUpdate.push_front(cpos - Vector3<int>(0, 0, 1));
 	}
-	desp = getDesp(ncpos);
-	if (desp != -1) {
-		if (chunks[desp] == nullptr) {
-			chunks[desp] = new Chunk(this, ncpos);
+	std::list<Vector3<int>>::iterator chunki;
+	for (chunki = toUpdate.begin(); (chunki != toUpdate.end()); chunki++) {
+		int desp = getDesp(*chunki);
+		if (chunks[desp] == nullptr || desp == -1 || estat[desp] != ChunkState::LLEST) {
+			continue;
 		}
 		chunks[desp]->updateMesh();
-		//chunks[desp]->firstdraw = true;
 	}
 }
 
@@ -907,16 +885,6 @@ bool World::saveRegion(Vector3<int> rPos) {
 					uLong comprLen = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
 					uLong srcLen = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
 					int err = compress(reinterpret_cast<Bytef*>(compr), &comprLen, reinterpret_cast<Bytef*>(buffer), srcLen);
-					/*if (err == Z_OK) {
-						printf("OKC ");
-					}
-					else if (err == Z_MEM_ERROR) {
-						printf("Mem error ");
-					}
-					else if (err == Z_BUF_ERROR) {
-						printf("Buf error ");
-					}*/
-					//printf("size compress: %lu\n", comprLen);
 					int size = (int)comprLen;
 					file.write(reinterpret_cast<char*>(&size), sizeof(size));
 					file.write(reinterpret_cast<char*>(compr), comprLen * sizeof(Byte));
@@ -948,7 +916,8 @@ bool World::loadRegion(Vector3<int> rPos) {
 
 				int desp = getDesp(Vector3<int>(x, y, z));
 				file.read(buffer, 1); //bioma
-				if (static_cast<int>(buffer[0]) == -1) {
+				if (static_cast<int>(buffer[0]) == -1) { //El chunk és buit
+					estat[desp] == ChunkState::LLEST;
 					continue;
 				}
 				Bioma bio = static_cast<Bioma>(buffer[0]);
@@ -966,25 +935,13 @@ bool World::loadRegion(Vector3<int> rPos) {
 					//printf(":(\n");
 				}
 
-				//if (memcmp(buffer, zeros, chunkSize) != 0) { //Si el chunk no és buit, el carregam
-					Vector3<int> cpos = Vector3<int>(x, y, z);
-					chunks[desp] = new Chunk(this, cpos);
-					chunks[desp]->readFromByteData(buffer);
-					chunks[desp]->setBiome(bio);
-					chunks[desp]->updateMesh();
-					for (int nX = cpos.x - 1; nX <= cpos.x + 1; nX++) {
-						for (int nY = cpos.y - 1; nY <= cpos.y + 1; nY++) {
-							for (int nZ = cpos.z - 1; nZ <= cpos.z + 1; nZ++) {
-								int desp = getDesp(Vector3<int>((int)nX, (int)nY, (int)nZ));
-								if (desp == -1 || chunks[desp] == nullptr || estat[desp] != ChunkState::LLEST) {
-									continue;
-								}
-								chunks[desp]->updateMesh();
-							}
-						}
-					}
-					estat[desp] = ChunkState::LLEST;
-				//}
+				Vector3<int> cPos = Vector3<int>(x, y, z);
+				chunks[desp] = new Chunk(this, cPos);
+				chunks[desp]->readFromByteData(buffer);
+				chunks[desp]->setBiome(bio);
+				chunks[desp]->updateMesh();
+				updateNeighborChunks(cPos);
+				estat[desp] = ChunkState::LLEST;
 			}
 		}
 	}

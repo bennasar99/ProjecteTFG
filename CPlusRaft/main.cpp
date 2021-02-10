@@ -381,8 +381,8 @@ int main(int argc, char** argv)
 		//Si el món ja existeix, el carregam
 		printf("Loading world %s... \n", wname.c_str());
 		world = new World(wname, &camera);
-		ent = new Player(world, Vector3<float>(400, 120, 400) + Vector3<float>(0, 2.0f, 0));
-		//ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 2.0f, 0));
+		//ent = new Player(world, Vector3<float>(400, 120, 400) + Vector3<float>(0, 2.0f, 0));
+		ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 2.0f, 0));
 		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
 	}
 	else {
@@ -500,7 +500,8 @@ int main(int argc, char** argv)
 		Update();
 	}
 	run = false;
-	//upd.join();
+	drw.join();
+	world->save();
 	glfwTerminate();
 	return 0;
 }
@@ -723,18 +724,20 @@ void centerPointer() {
 //Actualitzam el bloc seleccionat (posició) segons on miri el jugador
 void updatePlayerBlock() {
 	Vector3<float> front = camera.getFront();
-	bp = camera.getPos();
-	ba = camera.getPos() + front;
+	Vector3<float> bpN = camera.getPos();
+	Vector3<float> baN = camera.getPos() + front;
 	int i = 0;
-	while (!Block::isSolid(world->getBlock(ba)) && i < 100) { //Traçam una línia cap a la direcció del front de la càmera
-		bp = ba;
-		ba = ba + front * 0.1f;
+	while (!Block::isSolid(world->getBlock(baN)) && i < 100) { //Traçam una línia cap a la direcció del front de la càmera
+		bpN = baN;
+		baN = baN + front * 0.1f;
 		i++;
 	}
 	if (i == 100) { //Si no hem trobat cap bloc, no es veurà la selecció
-		ba = Vector3<float>(0, 0, 0);
-		bp = Vector3<float>(0, 0, 0);
+		baN = Vector3<float>(0, 0, 0);
+		bpN = Vector3<float>(0, 0, 0);
 	}
+	ba = baN;
+	bp = bpN;
 }
 
 void onKey(GLFWwindow* window, int key, int scancode, int action, int mods)

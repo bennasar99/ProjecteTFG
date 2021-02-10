@@ -34,4 +34,5 @@ public:
 	void erase();
 
 	Mesh(Primitiva prim);
+	Mesh();
 };

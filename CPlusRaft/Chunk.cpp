@@ -9,11 +9,10 @@ Chunk::Chunk(World* world, Vector3<int> pos) {
 			}
 		}
 	}
+	this->bio = Bioma::OCEA;
 	this->world = world;
 	this->cpos = pos;
 	this->nblocs = 0;
-
-	this->cMesh = new ChunkMesh();
 }
 
 void Chunk::drawO() {
@@ -22,13 +21,14 @@ void Chunk::drawO() {
 	}
 	if (firstdraw == true) {
 		firstdraw = false;
-		cMesh->update();
+		cMesh.update();
 		this->updateTransparency(Vector3<float>(100, 100, 100));
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	glTranslatef(0.5f, 0.5f, 0.5f);
 	glFrontFace(GL_CCW);
-	this->cMesh->drawO();
+
+	cMesh.drawO();
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -38,13 +38,13 @@ void Chunk::drawT() {
 	}
 	if (firstdraw == true) {
 		firstdraw = false;
-		cMesh->update();
+		cMesh.update();
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	glFrontFace(GL_CCW);
 	glTranslatef(0.5f, 0.5f, 0.5f);
 	glDepthMask(GL_FALSE);
-	this->cMesh->drawT();
+	this->cMesh.drawT();
 	glDepthMask(GL_TRUE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -98,7 +98,6 @@ Chunk::~Chunk() {
 			}
 		}
 	}
-	delete cMesh;
 }
 
 //TODO actualitzar display list
@@ -170,9 +169,9 @@ bool Chunk::setBlockWorld(Block* bloc, Vector3<int> bpos) {
 
 bool Chunk::getByteData(char* arr) {
 	int desp = 0;
-	for (int x = 0; x < CHUNKSIZE; x++) {
-		for (int y = 0; y < CHUNKSIZE; y++) {
-			for (int z = 0; z < CHUNKSIZE; z++) {
+	for (int y = 0; y < CHUNKSIZE; y++) {
+		for (int z = 0; z < CHUNKSIZE; z++) {
+			for (int x = 0; x < CHUNKSIZE; x++) {
 				arr[desp++] = static_cast<unsigned char>(this->getBlock(Vector3<int>(x, y, z)));
 			}
 		}
@@ -182,9 +181,9 @@ bool Chunk::getByteData(char* arr) {
 
 bool Chunk::readFromByteData(char* arr) {
 	int desp = 0;
-	for (int x = 0; x < CHUNKSIZE; x++) {
-		for (int y = 0; y < CHUNKSIZE; y++) {
-			for (int z = 0; z < CHUNKSIZE; z++) {
+	for (int y = 0; y < CHUNKSIZE; y++) {
+		for (int z = 0; z < CHUNKSIZE; z++) {
+			for (int x = 0; x < CHUNKSIZE; x++) {
 				//printf("%d ", arr[desp]);
 				Bloc tipus = static_cast<Bloc>(arr[desp++]);
 				if (tipus != Bloc::RES) {
@@ -198,7 +197,7 @@ bool Chunk::readFromByteData(char* arr) {
 }
 
 void Chunk::updateMesh() {
-	cMesh->eraseO();
+	cMesh.eraseO();
 	std::list<dT> transparent;
 	int nb = 0;
 	for (int x = 0; x < CHUNKSIZE; x++) { //1a Passada: OPACS
@@ -235,7 +234,7 @@ void Chunk::updateMesh() {
 							}
 						}
 						if (qualcun) {
-							blocs[x][y][z]->draw(cMesh, visible, Vector3<int>(x, y, z));
+							blocs[x][y][z]->draw(&cMesh, visible, Vector3<int>(x, y, z));
 						}
 					}
 					nb++;
@@ -262,7 +261,7 @@ void Chunk::updateTransparency(Vector3<float> pPos){
 		const std::lock_guard<std::mutex> lock(mutex);
 		transparent = std::list<dT>(this->transparent);
 	}
-	cMesh->eraseT();
+	cMesh.eraseT();
 	transparent.sort([this,pPos](dT b1, dT b2) {
 		//printf("dist %f\n", Vector3<float>::module(b1.pos - pPos));
 		return (Vector3<float>::module(b1.pos - pPos) > Vector3<float>::module(b2.pos - pPos)); //de més enfora a + aprop
@@ -286,10 +285,10 @@ void Chunk::updateTransparency(Vector3<float> pPos){
 		Vector3<int> bpos = Vector3<int>(info.pos.x, info.pos.y, info.pos.z) % CHUNKSIZE;
 		if (blocs[bpos.x][bpos.y][bpos.z] != nullptr) {
 			//printf("%d %d %d, ", bpos.y, bpos.y, bpos.z);
-			blocs[bpos.x][bpos.y][bpos.z]->draw(cMesh, info.visible, bpos);
+			blocs[bpos.x][bpos.y][bpos.z]->draw(&cMesh, info.visible, bpos);
 		}
 	}
-	cMesh->updateT();
+	cMesh.updateT();
 	//if ((pPos / CHUNKSIZE).toInt() == this->getPos()) {
 		//printf("first %d %d last %d %d pPos %d %d\n", (int)first.x, (int)first.z, (int)last.x, (int)last.z, (int)pPos.x, (int)pPos.z);
 	//}

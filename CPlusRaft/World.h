@@ -130,6 +130,7 @@ public:
 
 	//Chunks
 	void updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos);
+	void updateNeighborChunks(Vector3<int> cpos);
 
 	void update(float delta, Vector3<float> camPos);
 
