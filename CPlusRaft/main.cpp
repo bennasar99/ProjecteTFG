@@ -584,6 +584,7 @@ void movement(int key) {
 	}
 	else if (key == GLFW_KEY_P) {
 		printf("x:%f y:%f z:%f b:%d r:%f\n", ent->getPos().x, ent->getPos().y, ent->getPos().z, world->getBlock(ba), ent->getRot());
+		world->updateNeighborChunks(Vector3<int>(ent->getPos().x, ent->getPos().y, ent->getPos().z) / CHUNKSIZE);
 	}
 	else if (key == GLFW_KEY_TAB) { //Tab: obrir inventari
 		act = Active::INVENTARI;

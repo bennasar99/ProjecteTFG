@@ -16,7 +16,7 @@ Chunk::Chunk(World* world, Vector3<int> pos) {
 }
 
 void Chunk::drawO() {
-	if (nblocs == 0) {
+	if (nblocs <= 0) {
 		return;
 	}
 	if (firstdraw == true) {
@@ -33,7 +33,7 @@ void Chunk::drawO() {
 }
 
 void Chunk::drawT() {
-	if (nblocs == 0) {
+	if (nblocs <= 0) {
 		return;
 	}
 	if (firstdraw == true) {

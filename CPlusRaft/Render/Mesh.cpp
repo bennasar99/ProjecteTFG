@@ -30,12 +30,12 @@ void Mesh::addVertex(float* vert, float* norm, float* col, float* text) {
 }
 
 void Mesh::update() {
-	//Generam el VAO
-	glDeleteVertexArrays(1, &this->vao);
-	glGenVertexArrays(1, &this->vao);
-
-	//Generam el VBO
+	//Eliminam el VAO i el VBO
 	glDeleteBuffers(1, &this->vbo);
+	glDeleteVertexArrays(1, &this->vao);
+
+	//Generam el VAO i el VBO
+	glGenVertexArrays(1, &this->vao);
 	glGenBuffers(1, &this->vbo);
 
 	//Mides array
@@ -64,57 +64,28 @@ void Mesh::update() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //Deattach VBO
 	glBindVertexArray(0); //Deattach VAO
 
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
 }
 
 void Mesh::draw() {
 	glBindVertexArray(this->vao);
-	//glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
 
-	//// enable vertex arrays
-	//glEnableClientState(GL_VERTEX_ARRAY);
-	//glEnableClientState(GL_NORMAL_ARRAY);
-	//glEnableClientState(GL_COLOR_ARRAY);
-	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	////Mides array
-	//size_t vS = this->vert.size() * sizeof(float);
-	//size_t nS = this->norm.size() * sizeof(float);
-	//size_t cS = this->col.size() * sizeof(float);
-	//size_t tS = this->text.size() * sizeof(float);
-
-	////Càlcul offsets:
-	//void* nO = (void*)(3 * sizeof(float));
-	//void* cO = (void*)(6 * sizeof(float));
-	//void* tO = (void*)(10 * sizeof(float));
-
-	//// specify vertex arrays with their offsets
-	//glVertexPointer(3, GL_FLOAT, sizeof(float) * 12, 0);
-	//glNormalPointer(GL_FLOAT, sizeof(float) * 12, nO); //MAY NEED A HOLE ARRAY :3
-	//glColorPointer(4, GL_FLOAT, sizeof(float) * 12, cO);
-	//glTexCoordPointer(2, GL_FLOAT, sizeof(float) * 12, tO);
-
-	//Draw the mesh
+	//size dividit entre 12 per què hem de tenir en compte totes les dades (3 pos + 3 normal + 4 color + 2 text)
 	switch (this->prim) {
 	case Primitiva::QUAD:
-		glDrawArrays(GL_QUADS, 0, (GLsizei)this->vert.size() / 3);
+		glDrawArrays(GL_QUADS, 0, this->vert.size() / 12);
 		break;
 	case Primitiva::LINIA:
-		glDrawArrays(GL_LINES, 0, (GLsizei)this->vert.size() / 3);
+		glDrawArrays(GL_LINES, 0, this->vert.size() / 12);
 		break;
 	case Primitiva::TRIANGLE:
-		glDrawArrays(GL_TRIANGLES, (GLsizei)0, this->vert.size() / 3);
+		glDrawArrays(GL_TRIANGLES, 0, this->vert.size() / 12);
 		break;
 	}
-
-
-	//// disable vertex arrays
-	//glDisableClientState(GL_VERTEX_ARRAY);
-	//glDisableClientState(GL_NORMAL_ARRAY);
-	//glDisableClientState(GL_COLOR_ARRAY);
-	//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	//// unbind VBOs
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
 }
