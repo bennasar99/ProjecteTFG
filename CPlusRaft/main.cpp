@@ -30,7 +30,7 @@ const float axisSize = zFar;
 Vector3<float> ba; //Bloc actual (posició)
 Vector3<float> bp; //Bloc a posar posició)
 
-int btipus = 1; //Bloc actual (tipus)
+int btipus = 2; //Bloc actual (tipus)
 
 #include "Camera.h"
 Camera camera = Camera(Vector3<float>(64, 66, 64), Vector3<float>(64, 66, 60));
@@ -45,6 +45,9 @@ double lastX = 250, lastY = 250; //Darreres posicions del ratolí
 //llums
 bool llanterna = false;
 bool smoothlight = true;
+
+//Control amb gamepad (control press)
+bool press[GLFW_GAMEPAD_BUTTON_LAST+1];
 
 //Entitats
 #include "Entities/Entity.h"
@@ -68,6 +71,7 @@ void movement(int key);
 void centerPointer();
 void updatePlayerBlock();
 void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
+void gamePad();
 
 double lastTime;
 float lastTimeW;
@@ -252,11 +256,34 @@ void Display(GLFWwindow* window)
 
 		glEnable(GL_TEXTURE_2D);
 		glTranslatef(0.5f * aspect - 0.3f, 0.8f, -1);
-		for (int i = 0; i <= 25; i++) { //Objectes de l'inventari
+		for (int i = 0; i <= NBLOCS; i++) { //Objectes de l'inventari
 			glPushMatrix();
 			glScalef(0.1f, 0.1f, 0.1f);
 			Block bsel = Block(static_cast<Bloc>(i + 2)); //+2 perque botam aire i null
 			glDisable(GL_LIGHTING);
+
+			if (bsel.getId() == static_cast<Bloc>(btipus)) { //L'hem de dibuixar com a seleccionat
+				glPushMatrix();
+
+				glColor4f(0, 0, 0, 1);
+				glLineWidth(5.0f);
+				glBegin(GL_LINES);
+				glVertex3f(-0.5f, 0.5f, -0.5f);
+				glVertex3f(-0.5f, -0.5f, -0.5f);
+
+				glVertex3f(0.5f, 0.5f, -0.5f);
+				glVertex3f(0.5f, -0.5f, -0.5f);
+
+				glVertex3f(-0.5f, 0.5f, 0.5f);
+				glVertex3f(0.5f, 0.5f, -0.5f);
+
+				glVertex3f(-0.5f, -0.5f, -0.5f);
+				glVertex3f(0.5f, -0.5f, -0.5f);
+				glEnd();
+
+				glPopMatrix();
+			}
+
 			world->drawBloc(bsel.getId());
 			glPopMatrix();
 
@@ -300,19 +327,6 @@ void Display(GLFWwindow* window)
 // Update joc
 void Update(void)
 {
-	//Solució temporal shift i ctrl
-	if (GetKeyState(VK_SHIFT) & 0x8000) {
-		KeyboardManager::onKeyDown('{');
-	}
-	else {
-		KeyboardManager::onKeyUp('{');
-	}
-	if (GetKeyState(VK_CONTROL) & 0x8000) {
-		KeyboardManager::onKeyDown('}');
-	}
-	else {
-		KeyboardManager::onKeyUp('}');
-	}
 
 	//Gestió del temps
 	float time = (float)glfwGetTime();
@@ -496,6 +510,7 @@ int main(int argc, char** argv)
 	lastTime = (float)glfwGetTime();
 	lastTimeW = lastTime;
 	while (run) {
+		gamePad();
 		glfwPollEvents();
 		Update();
 	}
@@ -504,6 +519,129 @@ int main(int argc, char** argv)
 	world->save();
 	glfwTerminate();
 	return 0;
+}
+
+void gamePad() {
+	if (!glfwJoystickIsGamepad(GLFW_JOYSTICK_1)) {
+		return;
+	}
+	GLFWgamepadstate state;
+	if (glfwGetGamepadState(GLFW_JOYSTICK_1, &state))
+	{
+		if (act == Active::JOC) {
+			//Control càmera
+			float aX = state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X];
+			float aY = state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y];
+			if (abs(aX) > 0.2f || abs(aY) > 0.2f) {
+				lookAround(window, lastX + aX / 50, lastY + aY / 50);
+			}
+
+			//Bot
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_A] == GLFW_PRESS && !press[GLFW_GAMEPAD_BUTTON_A])
+			{
+				KeyboardManager::onKeyDown(GLFW_KEY_SPACE);
+			}
+			else if (state.buttons[GLFW_GAMEPAD_BUTTON_A] == GLFW_RELEASE) {
+				KeyboardManager::onKeyUp(GLFW_KEY_SPACE);
+			}
+
+			//Crouch
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_B] == GLFW_PRESS)
+			{
+				KeyboardManager::onKeyDown(GLFW_KEY_LEFT_CONTROL);
+			}
+			else {
+				KeyboardManager::onKeyUp(GLFW_KEY_LEFT_CONTROL);
+			}
+
+			//Item seleccionat
+
+			//Moviment DPAD
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN] == GLFW_PRESS || state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] > 0.2f)
+			{
+				KeyboardManager::onKeyDown(GLFW_KEY_S);
+			}
+			else {
+				KeyboardManager::onKeyUp(GLFW_KEY_S);
+			}
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP] == GLFW_PRESS || state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] < -0.2f)
+			{
+				KeyboardManager::onKeyDown(GLFW_KEY_W);
+			}
+			else {
+				KeyboardManager::onKeyUp(GLFW_KEY_W);
+			}
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT] == GLFW_PRESS || state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] < -0.2f)
+			{
+				KeyboardManager::onKeyDown(GLFW_KEY_A);
+			}
+			else {
+				KeyboardManager::onKeyUp(GLFW_KEY_A);
+			}
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT] == GLFW_PRESS || state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] > 0.2f)
+			{
+				KeyboardManager::onKeyDown(GLFW_KEY_D);
+			}
+			else {
+				KeyboardManager::onKeyUp(GLFW_KEY_D);
+			}
+
+
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER] == GLFW_PRESS && !press[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER]) //Col·locar bloc
+			{
+				mouseListener(window, GLFW_MOUSE_BUTTON_RIGHT, GLFW_PRESS, 0);
+			}
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER] == GLFW_PRESS && !press[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER]) //Llevar bloc
+			{
+				mouseListener(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
+			}
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_Y] && !press[GLFW_GAMEPAD_BUTTON_Y]) //INVENTARI
+			{
+				movement(GLFW_KEY_TAB);
+			}
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_X] && !press[GLFW_GAMEPAD_BUTTON_X]) //INVENTARI
+			{
+				movement(GLFW_KEY_F);
+			}
+		}
+		else if (act == Active::INVENTARI) {
+			int nbtipus = btipus;
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_Y] && !press[GLFW_GAMEPAD_BUTTON_Y]) //INVENTARI
+			{
+				movement(GLFW_KEY_ESCAPE);
+			}
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT] && !press[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT]) //INVENTARI
+			{
+				nbtipus++;
+			}
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT] && !press[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]) //INVENTARI
+			{
+				nbtipus--;
+			}
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN] && !press[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]) //INVENTARI
+			{
+				nbtipus+=6;
+			}
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP] && !press[GLFW_GAMEPAD_BUTTON_DPAD_UP]) //INVENTARI
+			{
+				nbtipus-=6;
+			}
+			if (nbtipus > 2 && nbtipus <= NBLOCS) {
+				btipus = nbtipus;
+			}
+		}
+
+		//Actualitzam l'estat dels botons
+		for (int i = 0; i <= GLFW_GAMEPAD_BUTTON_LAST; i++) {
+			if (state.buttons[i] == GLFW_PRESS && !press[GLFW_GAMEPAD_BUTTON_A])
+			{
+				press[i] = true;
+			}
+			else if (state.buttons[i] == GLFW_RELEASE) {
+				press[i] = false;
+			}
+		}
+	}
 }
 
 //Control amb botons del ratolí
@@ -524,7 +662,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 			printf("%f %f\n", xi, yi);
 
 			btipus = (int)floor(yi) * 6 +  (int)floor(xi) + 2; //+2 per botar aire i res
-			if (btipus > 27) { //Si no se selecciona cap objecte, no n'hi haurà cap de seleccionat
+			if (btipus > NBLOCS) { //Si no se selecciona cap objecte, no n'hi haurà cap de seleccionat
 				btipus = 0;
 			}
 		}
@@ -539,7 +677,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 			}
 		}
 		else if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) { //Botó de la rodeta, canviar d'objecte
-			btipus = (btipus + 1) % 22;
+			btipus = (btipus + 1) % NBLOCS;
 		}
 		else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) { //Botó dret, col·locar bloc / interactuar
 			Vector3 front = Vector3<float>::normalize(camera.getFront());

@@ -83,17 +83,17 @@ void Player::control(float delta, Camera *cam) {
 	if ((KeyboardManager::isPressed(GLFW_KEY_SPACE) && this->gamemode==0) || (grav < 0)) { //Creatiu o acabam de botar
 		add = add + up;
 	}
-	else if (KeyboardManager::isPressed('}') && this->gamemode == 0) {
+	else if (KeyboardManager::isPressed(GLFW_KEY_LEFT_CONTROL) && this->gamemode == 0) {
 		add = add - up;
 	}
-	if (KeyboardManager::isPressed('}')) { //Crouch
+	if (KeyboardManager::isPressed(GLFW_KEY_LEFT_CONTROL)) { //Crouch
 		this->eyesOffset = 0.0f;
 	}
 	else {
 		this->eyesOffset = 0.5f;
 	}
 	float speed = this->speed;
-	if (KeyboardManager::isPressed('{')) { //Si sprinta
+	if (KeyboardManager::isPressed(GLFW_KEY_LEFT_SHIFT)) { //Si sprinta
 		speed*=2.0f;
 	}
 	Vector3<float> newPos = this->pos + add * delta * speed;

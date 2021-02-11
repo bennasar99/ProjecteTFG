@@ -3,6 +3,9 @@
 #include "../Render/ChunkMesh.h"
 #include "../Utils/Vector3.h"
 
+
+#define NBLOCS 25
+
 enum class Bloc {
 	RES,
 	AIRE,
