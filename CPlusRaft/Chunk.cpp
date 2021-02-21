@@ -16,9 +16,9 @@ Chunk::Chunk(World* world, Vector3<int> pos) {
 }
 
 void Chunk::drawO() {
-	if (nblocs <= 0) {
+	/*if (nblocs <= 0) {
 		return;
-	}
+	}*/
 	if (firstdraw == true) {
 		firstdraw = false;
 		cMesh.update();
@@ -26,10 +26,14 @@ void Chunk::drawO() {
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	glTranslatef(0.5f, 0.5f, 0.5f);
-	glFrontFace(GL_CCW);
-
+	glFrontFace(GL_CW);
 	cMesh.drawO();
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Chunk::setDen(float den, Vector3<int> pos) {
+	this->den[pos.x][pos.y][pos.z] = den;
+	//printf("den %f \n", this->den[pos.x][pos.y][pos.z]);
 }
 
 void Chunk::drawT() {
@@ -62,6 +66,7 @@ bool Chunk::setBlock(Block* bloc, Vector3<int> pos) {
 	}
 	if (bloc->getId() != Bloc::RES) {
 		this->blocs[pos.x][pos.y][pos.z] = bloc;
+		this->den[pos.x][pos.y][pos.z] = 0;
 		this->nblocs++;
 	}
 
@@ -69,7 +74,7 @@ bool Chunk::setBlock(Block* bloc, Vector3<int> pos) {
 }
 
 Bloc Chunk::getBlock(Vector3<int> pos) {
-	if (blocs[pos.x][pos.y][pos.z] == nullptr) {
+	if (nblocs <= 0 || blocs[pos.x][pos.y][pos.z] == nullptr) {
 		return Bloc::RES;
 	}
 	return blocs[pos.x][pos.y][pos.z]->getId();
@@ -109,6 +114,8 @@ bool Chunk::delBlock(Vector3<int> bpos, bool destroy) {
 		}
 		delete this->blocs[bpos.x][bpos.y][bpos.z];
 		this->blocs[bpos.x][bpos.y][bpos.z] = 0;
+		this->den[bpos.x][bpos.y][bpos.z] = 1;
+		//this->den[bpos.x][bpos.y][bpos.z] = 2;
 		nblocs--;
 		this->updateMesh();
 		world->updateNeighborChunks(this->cpos, bpos);
@@ -203,7 +210,7 @@ void Chunk::updateMesh() {
 	for (int x = 0; x < CHUNKSIZE; x++) { //1a Passada: OPACS
 		for (int z = 0; z < CHUNKSIZE; z++) {
 			for (int y = 0; y < CHUNKSIZE; y++) {
-				if (blocs[x][y][z] != 0) {
+				/*if (blocs[x][y][z] != 0) {*/
 					Vector3 bpos = Vector3<int>(x, y, z);
 					//Ordre: Esquerra, Damunt, Dreta, Abaix, Davant, Darrera
 					Vector3<int> pos = cpos * CHUNKSIZE + bpos;
@@ -212,7 +219,13 @@ void Chunk::updateMesh() {
 
 					bool qualcun = false;
 					bool visible[6] = { false, false, false, false, false, false };
-					Bloc bt = blocs[x][y][z]->getId();
+					Bloc bt;
+					if (blocs[x][y][z] == 0) {
+						bt = Bloc::RES;
+					}
+					else {
+						bt = blocs[x][y][z]->getId();
+					}
 					bool solid = Block::isSolid(bt);
 					if (Block::isTransparent(bt)) {
 						dT info = dT(Vector3<float>(pos.x, pos.y, pos.z));
@@ -226,23 +239,32 @@ void Chunk::updateMesh() {
 						if (qualcun) {
 							transparent.push_back(info);
 						}
-					} else {
+						SolidBlock bl = SolidBlock(Bloc::TERRA);
+						bl.drawMarching(&cMesh, visible, Vector3<int>(x, y, z), this->cpos, world, this);
+					}
+					else {
 						for (int i = 0; i < 6; i++) {
 							if (Block::canSeeThrough(getBlockWorld(toCheck[i]))) {
 								visible[i] = true;
 								qualcun = true;
 							}
 						}
-						if (qualcun) {
-							blocs[x][y][z]->draw(&cMesh, visible, Vector3<int>(x, y, z));
-						}
+						//if (qualcun) {
+							if (Block::isSolid(bt)){
+								SolidBlock* bl = dynamic_cast<SolidBlock*>(blocs[x][y][z]);
+								
+								bl->drawMarching(&cMesh, visible, Vector3<int>(x, y, z), this->cpos, world, this);
+							}
+							else {
+								SolidBlock bl = SolidBlock(Bloc::TERRA);
+								bl.drawMarching(&cMesh, visible, Vector3<int>(x, y, z), this->cpos, world, this);
+								//blocs[x][y][z]->draw(&cMesh, visible, Vector3<int>(x, y, z));
+							}
+							
+						//}
 					}
 					nb++;
-
-					if (nb >= nblocs) { //No cal dibuixar més blocs
-						y = CHUNKSIZE; z = CHUNKSIZE; x = CHUNKSIZE;
-					}
-				}
+				/*}*/
 			}
 		}
 	}

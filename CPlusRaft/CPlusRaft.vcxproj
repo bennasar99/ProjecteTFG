@@ -154,7 +154,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Blocks\Block.h" />
-    <ClInclude Include="Blocks\BlockRenderer.h" />
     <ClInclude Include="Blocks\EntityBlock.h" />
     <ClInclude Include="Blocks\Jukebox.h" />
     <ClInclude Include="Blocks\LightBlock.h" />
@@ -169,6 +168,7 @@
     <ClInclude Include="lib\stb_image.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Render\ChunkMesh.h" />
+    <ClInclude Include="Render\MarchingCubes.h" />
     <ClInclude Include="Render\Mesh.h" />
     <ClInclude Include="Render\Shader.h" />
     <ClInclude Include="Utils.h" />
@@ -182,7 +182,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Blocks\Block.cpp" />
-    <ClCompile Include="Blocks\BlockRenderer.cpp" />
     <ClCompile Include="Blocks\EntityBlock.cpp" />
     <ClCompile Include="Blocks\Jukebox.cpp" />
     <ClCompile Include="Blocks\LightBlock.cpp" />
@@ -198,6 +197,7 @@
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Render\ChunkMesh.cpp" />
+    <ClCompile Include="Render\MarchingCubes.cpp" />
     <ClCompile Include="Render\Mesh.cpp" />
     <ClCompile Include="Render\Shader.cpp" />
     <ClCompile Include="Utils.cpp" />

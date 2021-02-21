@@ -24,14 +24,13 @@ float TextureAtlas::getCoordY(int index) {
 	return ((index / this->sizeX) * this->uSizeY);
 }
 
-float* TextureAtlas::getCoords(int index) {
+bool TextureAtlas::getCoords(int index, std::array<float ,4> &texCoords) {
 	if (index < 0) {
-		float coords[4] = { 0,0,0,0 };
-		return coords;
+		texCoords = { 0,0,0,0 };
+		return false;
 	}
 	float x = this->getCoordX(index);
 	float y = this->getCoordY(index);
 	float marge = 0.00; //Per evitar "bleeding edges"
-	float coords[4] = { x + marge, y+marge, x + uSizeX - marge, y + uSizeY - marge}; //Coordenades bottom i top (xb, yb, xt, yt)
-	return coords;
+	texCoords = { x + marge, y+marge, x + uSizeX - marge, y + uSizeY - marge}; //Coordenades bottom i top (xb, yb, xt, yt)
 }

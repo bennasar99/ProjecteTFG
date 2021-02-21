@@ -12,6 +12,7 @@ class Chunk {
 private:
 	Block* blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE] = {};
 	//int height[CHUNKSIZE][CHUNKSIZE]; //Heightmap
+	
 
 	Bioma bio;
 
@@ -36,6 +37,8 @@ private:
 	std::mutex mutex;
 
 public:
+	float den[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE] = {};
+
 	bool firstdraw = true;
 
 	void drawO();
@@ -46,6 +49,7 @@ public:
 	bool setBlock(Block* bloc, Vector3<int> bpos);
 	bool delBlock(Vector3<int> bpos, bool destroy);
 	Bloc getBlock(Vector3<int> bpos);
+	void setDen(float den, Vector3<int> pos);
 
 	void interact(Vector3<int> bpos);
 	void update(float delta);

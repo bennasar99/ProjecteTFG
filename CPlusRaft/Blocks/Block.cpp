@@ -1,8 +1,105 @@
 #include "Block.h"
 #include "../World.h"
-#include <iostream>
 
 TextureAtlas blockAtlas = TextureAtlas(1, 22);
+
+//Les texCoords és retornen en ordre xb, yb, xt, yt i el color en RGBA
+bool Block::getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<float, 4> &color) {
+	int texNum = -1; //Per defecte sense textura
+	//float color[4] = { 0, 0, 0, 1 }; //RGBA, Abstracció classe Color?
+
+	switch (id) {
+	case Bloc::CUB: //Cub vermell
+		//color[0] = 1; color[1] = 0; color[2] = 0; color[3] = 1;
+		color = { 1, 0, 0, 1 };
+		break;
+	case Bloc::TERRA: //Cub marró
+		texNum = 6;
+		//color[0] = 0.5f; color[1] = 0.35f; color[2] = 0.05f; color[3] = 1;
+		color = { 0.5f, 0.35f, 0.05f, 1 };
+		break;
+	case Bloc::VIDRE: //cub transparent/opac (vidre?)
+		//color[0] = 0; color[1] = 0; color[2] = 0; color[3] = 1;
+		color = { 0, 0, 0, 1 };
+		break;
+	case Bloc::FUSTA:
+		texNum = 3;
+		//color[0] = 0.76f; color[1] = 0.6f; color[2] = 0.42f; color[3] = 1;
+		color = { 0.76f, 0.6f, 0.42f, 1 };
+		break;
+	case Bloc::PEDRA:
+		texNum = 5;
+		//color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
+		color = { 0.5f, 0.5f, 0.5f, 1 };
+		break;
+	case Bloc::FUSTAARBRE:
+		texNum = 4;
+		//color[0] = 0.76f; color[1] = 0.6f; color[2] = 0.42f; color[3] = 1;
+		color = { 0.76f, 0.6f, 0.42f, 1 };
+		break;
+	case Bloc::FULLAARBRE:
+		texNum = 2;
+		//color[0] = 0; color[1] = 0.5f; color[2] = 0; color[3] = 1;
+		color = { 0, 0.5f, 0, 1 };
+		break;
+	case Bloc::NEU:
+		texNum = 1;
+		//color[0] = 1; color[1] = 1; color[2] = 1; color[3] = 1;
+		color = { 1,1,1,1 };
+		break;
+	case Bloc::GEL:
+		texNum = 7;
+		//color[0] = 0; color[1] = 0; color[2] = 1; color[3] = 0.8f;
+		color = { 0,0,1,0.8f };
+		break;
+	case Bloc::ARENA:
+		//color[0] = 0.929f; color[1] = 0.788f; color[2] = 0.686f; color[3] = 1;
+		color = { 0.929f, 0.788f, 0.686f, 1 };
+		texNum = 18;
+		break;
+	case Bloc::OR:
+		//color[0] = 1; color[1] = 0.843f; color[2] = 0; color[3] = 1;
+		color = { 1, 0.843f, 0, 1 };
+		texNum = 12;
+		break;
+	case Bloc::FANG:
+		//color[0] = 0.5f; color[1] = 0.35f; color[2] = 0.05f; color[3] = 1;
+		color = { 0.5f, 0.35f, 0.05f, 1 };
+		texNum = 8;
+		break;
+	case Bloc::FERRO:
+		//color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
+		color = { 0.5f, 0.5f, 0.5f, 1 };
+		texNum = 9;
+		break;
+	case Bloc::GRAVILLA:
+		//color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
+		color = { 0.5f, 0.5f, 0.5f, 1 };
+		texNum = 14;
+		break;
+	case Bloc::CARBO:
+		//color[0] = 0.21f; color[1] = 0.271f; color[2] = 0.31f; color[3] = 1;
+		color = { 0.21f, 0.271f, 0.31f, 1 };
+		texNum = 10;
+		break;
+	case Bloc::ALTAVEU: //Cub vermell
+		color = { 0.5f, 0.5f, 0.5f, 1 };
+		texNum = 0;
+		break;
+	case Bloc::AIGUA: //Aigua
+		color = { 0, 0, 1, 0.7f };
+		break;
+	default:
+		texCoords[0] = 0; texCoords[1] = 1; texCoords[0] = 2; texCoords[0] = 3;
+		//color[0] = 1; color[1] = 1; color[2] = 1; color[3] = 1;
+		color = { 1, 1, 1, 1 };
+		return false; //Tipus invàlid
+		break;
+	}
+
+	TextureManager::getTexCoords(texNum, texCoords);
+	return true;
+}
 
 Block::Block(Bloc id) {
 	//this->world = world;
@@ -60,41 +157,10 @@ void Block::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 		{{0, 0,-1},   {0, 0,-1},  {0, 0,-1},   {0, 0,-1}}   // v4,v7,v6,v5 (back)
 	};
 
-	int texNum = -1; //Per defecte sense textura
-	float color[4] = { 0, 0, 0, 1 }; //RGBA, Abstracció classe Color?
-
-	switch (this->id) {
-	case Bloc::CUB: //Cub vermell
-		color[0] = 1; color[1] = 0; color[2] = 0; color[3] = 1;
-		break;
-	case Bloc::TERRA: //Cub marró
-		texNum = 6;
-		color[0] = 0.5f; color[1] = 0.35f; color[2] = 0.05f; color[3] = 1;
-		break;
-	case Bloc::VIDRE: //cub transparent/opac (vidre?)
-		color[0] = 0; color[1] = 0; color[2] = 0; color[3] = 1;
-		break;
-	case Bloc::FUSTA:
-		texNum = 3;
-		color[0] = 0.76f; color[1] = 0.6f; color[2] = 0.42f; color[3] = 1;
-		break;
-	case Bloc::PEDRA:
-		texNum = 5;
-		color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
-		break;
-	case Bloc::FUSTAARBRE:
-		texNum = 4;
-		color[0] = 0.76f; color[1] = 0.6f; color[2] = 0.42f; color[3] = 1;
-		break;
-	case Bloc::FULLAARBRE:
-		texNum = 2;
-		color[0] = 0; color[1] = 0.5f; color[2] = 0; color[3] = 1;
-		break;
-	}
-
-	float* texCoords = TextureManager::getTexCoords(texNum);
-	float xb = 0, yb = 0, xt = 0, yt = 0;
-	xb = texCoords[0]; yb = texCoords[1]; xt = texCoords[2]; yt = texCoords[3];
+	std::array<float, 4> color = { 0, 0, 0, 1 };
+	std::array<float, 4> texCoords;
+	getBlockInfo(this->id, texCoords, color);
+	float xb = texCoords[0], yb = texCoords[1], xt = texCoords[2], yt = texCoords[3];
 
 	GLfloat text[6][4][2] =
 	{
@@ -125,13 +191,169 @@ bool Block::isTransparent(Bloc tipus) {
 }
 
 bool Block::canSeeThrough(Bloc tipus) {
-	return (Block::isTransparent(tipus) || tipus == Bloc::TORXA || tipus == Bloc::HERBA || tipus == Bloc::HERBAFULL || tipus == Bloc::AIRE || tipus == Bloc::RES);
+	return (Block::isTransparent(tipus) || tipus == Bloc::TORXA || tipus == Bloc::HERBA || tipus == Bloc::HERBAFULL || tipus == Bloc::RES);
 }
 
 bool Block::isSolid(Bloc tipus) {
-	if (tipus != Bloc::RES && tipus != Bloc::AIRE && tipus != Bloc::HERBA && tipus != Bloc::TORXA && tipus != Bloc::HERBAFULL 
+	if (tipus != Bloc::RES && tipus != Bloc::HERBA && tipus != Bloc::TORXA && tipus != Bloc::HERBAFULL 
 		&& tipus != Bloc::AIGUA) { //Exclude list
 		return true;
 	}
 	return false;
+}
+
+bool Block::isCube(Bloc tipus) {
+	if (tipus != Bloc::HERBA && tipus != Bloc::TORXA && tipus != Bloc::HERBAFULL
+		&& tipus != Bloc::LLUMSOTIL && tipus != Bloc::LLUMTERRA) { //Exclude list
+		return true;
+	}
+	return false;
+}
+
+
+bool Block::drawIcon(Bloc id) {
+	std::array<float, 4> color;
+	std::array<float, 4> texCoords;
+	Block::getBlockInfo(id, texCoords, color);
+	if (Block::isCube(id)) {
+		glColor4fv(color.data());
+
+		glFrontFace(GL_CCW);
+
+		float xt = 0, xb = 0, yt = 0, yb = 0;
+
+		xb = texCoords[0];
+		yb = texCoords[1];
+		xt = texCoords[2];
+		yt = texCoords[3];
+
+		GLfloat n[6][3] =
+		{
+		  {-1.0, 0.0, 0.0}, //Esquerra
+		  {0.0, 1.0, 0.0}, //Amunt
+		  {1.0, 0.0, 0.0}, //Dreta
+		  {0.0, -1.0, 0.0}, //Abaix
+		  {0.0, 0.0, 1.0}, //Davant
+		  {0.0, 0.0, -1.0} //Darrera
+		};
+		GLfloat text[4][2] ={ {xt, yt}, {xt,yb}, {xb,yb}, {xb,yt} }; //Davant OK
+
+
+		GLint face[4] = { 5, 6, 2, 1 }; //Davant
+		GLfloat v[8][3];
+
+		v[0][0] = v[1][0] = v[2][0] = v[3][0] = -0.5f;
+		v[4][0] = v[5][0] = v[6][0] = v[7][0] = 0.5f;
+		v[0][1] = v[1][1] = v[4][1] = v[5][1] = -0.5f;
+		v[2][1] = v[3][1] = v[6][1] = v[7][1] = 0.5f;
+		v[0][2] = v[3][2] = v[4][2] = v[7][2] = -0.5f;
+		v[1][2] = v[2][2] = v[5][2] = v[6][2] = 0.5f;
+
+		glBegin(GL_QUADS);
+		glNormal3fv(&n[4][0]);
+		glTexCoord2fv(text[0]);
+		glVertex3fv(&v[face[0]][0]); //Top left
+		glTexCoord2fv(text[1]);
+		glVertex3fv(&v[face[1]][0]); //Bottom left
+		glTexCoord2fv(text[2]);
+		glVertex3fv(&v[face[2]][0]); //Bottom right
+		glTexCoord2fv(text[3]);
+		glVertex3fv(&v[face[3]][0]); //Top right
+		glEnd();
+	}
+	else {
+		switch (id) { //Dibuixam el que correspongui per cada bloc
+		case Bloc::HERBA: //Herba
+			glColor3f(0, 1, 0);
+			glLineWidth(3.0f);
+			glBegin(GL_LINES);
+			glNormal3f(0, 1, 0);
+			glVertex3d(0.5, 0.3, 0.5); glVertex3d(0.5, -0.5, 0.5);
+			glVertex3d(-0.5, 0.5, 0.5); glVertex3d(-0.5, -0.5, 0.5);
+			glVertex3d(0.5, 0.1, -0.5); glVertex3d(0.5, -0.5, -0.5);
+			glVertex3d(-0.5, 0.4, -0.5); glVertex3d(-0.5, -0.5, -0.5);
+			glVertex3d(0.0, 0.5, 0.0); glVertex3d(0.0, -0.5, 0.0);
+			glVertex3d(0.5, 0.2, 0.0); glVertex3d(0.5, -0.5, 0.0);
+			glVertex3d(0.0, 0.4, 0.5); glVertex3d(0.0, -0.5, 0.5);
+			glVertex3d(-0.5, 0.2, 0.0); glVertex3d(-0.5, -0.5, 0.0);
+			glVertex3d(0.0, 0.4, -0.5); glVertex3d(0.0, -0.5, -0.5);
+			glVertex3d(0.25, 0.3, 0.25); glVertex3d(0.25, -0.5, 0.25);
+			glVertex3d(-0.25, 0.5, 0.25); glVertex3d(-0.25, -0.5, 0.25);
+			glVertex3d(0.25, 0.1, -0.25); glVertex3d(0.25, -0.5, -0.25);
+			glVertex3d(-0.25, 0.4, -0.25); glVertex3d(-0.25, -0.5, -0.25);
+			glVertex3d(0.25, 0.3, 0); glVertex3d(0.25, -0.5, 0);
+			glVertex3d(0, 0.5, 0.25); glVertex3d(0, -0.5, 0.25);
+			glVertex3d(-0.25, 0.1, 0); glVertex3d(-0.25, -0.5, 0);
+			glVertex3d(0, 0.4, -0.25); glVertex3d(0, -0.5, -0.25);
+			glEnd();
+			glLineWidth(1.0f);
+			break;
+		case Bloc::HERBAFULL: //Herba
+			glColor3f(0, 1, 0);
+			glLineWidth(3.0f);
+			glBegin(GL_LINES);
+			glNormal3f(0, 1, 0);
+			glVertex3d(0.5, 0.5, 0.5); glVertex3d(0.5, -0.5, 0.5);
+			glVertex3d(-0.5, 0.5, 0.5); glVertex3d(-0.5, -0.5, 0.5);
+			glVertex3d(0.5, 0.5, -0.5); glVertex3d(0.5, -0.5, -0.5);
+			glVertex3d(-0.5, 0.5, -0.5); glVertex3d(-0.5, -0.5, -0.5);
+			glVertex3d(0.0, 0.5, 0.0); glVertex3d(0.0, -0.5, 0.0);
+			glVertex3d(0.5, 0.5, 0.0); glVertex3d(0.5, -0.5, 0.0);
+			glVertex3d(0.0, 0.5, 0.5); glVertex3d(0.0, -0.5, 0.5);
+			glVertex3d(-0.5, 0.5, 0.0); glVertex3d(-0.5, -0.5, 0.0);
+			glVertex3d(0.0, 0.5, -0.5); glVertex3d(0.0, -0.5, -0.5);
+			glVertex3d(0.25, 0.5, 0.25); glVertex3d(0.25, -0.5, 0.25);
+			glVertex3d(-0.25, 0.5, 0.25); glVertex3d(-0.25, -0.5, 0.25);
+			glVertex3d(0.25, 0.5, -0.25); glVertex3d(0.25, -0.5, -0.25);
+			glVertex3d(-0.25, 0.5, -0.25); glVertex3d(-0.25, -0.5, -0.25);
+			glVertex3d(0.25, 0.5, 0); glVertex3d(0.25, -0.5, 0);
+			glVertex3d(0, 0.5, 0.25); glVertex3d(0, -0.5, 0.25);
+			glVertex3d(-0.25, 0.5, 0); glVertex3d(-0.25, -0.5, 0);
+			glVertex3d(0, 0.5, -0.25); glVertex3d(0, -0.5, -0.25);
+			glEnd();
+			glLineWidth(1.0f);
+			break;
+		case Bloc::TORXA: //torxa
+			glDisable(GL_LIGHTING);
+			glLineWidth(3.0f);
+			glColor3f(0.5f, 0.35f, 0.05f);
+			glBegin(GL_LINES);
+			glVertex3d(0.0, 0.0, 0.0); glVertex3d(0.0, -0.5, 0.0); //Cos
+			glEnd();
+			glColor3f(1, 1, 0);
+			glBegin(GL_LINES);
+			glVertex3d(0.0, 0.2, 0.0); glVertex3d(0.0, 0.1, 0.0); //Punta
+			glEnd();
+			glLineWidth(1.0f);
+			glEnable(GL_LIGHTING);
+			break;
+		case Bloc::LLUMSOTIL: //Llum de sòtil
+			glDisable(GL_LIGHTING);
+			glColor3f(1, 1, 1);
+			glBegin(GL_QUADS);
+			glVertex3d(0.5, 0.5, 0.5); glVertex3d(0.5, 0.5, -0.5); glVertex3d(-0.5, 0.5, -0.5); glVertex3d(-0.5, 0.5, 0.5);
+			glColor3f(0, 0, 0);
+			glLineWidth(2.0f);
+			glEnd();
+			glBegin(GL_LINE_LOOP);
+			glVertex3d(0.5, 0.5, 0.5); glVertex3d(0.5, 0.5, -0.5); glVertex3d(-0.5, 0.5, -0.5); glVertex3d(-0.5, 0.5, 0.5); glVertex3d(0.5, 0.5, 0.5);
+			glEnd();
+			glEnable(GL_LIGHTING);
+			break;
+		case Bloc::LLUMTERRA: //Foco (llum de sòtil però de baix cap adalt)
+			glDisable(GL_LIGHTING);
+			glColor3f(1, 1, 1);
+			glBegin(GL_QUADS);
+			glVertex3d(0.5, -0.5, 0.5); glVertex3d(0.5, -0.5, -0.5); glVertex3d(-0.5, -0.5, -0.5); glVertex3d(-0.5, -0.5, 0.5);
+			glColor3f(0, 0, 0);
+			glLineWidth(2.0f);
+			glEnd();
+			glBegin(GL_LINE_LOOP);
+			glVertex3d(0.5, -0.5, 0.5); glVertex3d(0.5, -0.5, -0.5); glVertex3d(-0.5, -0.5, -0.5); glVertex3d(-0.5, -0.5, 0.5); glVertex3d(0.5, -0.5, 0.5);
+			glEnd();
+			glEnable(GL_LIGHTING);
+			break;
+		}
+	}
+	return true;
 }

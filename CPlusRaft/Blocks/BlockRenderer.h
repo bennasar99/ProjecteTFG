@@ -5,13 +5,10 @@
 
 class BlockRenderer {
 	TextureAtlas *blockAtlas;
-	void drawCub(bool cares[6], int texNum);
-	void drawCub(bool cares[6]);
+	void drawCub(bool cares[6], std::array<float, 4> texCoords);
 public:
 	void drawBloc(Bloc id);
 	void drawBloc(Bloc id, bool cares[6]);
-	float* getTexCoords(Bloc tipus);
-	float* getColor(Bloc tipus);
 
 	BlockRenderer();
 };

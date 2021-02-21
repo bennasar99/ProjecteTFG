@@ -130,7 +130,7 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 						int random = rand() % randmax;
 						if (random == 4 || random == 5 || random == 6 || random == 7 || random == 8) {
 							//chunk->setBlock(new SpreadBlock(Bloc::HERBA, tpos), tpos);
-							world->setBlock(Bloc::HERBA, tpos, nullptr, false);
+							//world->setBlock(Bloc::HERBA, tpos, nullptr, false);
 						}
 						else if (random == 9) {
 							//Tronc
@@ -140,9 +140,6 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 							for (int i = 1; i <= rand2; i++) {
 								Vector3<int> fpos = tpos + Vector3<int>(0, i, 0);
 								world->setBlock(Bloc::FUSTAARBRE, fpos, nullptr, false);
-								/*if (fpos.y >= 0 && fpos.y < 15) {
-									chunk->setBlock(new SolidBlock(Bloc::FUSTAARBRE), fpos);
-								}*/
 							}
 							//Fulles
 							int altura = rand() % 3 + 1;
@@ -264,9 +261,10 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 					density += getDensity(bio, bpos);// / dist;
 					threshold += 1.0f;// / dist;
 				}
+				chunk->den[pos.x][pos.y][pos.z] = density/threshold;
 			
 				//printf("density %f threshold %f\n", density, threshold);
-				if (density < threshold) {
+				if (density/threshold < 1) {
 					if (CHUNKSIZE * cPos.y + y > sealvl) {
 						if (bio == Bioma::MAR || bio == Bioma::OCEA) {
 							//continue;

@@ -24,7 +24,6 @@
 #include "Camera.h"
 #include "Entities/Entity.h"
 #include "Chunk.h"
-#include "Blocks//BlockRenderer.h"
 #include "Generation/WorldGenerator.h"
 #include "lib/FastNoiseLite.h"
 #include "ryml.hpp"
@@ -86,13 +85,12 @@ private:
 	void updateGeneration();
 
 public:
-	bool checkthreads = false;
+	//bool checkthreads = false;
 
 	//Han de ser nombres parells
 	Vector3<int> size;
 
 	Camera* camera;
-	BlockRenderer *br;
 
 	void drawBloc(Bloc tipus);
 

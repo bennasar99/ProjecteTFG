@@ -6,8 +6,9 @@
 class ChunkMesh {
 private:
 	Mesh oMesh; //Quads sòlids
-	Mesh tMesh; //Quads transparents
+	Mesh trMesh; //Quads transparents
 	Mesh lMesh; //Mesh de línies
+	Mesh tMesh;  //Mesh de triangles
 
 	unsigned int vbo;
 	Primitiva prim;

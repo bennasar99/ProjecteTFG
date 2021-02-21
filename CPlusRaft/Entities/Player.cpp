@@ -97,6 +97,10 @@ void Player::control(float delta, Camera *cam) {
 		speed*=2.0f;
 	}
 	Vector3<float> newPos = this->pos + add * delta * speed;
+	if (gamemode == 0) {
+		this->pos = newPos;
+		return; //No comprovam colisions
+	}
 	if (newPos != this->pos) {
 		if (Block::isSolid(world->getBlock(newPos + add * ((float)delta) - Vector3<float>(0, 1, 0))) ||
 			Block::isSolid(world->getBlock(newPos + add * ((float)delta)))) {

@@ -1,8 +1,9 @@
 #include "ChunkMesh.h"
 
 ChunkMesh::ChunkMesh() {
+	tMesh = Mesh(Primitiva::TRIANGLE);
 	oMesh = Mesh(Primitiva::QUAD);
-	tMesh = Mesh(Primitiva::QUAD);
+	trMesh = Mesh(Primitiva::QUAD);
 	lMesh = Mesh(Primitiva::LINIA);
 }
 
@@ -12,6 +13,9 @@ void ChunkMesh::addVertexO(float* vert, float* norm, float* col, float* text, Pr
 	case Primitiva::QUAD:
 		oMesh.addVertex(vert, norm, col, text);
 		break;
+	case Primitiva::TRIANGLE:
+		tMesh.addVertex(vert, norm, col, text);
+		break;
 	case Primitiva::LINIA:
 		lMesh.addVertex(vert, norm, col, text);
 		break;
@@ -20,11 +24,14 @@ void ChunkMesh::addVertexO(float* vert, float* norm, float* col, float* text, Pr
 
 //Estructura vertex: x,y,z, nx,ny,nz, R,G,B,A, tx,ty (12 floats)
 void ChunkMesh::addVertexT(float* vert, float* norm, float* col, float* text) {
-	tMesh.addVertex(vert, norm, col, text);
+	trMesh.addVertex(vert, norm, col, text);
 }
 
 
 void ChunkMesh::drawO() {
+	GLfloat specular[4] = { 0.1f,0.1f,0.1f,1 };
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
+	tMesh.draw();
 	oMesh.draw();
 	glLineWidth(2.5f);
 	lMesh.draw();
@@ -33,7 +40,7 @@ void ChunkMesh::drawO() {
 
 void ChunkMesh::drawT() {
 	//glDisable(GL_CULL_FACE);
-	tMesh.draw();
+	trMesh.draw();
 	//glEnable(GL_CULL_FACE);
 }
 
@@ -41,15 +48,17 @@ void ChunkMesh::erase() {
 	oMesh.erase();
 	lMesh.erase();
 	tMesh.erase();
+	trMesh.erase();
 }
 
 void ChunkMesh::eraseT() {
-	tMesh.erase();
+	trMesh.erase();
 }
 
 void ChunkMesh::eraseO() {
 	oMesh.erase();
 	lMesh.erase();
+	tMesh.erase();
 }
 
 
@@ -58,16 +67,18 @@ ChunkMesh::~ChunkMesh() {
 }
 
 void ChunkMesh::update() {
+	tMesh.update();
 	oMesh.update();
 	lMesh.update();
-	tMesh.update();
+	trMesh.update();
 }
 
 void ChunkMesh::updateO() {
 	oMesh.update();
 	lMesh.update();
+	tMesh.update();
 }
 
 void ChunkMesh::updateT() {
-	tMesh.update();
+	trMesh.update();
 }

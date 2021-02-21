@@ -32,6 +32,7 @@ public:
 	bool equals(Vector3<T> other);
 	void print();
 	void floor();
+	void ceil();
 	Vector3<int> toInt();
 };
 
@@ -152,6 +153,11 @@ inline void Vector3<float>::floor() {
 	this->x = floorf(this->x);
 	this->y = floorf(this->y);
 	this->z = floorf(this->z);
+}
+inline void Vector3<float>::ceil() {
+	this->x = ceilf(this->x);
+	this->y = ceilf(this->y);
+	this->z = ceilf(this->z);
 }
 
 inline Vector3<int> Vector3<float>::toInt() {

@@ -38,5 +38,5 @@ public:
 	static bool LoadTexture(const char* path, Textura nom);
 	static unsigned int getTexture(Textura nom);
 	static void initialize();
-	static float* getTexCoords(int texNum);
+	static bool getTexCoords(int texNum, std::array<float, 4> &texCoords);
 };

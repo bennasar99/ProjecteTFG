@@ -9,7 +9,6 @@ World::World(std::string name, int seed, int sizex, int sizey, int sizez, Camera
 	this->cnk = std::vector< std::future<Chunk*> >(genCores);
 	this->name = name;
 	this->wGen = WorldGenerator(seed, this);
-	this->br = new BlockRenderer();
 
 	this->seed = seed;
 	this->camera = camera;
@@ -41,7 +40,6 @@ World::World(std::string name, int seed, int sizex, int sizey, int sizez, Camera
 
 World::World(std::string name, Camera* camera) { //Càrrega ja existent
 
-	this->br = new BlockRenderer();
 	this->genCores = ThreadManager::getCoreCount() - 2;
 	this->genCores = std::max(this->genCores, 1);
 
@@ -256,13 +254,13 @@ void World::updateGeneration() {
 							ch->updateMesh();
 							estat[desp] = ChunkState::LLEST;
 						}
-						if (ch->nblocs <= 0) {
+						/*if (ch->nblocs <= 0) { //Amb marching cubes no es pot fer ja que un chunk pot haver de dibuixar triangles sense tenir blocs
 							estat[desp] = ChunkState::LLEST;
 							delete ch;
 							continue;
-						}
+						}*/
 						chunks[desp] = ch;
-						if (estat[desp] == ChunkState::LLEST) {
+						if (estat[desp] == ChunkState::LLEST && ch->nblocs > 0) {
 							updateNeighborChunks(cPos);
 						}
 					}
@@ -398,7 +396,6 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, Block* parent, bool listUpdat
 	}
 	chunks[desp]->setBlock(bloc, bpos);
 	if (listUpdate) {
-		//chunks[desp]->updateDL();
 		chunks[desp]->updateMesh();
 		updateNeighborChunks(cpos, bpos);
 	}
@@ -430,7 +427,6 @@ bool World::setBlock(Block* bloc, Vector3<int> pos, bool listUpdate) {
 	chunks[desp]->setBlock(bloc, bpos);
 
 	if (listUpdate) {
-		//chunks[desp]->updateDL();
 		chunks[desp]->updateMesh();
 		updateNeighborChunks(cpos, bpos);
 	}
@@ -583,7 +579,7 @@ void World::updateVisibility() {
 
 //Dibuixa un bloc a una posició determinada (Sense guardar-lo al món)
 void World::drawBloc(Bloc tipus) {
-	br->drawBloc(tipus);
+	Block::drawIcon(tipus);
 }
 
 //Dibuixa l'eix de coordenades a la posició indicada
@@ -738,9 +734,13 @@ void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
 	std::list<Vector3<int>>::iterator chunki;
 	for (chunki = toUpdate.begin(); (chunki != toUpdate.end()); chunki++) {
 		int desp = getDesp(*chunki);
-		if (chunks[desp] == nullptr || desp == -1 || estat[desp] != ChunkState::LLEST) {
+		if (desp == -1 || estat[desp] != ChunkState::LLEST) {
 			continue;
 		}
+		if (chunks[desp] == nullptr) {
+			chunks[desp] = new Chunk(this, *chunki);
+		}
+
 		chunks[desp]->updateMesh();
 	}
 }

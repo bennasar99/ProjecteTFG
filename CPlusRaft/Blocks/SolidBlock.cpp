@@ -3,10 +3,82 @@
 #include <iostream>
 #include <cmath>
 #include "../World.h"
+#include "../Render/MarchingCubes.h"
 
 
 SolidBlock::SolidBlock(Bloc id) : Block(id) {
 
+}
+
+void SolidBlock::drawMarching(ChunkMesh* cM, bool visible[6], Vector3<int> relPos, Vector3<int> cPos, World* world, Chunk *cnk) {
+
+    static Vector3<int> toCheck[8] = { Vector3(0, 0, 0), Vector3(1, 0, 0), Vector3(1, 1, 0), Vector3(0, 1, 0),
+                        Vector3(0, 0, 1), Vector3(1, 0, 1), Vector3(1, 1, 1), Vector3(0, 1, 1) };
+
+	std::array<float, 8> cube = {};
+    Bloc neighbors[8] = { Bloc::RES, Bloc::RES, Bloc::RES, Bloc::RES, Bloc::RES, Bloc::RES, Bloc::RES, Bloc::RES };
+    for (int i = 0; i < 8; i++) {
+        //cube[i] = cnk->den[pos.x][pos.y][pos.z];
+		Vector3<int> bpos = cPos*CHUNKSIZE + relPos + toCheck[i];
+        Bloc bt = world->getBlock(bpos);
+		if (!Block::isSolid(bt)){
+			cube[i] = 1;
+		}
+        neighbors[i] = bt;
+	}
+
+	std::vector< Vector3<float> > toDraw;
+	std::vector< Vector3<float> > normals;
+	MarchingCubes::apply(1, cube, toDraw, normals);
+    
+    //Decidim el tipus de bloc que ha de ser
+    int freq[NBLOCS] = {};
+    for (int i = 0; i < 8; i++) {
+        if (!Block::isSolid(neighbors[i])) {
+            continue;
+        }
+        freq[static_cast<int>(neighbors[i])]++;
+    }
+    int max = 0;
+    int maxi = -1;
+    for (int i = 0; i < NBLOCS; i++) {
+        if (freq[i] > max) {
+            maxi = i;
+            max = freq[i];
+        }
+    }
+    Bloc bt = static_cast<Bloc>(maxi); //Frequència màxima
+
+    std::array<float, 4> color = { 1, 0, 0, 1 }; //RGBA, Abstracció classe Color?
+    std::array<float, 4> tCoords;
+    Block::getBlockInfo(bt, tCoords, color);
+    float xb = tCoords[0], yb = tCoords[1], xt = tCoords[2], yt = tCoords[3];
+    float text[4][2]{
+        {xb, yb},
+        {xb, yt},
+        {xt, yb},
+        {xt, yt}
+    };
+
+    std::vector< Vector3<float> >::iterator it;
+    std::vector< Vector3<float> >::iterator it2;
+    it2 = normals.begin();
+    int i = 0;
+    for (it = toDraw.begin(); it != toDraw.end(); it++) {
+
+        Vector3 normalV = *it2;
+        float normal[3] = { -normalV.x, -normalV.y, -normalV.z };
+        Vector3 pos = *it;
+        float vPos[3] = { pos.x, pos.y, pos.z };
+        vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
+        cM->addVertexO(vPos, normal, color.data(), text[i], Primitiva::TRIANGLE);
+        i++;
+        if (i == 3) {
+            i = 0;
+            it2++;
+        }
+    }
+	//delete[] cubeEdgeFlags;
 }
 
 //Funció de dibuixat (Del bloc/objecte tal com és, no icona)
@@ -94,7 +166,8 @@ void SolidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 			break;
 	}
 
-	float* texCoords = TextureManager::getTexCoords(texNum);
+    std::array<float, 4> texCoords;
+    TextureManager::getTexCoords(texNum, texCoords);
 	float xb = 0, yb = 0, xt = 0, yt = 0;
 	xb = texCoords[0]; yb = texCoords[1]; xt = texCoords[2]; yt = texCoords[3];
 

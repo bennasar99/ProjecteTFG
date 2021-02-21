@@ -98,7 +98,7 @@ void Display(GLFWwindow* window)
 
 	fpsc++;
 	if (fpsc > 20) { //Contador fps
-		printf("%f\n", fps);
+		//printf("%f\n", fps);
 		fpsc = 0;
 	}
 	//if (fps < 26) {
@@ -256,10 +256,10 @@ void Display(GLFWwindow* window)
 
 		glEnable(GL_TEXTURE_2D);
 		glTranslatef(0.5f * aspect - 0.3f, 0.8f, -1);
-		for (int i = 0; i <= NBLOCS; i++) { //Objectes de l'inventari
+		for (int i = 1; i < NBLOCS-1; i++) { //Objectes de l'inventari, botam primer (RES) i darrer (LIMIT)
 			glPushMatrix();
 			glScalef(0.1f, 0.1f, 0.1f);
-			Block bsel = Block(static_cast<Bloc>(i + 2)); //+2 perque botam aire i null
+			Block bsel = Block(static_cast<Bloc>(i));
 			glDisable(GL_LIGHTING);
 
 			if (bsel.getId() == static_cast<Bloc>(btipus)) { //L'hem de dibuixar com a seleccionat
@@ -288,7 +288,7 @@ void Display(GLFWwindow* window)
 			glPopMatrix();
 
 			glTranslatef(0.12f, 0, 0); //Passam a la següent columna
-			if ((i + 1) % 6 == 0) { //I, si cal, a la següent fila
+			if (i % 6 == 0) { //I, si cal, a la següent fila
 				glTranslatef(0, -0.12f, 0);
 				glTranslatef(-0.12f * 6, 0, 0);
 			}
@@ -626,7 +626,7 @@ void gamePad() {
 			{
 				nbtipus-=6;
 			}
-			if (nbtipus > 2 && nbtipus <= NBLOCS) {
+			if (nbtipus >= 2 && nbtipus <= NBLOCS) {
 				btipus = nbtipus;
 			}
 		}
@@ -661,7 +661,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 			float xi = ((float)x - minx) / (maxx - minx) * 6;// *7.1f;
 			printf("%f %f\n", xi, yi);
 
-			btipus = (int)floor(yi) * 6 +  (int)floor(xi) + 2; //+2 per botar aire i res
+			btipus = (int)floor(yi) * 6 +  (int)floor(xi) + 1; //+2 per botar RES
 			if (btipus > NBLOCS) { //Si no se selecciona cap objecte, no n'hi haurà cap de seleccionat
 				btipus = 0;
 			}
@@ -823,14 +823,16 @@ void setLighting() {
 	glFogf(GL_FOG_START, zFar - 4);
 
 	//LLum ambient
-	GLfloat lluma[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lluma);
+	GLfloat lluma[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lluma); //Posar a 0.1
 
 	//Llanterna
 	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 1.0f);
 	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.0f);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.1f);
 	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.1f);
+	float diff[4] = { 1,1,1,1 };
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);
 
 	//Sol
 	world->setSol(GL_LIGHT1); //Triam quina llum farà de sol (llum direccional)

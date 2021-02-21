@@ -2,13 +2,12 @@
 
 #include "../Render/ChunkMesh.h"
 #include "../Utils/Vector3.h"
+#include <array>
 
-
-#define NBLOCS 25
+#define NBLOCS 24
 
 enum class Bloc {
 	RES,
-	AIRE,
 	AIGUA,
 	CUB,
 	HERBA,
@@ -52,9 +51,12 @@ public:
 	Bloc getId();
 	void setId(Bloc id);
 
+	static bool getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<float, 4>& color);
 	static bool isTransparent(Bloc tipus);
 	static bool isSolid(Bloc tipus);
+	static bool isCube(Bloc tipus);
 	static bool canSeeThrough(Bloc tipus);
+	static bool drawIcon(Bloc tipus);
 
 	Block(Bloc id);
 	Block();

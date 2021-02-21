@@ -46,6 +46,6 @@ void TextureManager::initialize() {
 	TextureManager::blockAtlas = TextureAtlas(1, 22);
 }
 
-float* TextureManager::getTexCoords(int texNum) {
-	return TextureManager::blockAtlas.getCoords(texNum);
+bool TextureManager::getTexCoords(int texNum, std::array<float, 4> &texCoords) {
+	return TextureManager::blockAtlas.getCoords(texNum, texCoords);
 }
