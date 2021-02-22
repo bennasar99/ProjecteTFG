@@ -18,7 +18,7 @@ World::World(std::string name, int seed, int sizex, int sizey, int sizez, Camera
 	this->size.z = sizez;
 
 	//NOU CODI CHUNKS:
-	this->chunks = new Chunk * [(size_t)size.x * (size_t)size.y * (size_t)size.z];
+	//this->chunks = new Chunk * [(size_t)size.x * (size_t)size.y * (size_t)size.z];
 	this->estat = new ChunkState[(size_t)size.x * (size_t)size.y * (size_t)size.z];
 	for (int i = 0; i < size.x * size.y * size.z; i++) {
 		this->chunks[i] = nullptr;
@@ -68,7 +68,7 @@ World::World(std::string name, Camera* camera) { //Càrrega ja existent
 	std::fstream file;
 	this->cnk = std::vector< std::future<Chunk*> >(genCores);
 	this->wGen = WorldGenerator(this->seed, this);
-	this->chunks = new Chunk * [(size_t)size.x * (size_t)size.y * (size_t)size.z];
+	//this->chunks = new Chunk * [(size_t)size.x * (size_t)size.y * (size_t)size.z];
 	this->estat = new ChunkState[(size_t)size.x * (size_t)size.y * (size_t)size.z];
 	for (int i = 0; i < size.x * size.y * size.z; i++) {
 		this->chunks[i] = nullptr;
@@ -322,7 +322,7 @@ void World::destroy() {
 	for (int i = 0; i < this->size.x * this->size.y * this->size.z; i++) {
 		delete this->chunks[i];
 	}
-	delete[] this->chunks;
+	//delete[] this->chunks;
 
 	std::list<Entity*>::iterator ent;
 	for (ent = entities.begin(); (ent != entities.end()); ent++) {
@@ -947,4 +947,17 @@ bool World::loadRegion(Vector3<int> rPos) {
 	}
 	file.close();
 	return true;
+}
+
+void World::redrawChunks() {
+	for (int x = 0; x < this->size.x; x++) {
+		for (int y = 0; y < this->size.y; y++) {
+			for (int z = 0; z < this->size.z; z++) {
+				int desp = getDesp(Vector3<int>(x, y, z));
+				if (chunks[desp] != 0 && estat[desp] == ChunkState::LLEST) {
+					chunks[getDesp(Vector3<int>(x, y, z))]->updateMesh();
+				}
+			}
+		}
+	}
 }

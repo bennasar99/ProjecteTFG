@@ -720,6 +720,10 @@ void movement(int key) {
 	if (key == GLFW_KEY_F) {
 		llanterna = !llanterna;
 	}
+	else if (key == GLFW_KEY_C) { //Switch Marching Cubes ON/OFF
+		Block::setMCEnabled(!Block::getMCEnabled());
+		world->redrawChunks();
+	}
 	else if (key == GLFW_KEY_P) {
 		printf("x:%f y:%f z:%f b:%d r:%f\n", ent->getPos().x, ent->getPos().y, ent->getPos().z, world->getBlock(ba), ent->getRot());
 		world->updateNeighborChunks(Vector3<int>(ent->getPos().x, ent->getPos().y, ent->getPos().z) / CHUNKSIZE);

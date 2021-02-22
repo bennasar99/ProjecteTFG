@@ -2,7 +2,10 @@
 
 #include "../Render/ChunkMesh.h"
 #include "../Utils/Vector3.h"
+#include "../Render/MarchingCubes.h"
 #include <array>
+
+class Chunk;
 
 #define NBLOCS 24
 
@@ -37,6 +40,7 @@ class World;
 
 class Block {
 protected:
+	static bool marching;
 
 	Bloc id;
 	//Block* parent = 0;	/*	Bloc pare: si un bloc té un pare vol dir que el "fill" és un bloc que només serveix per ocupar 
@@ -56,7 +60,13 @@ public:
 	static bool isSolid(Bloc tipus);
 	static bool isCube(Bloc tipus);
 	static bool canSeeThrough(Bloc tipus);
+	static bool isMarcheable(Bloc tipus);
 	static bool drawIcon(Bloc tipus);
+
+	//Marching cubes
+	static void drawMarching(Bloc id, ChunkMesh* cM, Vector3<int> relPos, Chunk* cnk);
+	static void setMCEnabled(bool set);
+	static bool getMCEnabled();
 
 	Block(Bloc id);
 	Block();

@@ -1,6 +1,7 @@
 #include "Block.h"
 #include "../World.h"
 
+bool Block::marching = true;
 TextureAtlas blockAtlas = TextureAtlas(1, 22);
 
 //Les texCoords és retornen en ordre xb, yb, xt, yt i el color en RGBA
@@ -202,6 +203,14 @@ bool Block::isSolid(Bloc tipus) {
 	return false;
 }
 
+//Indica si a un bloc se li pot aplicar marching cubes. Ex: Als transparents i solids (gel) no s'ha de permetre
+bool Block::isMarcheable(Bloc tipus) {
+	if (isSolid(tipus) && !isTransparent(tipus)) {
+		return true;
+	}
+	return false;
+}
+
 bool Block::isCube(Bloc tipus) {
 	if (tipus != Bloc::HERBA && tipus != Bloc::TORXA && tipus != Bloc::HERBAFULL
 		&& tipus != Bloc::LLUMSOTIL && tipus != Bloc::LLUMTERRA) { //Exclude list
@@ -356,4 +365,88 @@ bool Block::drawIcon(Bloc id) {
 		}
 	}
 	return true;
+}
+
+void Block::drawMarching(Bloc id, ChunkMesh* cM, Vector3<int> relPos, Chunk* ch) {
+
+	static Vector3<int> toCheck[8] = { Vector3(0, 0, 0), Vector3(1, 0, 0), Vector3(1, 1, 0), Vector3(0, 1, 0),
+						Vector3(0, 0, 1), Vector3(1, 0, 1), Vector3(1, 1, 1), Vector3(0, 1, 1) };
+
+	std::array<float, 8> cube = {};
+	Bloc neighbors[8] = { Bloc::RES, Bloc::RES, Bloc::RES, Bloc::RES, Bloc::RES, Bloc::RES, Bloc::RES, Bloc::RES };
+	for (int i = 0; i < 8; i++) {
+		//cube[i] = cnk->den[pos.x][pos.y][pos.z];
+		Vector3<int> bpos = ch->getPos() * CHUNKSIZE + relPos + toCheck[i];
+		Bloc bt = ch->getBlockWorld(bpos);
+		if (!Block::isMarcheable(bt)) {
+			cube[i] = 1;
+		}
+		neighbors[i] = bt;
+	}
+
+	std::vector< Vector3<float> > toDraw;
+	std::vector< Vector3<float> > normals;
+	MarchingCubes::apply(1, cube, toDraw, normals);
+
+	//Decidim el tipus de bloc que ha de ser
+	Bloc bt;
+	if (id == Bloc::RES) {
+		int freq[NBLOCS] = {};
+		for (int i = 0; i < 8; i++) {
+			if (!Block::isSolid(neighbors[i])) {
+				continue;
+			}
+			freq[static_cast<int>(neighbors[i])]++;
+		}
+		int max = 0;
+		int maxi = -1;
+		for (int i = 0; i < NBLOCS; i++) {
+			if (freq[i] > max) {
+				maxi = i;
+				max = freq[i];
+			}
+		}
+		bt = static_cast<Bloc>(maxi); //Frequència màxima
+	}
+	else {
+		bt = id;
+	}
+
+	std::array<float, 4> color; //RGBA, Abstracció classe Color?
+	std::array<float, 4> tCoords;
+	Block::getBlockInfo(bt, tCoords, color);
+	float xb = tCoords[0], yb = tCoords[1], xt = tCoords[2], yt = tCoords[3];
+	float text[4][2]{
+		{xb, yb},
+		{xb, yt},
+		{xt, yb},
+		{xt, yt}
+	};
+
+	std::vector< Vector3<float> >::iterator it;
+	std::vector< Vector3<float> >::iterator it2;
+	it2 = normals.begin();
+	int i = 0;
+	for (it = toDraw.begin(); it != toDraw.end(); it++) {
+
+		Vector3 normalV = *it2;
+		float normal[3] = { -normalV.x, -normalV.y, -normalV.z };
+		Vector3 pos = *it;
+		float vPos[3] = { pos.x, pos.y, pos.z };
+		vPos[0] += relPos.x - 0.5f; vPos[1] += relPos.y - 0.5f; vPos[2] += relPos.z - 0.5f; //-0.5f per compensar
+		cM->addVertexO(vPos, normal, color.data(), text[i], Primitiva::TRIANGLE);
+		i++;
+		if (i == 3) {
+			i = 0;
+			it2++;
+		}
+	}
+}
+
+void Block::setMCEnabled(bool set) {
+	Block::marching = set;
+}
+
+bool Block::getMCEnabled() {
+	return Block::marching;
 }

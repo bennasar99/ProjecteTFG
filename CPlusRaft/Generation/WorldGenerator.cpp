@@ -261,7 +261,6 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 					density += getDensity(bio, bpos);// / dist;
 					threshold += 1.0f;// / dist;
 				}
-				chunk->den[pos.x][pos.y][pos.z] = density/threshold;
 			
 				//printf("density %f threshold %f\n", density, threshold);
 				if (density/threshold < 1) {

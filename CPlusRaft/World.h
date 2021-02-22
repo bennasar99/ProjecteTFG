@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <future> 
 #include <algorithm>
+#include <map>
 
 #include "Light.h"
 #include "Blocks/Block.h"
@@ -58,7 +59,8 @@ private:
 
 	WorldGenerator wGen;
 
-	Chunk** chunks;
+	//Chunk** chunks;
+	std::map< int, Chunk*> chunks;
 	ChunkState *estat;
 	short pendents = 0;
 
@@ -141,6 +143,8 @@ public:
 	Vector3<int> getRegion(Vector3<int> cPos);
 	bool saveRegion(Vector3<int> rPos);
 	bool loadRegion(Vector3<int> rPos);
+
+	void redrawChunks();
 
 	World(std::string name, int seed, int sizex, int sizey, int sizez, Camera* camera);
 	World(std::string file, Camera* camera);
