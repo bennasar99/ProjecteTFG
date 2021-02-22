@@ -1,12 +1,12 @@
 #include "MarchingCubes.h"
 
-float GetOffset(float v1, float v2)
+float GetOffset(float surface, float v1, float v2)
 {
-    float surface = 1;
     float delta = v2 - v1;
     return (delta == 0.0f) ? surface : (surface - v1) / delta;
 };
 
+//Aplica MC donades les 8 densitats d'un cub i la "surface" (valor que fins al qual un bloc pertany al model)
 bool MarchingCubes::apply(float surface, std::array<float, 8>& density, std::vector< Vector3<float> > &vertexs, std::vector< Vector3<float> > &normals) {
     unsigned char bitfield = {};
 	for (int i = 0; i < 8; i++) {
@@ -14,7 +14,6 @@ bool MarchingCubes::apply(float surface, std::array<float, 8>& density, std::vec
 			bitfield |= 1UL << i;
 		}
 	}
-    //printf("%d\n", int(bitfield));
 
     int edgeFlags = cubeEdgeFlags[bitfield];
 
@@ -22,13 +21,14 @@ bool MarchingCubes::apply(float surface, std::array<float, 8>& density, std::vec
     if (edgeFlags == 0) return false;
 
     Vector3<float> EdgeVertex[12];
+
     //Find the point of intersection of the surface with each edge
     for (int i = 0; i < 12; i++)
     {
         //if there is an intersection on this edge
         if ((edgeFlags & (1 << i)) != 0)
         {
-            float offset = GetOffset(density[EdgeConnection[i][0]], density[EdgeConnection[i][1]]);
+            float offset = GetOffset(surface, density[EdgeConnection[i][0]], density[EdgeConnection[i][1]]);
 
             EdgeVertex[i].x = toCheck[EdgeConnection[i][0]][0] + offset * EdgeDirection[i][0];
             EdgeVertex[i].y = toCheck[EdgeConnection[i][0]][1] + offset * EdgeDirection[i][1];
@@ -48,7 +48,8 @@ bool MarchingCubes::apply(float surface, std::array<float, 8>& density, std::vec
             triangle[j] = EdgeVertex[vert];
             vertexs.push_back(EdgeVertex[vert]);
         }
-        //Solució alternativa a decidir tipus bloc: mirar centre de cada triangle i bloc sòlid més proper a aquest
+
+        //TODO?: Solució alternativa a decidir tipus bloc: mirar centre de cada triangle i bloc sòlid més proper a aquest
         Vector3<float> a = triangle[1] - triangle[0];
         Vector3<float> b = triangle[2] - triangle[0];
         Vector3<float> normal = Vector3<float>::normalize(Vector3<float>::cross(a, b));
