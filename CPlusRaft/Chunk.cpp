@@ -58,6 +58,7 @@ Vector3<int> Chunk::getPos() {
 }
 
 bool Chunk::setBlock(Block* bloc, Vector3<int> pos) {
+	this->dirty = true;
 	//Hi ha blocs amb les seves pròpies classes, sinó s'utilitza la classe genèrica
 	if (this->blocs[pos.x][pos.y][pos.z] != nullptr) {
 		this->blocs[pos.x][pos.y][pos.z]->destroy(this->world);
@@ -142,16 +143,16 @@ bool Chunk::isVisible(Vector3<int> bpos) {
 }
 
 Bloc Chunk::getBlockWorld(Vector3<int> bpos) {
-	if (bpos.x >= world->size.x * CHUNKSIZE || bpos.y >= world->size.y * CHUNKSIZE || bpos.z >= world->size.z * CHUNKSIZE ||
-		bpos.x < 0 || bpos.y < 0 || bpos.z < 0) {
-		return Bloc::TERRA; //Optimització no dibuixar bloc border
-	}
 	if (bpos.x >= cpos.x * CHUNKSIZE && bpos.x < (cpos.x + 1) * CHUNKSIZE && bpos.y >= cpos.y * CHUNKSIZE &&
 		bpos.y < (cpos.y + 1) * CHUNKSIZE && bpos.z >= cpos.z * CHUNKSIZE && bpos.z < (cpos.z + 1) * CHUNKSIZE) {
-		if (this->blocs[(int)bpos.x % CHUNKSIZE][(int)bpos.y % CHUNKSIZE][(int)bpos.z % CHUNKSIZE] == 0) {
+		Vector3<int> bposi = bpos % CHUNKSIZE;
+		if (this->blocs[bposi.x][bposi.y][bposi.z] == nullptr) {
 			return Bloc::RES;
 		}
-		return this->blocs[(int)bpos.x % CHUNKSIZE][(int)bpos.y % CHUNKSIZE][(int)bpos.z % CHUNKSIZE]->getId();
+		if (bposi.x < 0 || bposi.y < 0 || bposi.z < 0) {
+			return Bloc::RES;
+		}
+		return this->blocs[bposi.x][bposi.y][bposi.z]->getId();
 	}
 	else {
 		return this->world->getBlock(bpos);
@@ -221,7 +222,7 @@ void Chunk::updateMesh() {
 					bt = blocs[x][y][z]->getId();
 				}
 				Vector3 bpos = Vector3<int>(x, y, z);
-				if ((!Block::isTransparent(bt) || bt == Bloc::RES) && (Block::getMCEnabled())) {
+				if ((Block::isMarcheable(bt) || bt == Bloc::RES) && (Block::getMCEnabled())) {
 					Block::drawMarching(bt, &this->cMesh, bpos, this);
 					continue;
 				}
@@ -258,6 +259,9 @@ void Chunk::updateMesh() {
 					}
 					if (qualcun) {
 						blocs[x][y][z]->draw(&cMesh, visible, Vector3<int>(x, y, z));
+					}
+					if (Block::getMCEnabled() && Block::canSeeThrough(bt)) { //Amb els sòlids que no cobreixen totalment s'ha d'aplicar MC com si fos aire
+						Block::drawMarching(Bloc::RES, &this->cMesh, bpos, this);
 					}
 				}
 				nb++;
@@ -318,4 +322,12 @@ Bioma Chunk::getBiome() {
 
 void Chunk::setBiome(Bioma biome) {
 	this->bio = biome;
+}
+
+void Chunk::setDirty(bool dirty) {
+	this->dirty = dirty;
+}
+
+bool Chunk::getDirty() {
+	return this->dirty;
 }

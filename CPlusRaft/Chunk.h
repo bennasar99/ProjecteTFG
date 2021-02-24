@@ -39,6 +39,7 @@ private:
 public:
 
 	bool firstdraw = true;
+	bool dirty = false;
 
 	void drawO();
 	void drawT();
@@ -64,6 +65,9 @@ public:
 
 	void updateMesh();
 	void updateTransparency(Vector3<float> pPos);
+
+	void setDirty(bool dirty);
+	bool getDirty();
 
 	int nblocs;
 

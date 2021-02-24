@@ -13,23 +13,11 @@ World::World(std::string name, int seed, int sizex, int sizey, int sizez, Camera
 	this->seed = seed;
 	this->camera = camera;
 
-	this->size.x = sizex;
-	this->size.y = sizey;
-	this->size.z = sizez;
-
-	//NOU CODI CHUNKS:
-	//this->chunks = new Chunk * [(size_t)size.x * (size_t)size.y * (size_t)size.z];
-	this->estat = new ChunkState[(size_t)size.x * (size_t)size.y * (size_t)size.z];
-	for (int i = 0; i < size.x * size.y * size.z; i++) {
-		this->chunks[i] = nullptr;
-		this->estat[i] = ChunkState::BUIT;
-	}
-
 	//Col·locam càmera
-	int x = rand() % (size.x * CHUNKSIZE);
-	int z = rand() % (size.z * CHUNKSIZE);
+	int x = rand() % (512 * CHUNKSIZE);
+	int z = rand() % (512 * CHUNKSIZE);
 	bool trobat = false;
-	for (int y = (this->size.y * CHUNKSIZE - 1); y > 0 && (!trobat); y--) {
+	for (int y = 256; y > 0 && (!trobat); y--) {
 		Bloc b = getBlock(Vector3<int>(x, y, z));
 		if (b != Bloc::RES) {
 			trobat = true;
@@ -47,7 +35,7 @@ World::World(std::string name, Camera* camera) { //Càrrega ja existent
 	this->name = name;
 
 	this->camera = camera;
-	this->minpos = Vector3<int>(size.x - 1, size.y - 1, size.z - 1);
+	this->minpos = Vector3<int>(INT_MAX, INT_MAX, INT_MAX);
 
 	//Lectura informació món
 	std::ifstream info("worlds/" + name + "/info.yml");
@@ -59,29 +47,26 @@ World::World(std::string name, Camera* camera) { //Càrrega ja existent
 	ryml::read(tree["spawn"]["x"], &this->spawn.x);
 	ryml::read(tree["spawn"]["y"], &this->spawn.y);
 	ryml::read(tree["spawn"]["z"], &this->spawn.z);
-	ryml::read(tree["size"]["x"], &this->size.x);
-	ryml::read(tree["size"]["y"], &this->size.y);
-	ryml::read(tree["size"]["z"], &this->size.z);
-	printf("Mides del mon: %d %d %d, spawn a: %d %d %d. Seed %d\n", this->size.x, this->size.y, this->size.z, this->spawn.x, this->spawn.y, this->spawn.z, this->seed);
+	printf("Spawn del món a: %d %d %d. Seed %d\n", this->spawn.x, this->spawn.y, this->spawn.z, this->seed);
 	info.close();
 
 	std::fstream file;
 	this->cnk = std::vector< std::future<Chunk*> >(genCores);
 	this->wGen = WorldGenerator(this->seed, this);
-	//this->chunks = new Chunk * [(size_t)size.x * (size_t)size.y * (size_t)size.z];
-	this->estat = new ChunkState[(size_t)size.x * (size_t)size.y * (size_t)size.z];
-	for (int i = 0; i < size.x * size.y * size.z; i++) {
-		this->chunks[i] = nullptr;
-		this->estat[i] = ChunkState::BUIT;
-	}
+
 	//Carregam les regions
-	for (int rX = 0; rX < ceil((float)this->size.x / REGIONSIZE); rX++) {
-		for (int rY = 0; rY < ceil((float)this->size.y / REGIONSIZE); rY++) {
-			for (int rZ = 0; rZ < ceil((float)this->size.z / REGIONSIZE); rZ++) {
+	string path = "worlds/" + name + "/chunks/";
+
+	for (const auto& file : std::filesystem::directory_iterator(path))
+		loadFile(file.path().string());
+
+	/*for (int rX = ceil((float)this->spawn.x - SPAWNSIZE/2)/REGIONSIZE; rX < ceil((float)this->spawn.x + SPAWNSIZE / 2)/REGIONSIZE; rX++) {
+		for (int rY = ceil((float)this->spawn.y - SPAWNSIZE / 2)/REGIONSIZE; rY < ceil((float)this->spawn.y + SPAWNSIZE / 2)/REGIONSIZE; rY++) {
+			for (int rZ = ceil((float)this->spawn.z - SPAWNSIZE / 2)/REGIONSIZE; rZ < ceil((float)this->spawn.z + SPAWNSIZE / 2)/REGIONSIZE; rZ++) {
 				loadRegion(Vector3<int>(rX, rY, rZ));
 			}
 		}
-	}
+	}*/
 
 	//printf("Mides del mon: %d %d %d, spawn a: %d %d %d. Seed %d\n", this->size.x, this->size.y, this->size.z, sX, sY, sZ, this->seed);
 }
@@ -93,9 +78,9 @@ void World::save() {
 	path += "/chunks";
 	std::filesystem::create_directory(path.c_str());
 
-	for (int rX = 0; rX < ceil((float)this->size.x / REGIONSIZE); rX++) {
-		for (int rY = 0; rY < ceil((float)this->size.y / REGIONSIZE); rY++) {
-			for (int rZ = 0; rZ < ceil((float)this->size.z / REGIONSIZE); rZ++) {
+	for (int rX = ceil((float)this->spawn.x - SPAWNSIZE / 2) / REGIONSIZE; rX < ceil((float)this->spawn.x + SPAWNSIZE / 2) / REGIONSIZE; rX++) {
+		for (int rY = ceil((float)this->spawn.y - SPAWNSIZE / 2) / REGIONSIZE; rY < ceil((float)this->spawn.y + SPAWNSIZE / 2) / REGIONSIZE; rY++) {
+			for (int rZ = ceil((float)this->spawn.z - SPAWNSIZE / 2) / REGIONSIZE; rZ < ceil((float)this->spawn.z + SPAWNSIZE / 2) / REGIONSIZE; rZ++) {
 				saveRegion(Vector3<int>(rX, rY, rZ));
 			}
 		}
@@ -108,10 +93,6 @@ void World::save() {
 	info << " x: " << this->camera->getPos().x << "\n";
 	info << " y: " << this->camera->getPos().y << "\n";
 	info << " z: " << this->camera->getPos().z << "\n";
-	info << "size:\n";
-	info << " x: " << this->size.x << "\n";
-	info << " y: " << this->size.y << "\n";
-	info << " z: " << this->size.z << "\n";
 	info.close();
 }
 
@@ -212,15 +193,16 @@ void World::update(float delta, Vector3<float> pos) {
 	updTimer = 50;*/ //10 tps
 
 	//NOU CODI CHUNKS
-	pos = pos / CHUNKSIZE;
-	pos.floor();
+	Vector3<int> cPos = getChunkPos(pos.toInt());
+	//pos.floor();
 	int dist = floor(camera->getViewDist() / CHUNKSIZE / 3);
-	for (int x = (int)(pos.x - dist); x < pos.x + dist; x++) {
-		for (int y = (int)(pos.y - dist); y < pos.y + dist; y++) {
-			for (int z = (int)(pos.z - dist); z < pos.z + dist; z++) {
-				int desp = getDesp(Vector3<int>(x, y, z));
-				if (desp != -1 && chunks[desp] != 0 && estat[desp] == ChunkState::LLEST) {
-					chunks[desp]->update(delta);
+	for (int x = cPos.x - dist; x < cPos.x + dist; x++) {
+		for (int y = cPos.y - dist; y < cPos.y + dist; y++) {
+			for (int z = cPos.z - dist; z < cPos.z + dist; z++) {
+				Vector3<int> cPos = Vector3<int>(x, y, z);
+				Chunk* ch = chunks[cPos];
+				if (ch != 0 && estat[cPos] == ChunkState::LLEST) {
+					ch->update(delta);
 				}
 			}
 		}
@@ -240,27 +222,28 @@ void World::updateGeneration() {
 				if (cnk[i].wait_for(std::chrono::nanoseconds(0)) == std::future_status::ready) {
 					Chunk* ch = cnk[i].get();
 					Vector3 cPos = ch->getPos();
-					int desp = getDesp(cPos);
 					if (ch != nullptr) {
 						pendents--;
-						if (estat[desp] == ChunkState::PENDENT) {
-							estat[desp] = ChunkState::TERRENY;
+						if (estat[cPos] == ChunkState::PENDENT) {
+							estat[cPos] = ChunkState::TERRENY;
 						}
-						else if (estat[desp] == ChunkState::TERRENY) {
-							chunks[desp]->updateMesh();
-							estat[desp] = ChunkState::LLEST;
-						}
-						else if (estat[desp] == ChunkState::CARREGAT) {
+						else if (estat[cPos] == ChunkState::TERRENY) {
 							ch->updateMesh();
-							estat[desp] = ChunkState::LLEST;
+							estat[cPos] = ChunkState::LLEST;
+							ch->setDirty(false);
+						}
+						else if (estat[cPos] == ChunkState::CARREGAT) {
+							ch->updateMesh();
+							estat[cPos] = ChunkState::LLEST;
+							ch->setDirty(false);
 						}
 						/*if (ch->nblocs <= 0) { //Amb marching cubes no es pot fer ja que un chunk pot haver de dibuixar triangles sense tenir blocs
-							estat[desp] = ChunkState::LLEST;
+							estat[cPos] = ChunkState::LLEST;
 							delete ch;
 							continue;
 						}*/
-						chunks[desp] = ch;
-						if (estat[desp] == ChunkState::LLEST && ch->nblocs > 0) {
+						chunks[cPos] = ch;
+						if (estat[cPos] == ChunkState::LLEST && ch->nblocs > 0) {
 							updateNeighborChunks(cPos);
 						}
 					}
@@ -272,14 +255,14 @@ void World::updateGeneration() {
 		std::list<Vector3<int>>::iterator chunki;
 		for (chunki = vChunks.begin(); (chunki != vChunks.end()); chunki++) {
 			Vector3<int> cPos = *chunki;
-			int desp = getDesp(cPos);
-			if (chunks[desp] == nullptr) {
-				if (estat[desp] == ChunkState::BUIT && pendents < genCores) {
+			Chunk* ch = chunks[cPos];
+			if (ch == nullptr) {
+				if (estat[cPos] == ChunkState::BUIT && pendents < genCores) {
 					bool trobat = false;
 					for (int i = 0; (i < genCores) && !trobat; i++) {
 						if (!cnk[i].valid()) {
 							cnk[i] = std::async(std::launch::async, &WorldGenerator::generateTerrain, &wGen, cPos);
-							estat[desp] = ChunkState::PENDENT;
+							estat[cPos] = ChunkState::PENDENT;
 							trobat = true;
 							pendents++;
 						}
@@ -287,15 +270,16 @@ void World::updateGeneration() {
 				}
 				continue;
 			}
-			else if (estat[desp] == ChunkState::TERRENY && pendents < genCores) {
+			else if (estat[cPos] == ChunkState::TERRENY && pendents < genCores) {
 				bool trobat = false;
 				bool possible = true;
+
+				//IDEA: llista de canvis pendents per cada Chunk, s'aplicaran en acabar la generació, així aquest control podria no fer falta
 				Vector3<int> nPos;
 				for (nPos.x = cPos.x - 1; nPos.x <= cPos.x + 1 && possible; nPos.x++) {
 					for (nPos.y = cPos.y - 1; nPos.y <= cPos.y + 1 && possible; nPos.y++) {
 						for (nPos.z = cPos.z - 1; nPos.z <= cPos.z + 1 && possible; nPos.z++) {
-							int desp = getDesp(nPos);
-							if (estat[desp] != ChunkState::LLEST && estat[desp] != ChunkState::TERRENY) {
+							if (estat[nPos] != ChunkState::LLEST && estat[nPos] != ChunkState::TERRENY) {
 								possible = false;
 							}
 						}
@@ -305,7 +289,7 @@ void World::updateGeneration() {
 					for (int i = 0; (i < genCores) && !trobat; i++) {
 						if (!cnk[i].valid()) {
 							trobat = true;
-							cnk[i] = std::async(std::launch::async, &WorldGenerator::generateDetail, &wGen, chunks[desp]);
+							cnk[i] = std::async(std::launch::async, &WorldGenerator::generateDetail, &wGen, ch);
 							pendents++;
 						}
 					}
@@ -317,12 +301,10 @@ void World::updateGeneration() {
 
 //Alliberam la memòria de tots els blocs i entitats
 void World::destroy() {
-
-	//NOU CODI CHUNKS
-	for (int i = 0; i < this->size.x * this->size.y * this->size.z; i++) {
-		delete this->chunks[i];
+	std::map<Vector3<int>, Chunk*>::iterator cit;
+	for (cit = chunks.begin(); cit != chunks.end(); cit++) {
+		delete cit->second;
 	}
-	//delete[] this->chunks;
 
 	std::list<Entity*>::iterator ent;
 	for (ent = entities.begin(); (ent != entities.end()); ent++) {
@@ -350,32 +332,35 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos) {
 bool World::deleteBlock(Vector3<int> pos, bool destroy) { //Eliminar Bloc::RES?
 
 	//pos.floor();
-	Vector3<int> cpos = pos / CHUNKSIZE;
+	Vector3<int> cPos = getChunkPos(pos);
 	//cpos.floor();
 	Vector3<int> bpos = pos % CHUNKSIZE;
-	int desp = getDesp(cpos);
-	if (desp == -1 || chunks[desp] == nullptr) {
+	Chunk* ch = chunks[cPos];
+	if (ch == nullptr) {
 		return false;
 	}
-	return this->chunks[desp]->delBlock(bpos, destroy);
+	return ch->delBlock(bpos, destroy);
 }
 
 //Col·locam un bloc d'un tipus determinat a la posició indicada
 bool World::setBlock(Bloc tipus, Vector3<int> pos, Block* parent, bool listUpdate) {
 
+	//TONI!! -16 ha de ser des CHunk -1, no -2!!!!!
+
 	//NOU CODI CHUNKS:
 	//pos.floor();
-	Vector3<int> cpos = pos / CHUNKSIZE;
+	Vector3<int> cPos = getChunkPos(pos);
 	//cpos.floor();
 	Vector3<int> bpos = pos % CHUNKSIZE;
-	int desp = getDesp(cpos);
-	if (desp == -1) {
-		return false;
+
+	if (listUpdate) {
+		printf("%d %d %d\n", cPos.x, cPos.y, cPos.z);
 	}
 
-	if (chunks[desp] == nullptr){
-		chunks[desp] = new Chunk(this, cpos);
+	if (chunks[cPos] == nullptr){
+		chunks[cPos] = new Chunk(this, cPos);
 	}
+	Chunk* ch = chunks[cPos];
 
 	Block* bloc;
 	switch (tipus) {
@@ -394,10 +379,10 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, Block* parent, bool listUpdat
 	default:
 		bloc = new SolidBlock(tipus);
 	}
-	chunks[desp]->setBlock(bloc, bpos);
+	ch->setBlock(bloc, bpos);
 	if (listUpdate) {
-		chunks[desp]->updateMesh();
-		updateNeighborChunks(cpos, bpos);
+		ch->updateMesh();
+		updateNeighborChunks(cPos, bpos);
 	}
 
 	//Actualitzam maxpos i minpos
@@ -411,24 +396,21 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, Block* parent, bool listUpdat
 //Assignam un bloc (per punter) a la posició indicada
 bool World::setBlock(Block* bloc, Vector3<int> pos, bool listUpdate) {
 	//pos.floor();
-	Vector3<int> cpos = pos / CHUNKSIZE;
+	Vector3<int> cPos = getChunkPos(pos);
 	//cpos.floor();
 	Vector3<int> bpos = pos % CHUNKSIZE;
-	int desp = getDesp(cpos);
-	if (desp == -1) {
-		return false;
-	}
+	Chunk* ch = chunks[cPos];
 
 	//Actualitzam maxpos i minpos
-	maxpos.x = std::max(maxpos.x, cpos.x); minpos.x = std::min(minpos.x, cpos.x);
-	maxpos.y = std::max(maxpos.y, cpos.y); minpos.y = std::min(minpos.y, cpos.y);
-	maxpos.z = std::max(maxpos.z, cpos.z); minpos.z = std::min(minpos.z, cpos.z);
+	maxpos.x = std::max(maxpos.x, cPos.x); minpos.x = std::min(minpos.x, cPos.x);
+	maxpos.y = std::max(maxpos.y, cPos.y); minpos.y = std::min(minpos.y, cPos.y);
+	maxpos.z = std::max(maxpos.z, cPos.z); minpos.z = std::min(minpos.z, cPos.z);
 
-	chunks[desp]->setBlock(bloc, bpos);
+	ch->setBlock(bloc, bpos);
 
 	if (listUpdate) {
-		chunks[desp]->updateMesh();
-		updateNeighborChunks(cpos, bpos);
+		ch->updateMesh();
+		updateNeighborChunks(cPos, bpos);
 	}
 	return true;
 }
@@ -436,21 +418,18 @@ bool World::setBlock(Block* bloc, Vector3<int> pos, bool listUpdate) {
 //Obtenim el bloc a la posició indicada
 Bloc World::getBlock(Vector3<float> pos) {
 	pos.floor();
-	return getBlock(Vector3<int>((int)pos.x, (int)pos.y, (int)pos.z));
+	return getBlock(pos.toInt());
 }
 
 Bloc World::getBlock(Vector3<int> pos) {
-	Vector3<int> cpos = pos / CHUNKSIZE;
+	Vector3<int> cPos = getChunkPos(pos);
 	//cpos.floor();
-	Vector3<int> bpos = Vector3<int>(pos.x % CHUNKSIZE, pos.y % CHUNKSIZE, pos.z % CHUNKSIZE);
-	int desp = getDesp(cpos);
-	if (desp == -1) {
-		return Bloc::LIMIT;
-	}
-	if (chunks[desp] == 0) {
+	Vector3<int> bpos = pos % CHUNKSIZE;
+	Chunk* ch = chunks[cPos];
+	if (ch == nullptr || estat[cPos] != ChunkState::LLEST) {
 		return Bloc::RES;
 	}
-	return chunks[desp]->getBlock(bpos);
+	return ch->getBlock(bpos);
 }
 
 //remove indica si el bloc s'ha d'eliminar del món (NO S'ALLIBERA LA MEMÒRIA)
@@ -496,16 +475,16 @@ void World::draw(Vector3<float> pos, float dist) {
 	int nchunk = 0;
 	for (chunki = vChunks.begin(); (chunki != vChunks.end()); chunki++) {
 		Vector3<int> cPos = *chunki;
-		int desp = getDesp(cPos);
-		if (desp == -1 || chunks[desp] == NULL || estat[desp] != ChunkState::LLEST) {
+		Chunk* ch = chunks[cPos];
+		if (ch == NULL || estat[cPos] != ChunkState::LLEST) {
 			continue;
 		}
 		glPushMatrix();
 		glTranslatef(cPos.x * CHUNKSIZE, cPos.y * CHUNKSIZE, cPos.z * CHUNKSIZE);
-		chunks[desp]->drawO();
+		ch->drawO();
 		glPopMatrix();
 		if (nchunk < 5) {
-			chunks[desp]->updateTransparency(camera->getPos());
+			ch->updateTransparency(camera->getPos());
 		}
 		nchunk++;
 	}
@@ -513,13 +492,13 @@ void World::draw(Vector3<float> pos, float dist) {
 	std::list<Vector3<int>>::reverse_iterator rchunki;
 	for (rchunki = vChunks.rbegin(); (rchunki != vChunks.rend()); ++rchunki) {
 		Vector3<int> cPos = *rchunki;
-		int desp = getDesp(cPos);
-		if (desp == -1 || chunks[desp] == NULL || estat[desp] != ChunkState::LLEST) {
+		Chunk *ch = chunks[cPos];
+		if (ch == NULL || estat[cPos] != ChunkState::LLEST) {
 			continue;
 		}
 		glPushMatrix();
 		glTranslatef(cPos.x * CHUNKSIZE, cPos.y * CHUNKSIZE, cPos.z * CHUNKSIZE);
-		chunks[desp]->drawT();
+		ch->drawT();
 		glPopMatrix();
 	}
 
@@ -531,17 +510,8 @@ void World::draw(Vector3<float> pos, float dist) {
 void World::updateVisibility() {
 
 	//Obtenim el volum de possible visibilitat de la càmera
-	int xmin = camera->xmin / CHUNKSIZE;	int xmax = camera->xmax / CHUNKSIZE;
-	int ymin = camera->ymin / CHUNKSIZE;	int ymax = camera->ymax / CHUNKSIZE;
-	int zmin = camera->zmin / CHUNKSIZE;	int zmax = camera->zmax / CHUNKSIZE;
-
-	xmin = std::max(xmin, 0);				ymin = std::max(ymin, 0);				zmin = std::max(zmin, 0);
-	xmax = std::min(xmax, this->size.x);		ymax = std::min(ymax, this->size.y);		zmax = std::min(zmax, this->size.z);
-
-	//NOU CODI CHUNKS
-	Vector3<int> cMin = Vector3<int>(xmin, ymin, zmin);
-
-	Vector3<int> cMax = Vector3<int>(xmax, ymax, zmax);
+	Vector3<int> cMin = getChunkPos(Vector3<int>(camera->xmin, camera->ymin, camera->zmin));
+	Vector3<int> cMax = getChunkPos(Vector3<int>(camera->xmax, camera->ymax, camera->zmax));
 
 	std::list<Vector3<int>> vChunks;
 	//printf("%d %d %d, %d %d %d\n", cMin.x, cMin.y, cMin.z, cMax.x, cMax.y, cMax.z);
@@ -639,23 +609,11 @@ void World::drawSol(Vector3<float> pos, float dist) {
 //Interacció amb un bloc
 void World::interact(Vector3<int> pos) {
 	//pos.floor();
-	Vector3<int> cpos = pos / CHUNKSIZE;
+	Vector3<int> cPos = getChunkPos(pos);
 	//cpos.floor();
 	Vector3<int> bpos = Vector3<int>(pos.x % CHUNKSIZE, pos.y % CHUNKSIZE, pos.z % CHUNKSIZE);
-	int desp = getDesp(cpos);
-	if (desp == -1) {
-		return;
-	}
-	return chunks[desp]->interact(bpos);
-}
 
-//Comprova que una posició és valida i retorna el desplaçament corresponent a la posició
-int World::getDesp(Vector3<int> pos) {
-	int desp = pos.x + this->size.x * (pos.y + this->size.y * pos.z);
-	if ((desp >= (this->size.x * this->size.y * this->size.z))||(desp < 0) || pos.x < 0 || pos.y < 0 || pos.z < 0 || pos.x >= this->size.x || pos.y >= this->size.y || pos.z >= this->size.z) {
-		return -1;
-	}
-	return desp;
+	return chunks[cPos]->interact(bpos);
 }
 
 //Afegeix una entitat al món
@@ -701,11 +659,10 @@ void World::updateNeighborChunks(Vector3<int> cPos) {
 				if (oPos == cPos) {
 					continue;
 				}
-				int desp = getDesp(oPos);
-				if (desp == -1 || chunks[desp] == nullptr || estat[desp] != ChunkState::LLEST) {
+				if (chunks[oPos] == nullptr || estat[oPos] != ChunkState::LLEST) {
 					continue;
 				}
-				chunks[desp]->updateMesh();
+				chunks[oPos]->updateMesh();
 			}
 		}
 	}
@@ -733,15 +690,16 @@ void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
 	}
 	std::list<Vector3<int>>::iterator chunki;
 	for (chunki = toUpdate.begin(); (chunki != toUpdate.end()); chunki++) {
-		int desp = getDesp(*chunki);
-		if (desp == -1 || estat[desp] != ChunkState::LLEST) {
+		if (estat[*chunki] != ChunkState::LLEST) {
 			continue;
 		}
-		if (chunks[desp] == nullptr) {
-			chunks[desp] = new Chunk(this, *chunki);
+		Chunk* ch = chunks[*chunki];
+		if (ch == nullptr) {
+			ch = new Chunk(this, *chunki);
+			chunks[*chunki] = ch;
 		}
 
-		chunks[desp]->updateMesh();
+		ch->updateMesh();
 	}
 }
 
@@ -779,20 +737,25 @@ void World::drawMap(float scrAspect, Entity *ent, int y) {
 	glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
 	glEnd();
 
-	float dX = 0.8f * ((float)1 / (float)this->size.x);
-	float dZ = 0.8f * ((float)1 / (float)this->size.z);
+	float dX = 0.8f * ((float)1 / (float)SPAWNSIZE);
+	float dZ = 0.8f * ((float)1 / (float)SPAWNSIZE);
 
+	Vector3<int> cPos = getChunkPos(ent->getPos().toInt());
 	glTranslatef(0.5f * aspect - 0.4f, 0.1f, -1);
-	for (int x = 0; x < this->size.x; x++) {
-		for (int z = 0; z < this->size.z; z++) {
+	float mX = 0;
+	float mZ = 0;
+	for (int x = cPos.x - SPAWNSIZE/2; x <= cPos.x + SPAWNSIZE/2; x++) {
+		mZ = 0;
+		for (int z = cPos.z - SPAWNSIZE/2; z <= cPos.z + SPAWNSIZE/2; z++) {
+			Vector3 cPos = Vector3<int>(x, y, z);
 			glPushMatrix();
-			int desp = getDesp(Vector3<int>(x, y, z));
-			glTranslatef(((float)x / (float)this->size.x)*0.8f, ((float)z / (float)this->size.z)*0.8f, 0);
-			if (chunks[desp] == nullptr || desp == -1) {
+			glTranslatef(mX * dX, mZ * dZ, 0);
+			Chunk* ch = chunks[cPos];
+			if (ch == nullptr) {
 				glColor3f(0,0,0);
 			}
 			else {
-				switch (chunks[desp]->getBiome()) {
+				switch (ch->getBiome()) {
 					case Bioma::MUNTANYA:
 						glColor3f(0.8f,0.8f,0.8f);
 						break;
@@ -832,15 +795,15 @@ void World::drawMap(float scrAspect, Entity *ent, int y) {
 			glVertex2f(0, 0);
 			glEnd();
 			glPopMatrix();
+			mZ++;
 		}
+		mX++;
 	}
 	glPushMatrix();
 
 	//Dibuix del jugador
 
-	float pX = ent->getPos().x / CHUNKSIZE;
-	float pZ = ent->getPos().z / CHUNKSIZE;
-	glTranslatef((pX / (float)this->size.x) * 0.8f + dX/2, (pZ / (float)this->size.z) * 0.8f + dZ/2, 0);
+	glTranslatef(0.4f, 0.4f, 0);
 	glRotatef(ent->getRot() - 90, 0, 0, 1);
 	glColor3f(1, 1, 0);
 	glBegin(GL_TRIANGLES);
@@ -868,18 +831,20 @@ bool World::saveRegion(Vector3<int> rPos) {
 	const int chunkSize = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
 	char buffer[chunkSize];
 	std::fstream file; 
-	std::string path = "worlds/" + this->name + "/chunks/reg" + std::to_string(rPos.x) + "-" + std::to_string(rPos.y) + "-" + std::to_string(rPos.z) + ".cnk";
+	std::string path = "worlds/" + this->name + "/chunks/reg" + std::to_string(rPos.x) + "_" + std::to_string(rPos.y) + "_" + std::to_string(rPos.z) + ".cnk";
 	printf("%s\n", path.c_str());
 	file.open(path.c_str(), std::ios::out | std::ios::binary);
+	int nChunks = 0;
 	for (int x = rPos.x * REGIONSIZE; x < (rPos.x+1) * REGIONSIZE; x++) {
 		for (int y = rPos.y * REGIONSIZE; y < (rPos.y + 1) * REGIONSIZE; y++) {
 			for (int z = rPos.z * REGIONSIZE; z < (rPos.z + 1) * REGIONSIZE; z++) {
 				Vector3<int> rPos = getRegion(Vector3<int>(x, y, z));
-				int desp = getDesp(Vector3<int>(x, y, z));
-				if (chunks[desp] != nullptr && desp != -1 && estat[desp] == ChunkState::LLEST && chunks[desp]->nblocs > 0) {
-					buffer[0] = static_cast<int>(chunks[desp]->getBiome());
+				Vector3 cPos = Vector3<int>(x, y, z);
+				Chunk* ch = chunks[cPos];
+				if (ch != nullptr && estat[cPos] == ChunkState::LLEST && ch->nblocs > 0 && ch->getDirty()) {
+					buffer[0] = static_cast<int>(ch->getBiome());
 					file.write(buffer, 1);
-					chunks[desp]->getByteData(buffer);
+					ch->getByteData(buffer);
 					//Comprimir buffer
 					Byte compr[CHUNKSIZE*CHUNKSIZE*CHUNKSIZE];
 					uLong comprLen = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
@@ -888,6 +853,7 @@ bool World::saveRegion(Vector3<int> rPos) {
 					int size = (int)comprLen;
 					file.write(reinterpret_cast<char*>(&size), sizeof(size));
 					file.write(reinterpret_cast<char*>(compr), comprLen * sizeof(Byte));
+					nChunks++;
 				}
 				else {
 					buffer[0] = -1;
@@ -898,26 +864,40 @@ bool World::saveRegion(Vector3<int> rPos) {
 		}
 	}
 	file.close();
+	if (nChunks == 0) {
+		std::remove(path.c_str());
+	}
 	return true;
 }
 
-bool World::loadRegion(Vector3<int> rPos) {
+
+bool World::loadFile(std::string path) {
 	const int chunkSize = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
 	char buffer[chunkSize] = {};
 	char zeros[chunkSize];
 	memset(zeros, 0, chunkSize);
 	std::fstream file;
-	std::string path = "worlds/" + this->name + "/chunks/reg" + std::to_string(rPos.x) + "-" + std::to_string(rPos.y) + "-" + std::to_string(rPos.z) + ".cnk";
-	printf("%s\n", path.c_str());
+	//std::string path = "worlds/" + this->name + "/chunks/" + fpath;
+	size_t f1 = path.find("reg", 3);
+	std::string s1 = path.substr(f1+3, std::string::npos);
+	size_t f2 = s1.find("_", 1);
+	int rX = atoi(s1.substr(0, f2).c_str());
+	std::string s2 = s1.substr(f2 + 1, std::string::npos);
+	size_t f3 = s2.find("_", 1);
+	int rY = atoi(s2.substr(0, f3).c_str());
+	std::string s3 = s2.substr(f3 + 1, std::string::npos);
+	size_t f4 = s3.find(".", 1);
+	int rZ = atoi(s3.substr(0, f4).c_str());
+	Vector3<int> rPos = Vector3<int>(rX, rY, rZ);
+	printf("Region %d %d %d\n", rPos.x, rPos.y, rPos.z);
 	file.open(path.c_str(), std::ios::in | std::ios::binary);
 	for (int x = rPos.x * REGIONSIZE; x < (rPos.x + 1) * REGIONSIZE; x++) {
 		for (int y = rPos.y * REGIONSIZE; y < (rPos.y + 1) * REGIONSIZE; y++) {
 			for (int z = rPos.z * REGIONSIZE; z < (rPos.z + 1) * REGIONSIZE; z++) {
-
-				int desp = getDesp(Vector3<int>(x, y, z));
+				Vector3<int> cPos = Vector3<int>(x, y, z);
 				file.read(buffer, 1); //bioma
 				if (static_cast<int>(buffer[0]) == -1) { //El chunk és buit
-					estat[desp] == ChunkState::LLEST;
+					//estat[cPos] = ChunkState::LLEST;
 					continue;
 				}
 				Bioma bio = static_cast<Bioma>(buffer[0]);
@@ -929,19 +909,19 @@ bool World::loadRegion(Vector3<int> rPos) {
 				file.read(compr, size);
 				//Descomprimir buffer
 				uLong comprLen = (long)size;
-				uLong destLen = CHUNKSIZE*CHUNKSIZE*CHUNKSIZE;
+				uLong destLen = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
 				//printf("size: %lu\n", comprLen);
 				if (uncompress(reinterpret_cast<Bytef*>(buffer), &destLen, reinterpret_cast<Bytef*>(compr), comprLen) == Z_DATA_ERROR) {
 					//printf(":(\n");
 				}
 
-				Vector3<int> cPos = Vector3<int>(x, y, z);
-				chunks[desp] = new Chunk(this, cPos);
-				chunks[desp]->readFromByteData(buffer);
-				chunks[desp]->setBiome(bio);
-				chunks[desp]->updateMesh();
+				Chunk* ch = new Chunk(this, cPos);
+				chunks[cPos] = ch;
+				ch->readFromByteData(buffer);
+				ch->setBiome(bio);
+				ch->updateMesh();
 				updateNeighborChunks(cPos);
-				estat[desp] = ChunkState::LLEST;
+				estat[cPos] = ChunkState::LLEST;
 			}
 		}
 	}
@@ -949,15 +929,36 @@ bool World::loadRegion(Vector3<int> rPos) {
 	return true;
 }
 
+
+bool World::loadRegion(Vector3<int> rPos) {
+	std::string path = "worlds/" + this->name + "/chunks/reg" + std::to_string(rPos.x) + "-" + std::to_string(rPos.y) + "-" + std::to_string(rPos.z) + ".cnk";
+	loadFile(path);
+}
+
 void World::redrawChunks() {
-	for (int x = 0; x < this->size.x; x++) {
-		for (int y = 0; y < this->size.y; y++) {
-			for (int z = 0; z < this->size.z; z++) {
-				int desp = getDesp(Vector3<int>(x, y, z));
-				if (chunks[desp] != 0 && estat[desp] == ChunkState::LLEST) {
-					chunks[getDesp(Vector3<int>(x, y, z))]->updateMesh();
-				}
-			}
+	std::map<Vector3<int>, Chunk*>::iterator cit;
+	for (cit = chunks.begin(); cit != chunks.end(); cit++) {
+		Vector3<int> cPos = cit->first;
+		Chunk* ch = chunks[cPos];
+		if (ch != nullptr && estat[cPos] == ChunkState::LLEST) {
+			ch->updateMesh();
 		}
 	}
+}
+
+Vector3<int> World::getChunkPos(Vector3<int> bpos) {
+	Vector3<int> toAdd = Vector3<int>(0, 0, 0);
+	if (bpos.x < 0) {
+		bpos.x++;
+		toAdd = toAdd + Vector3<int>(-1, 0, 0);
+	}
+	if (bpos.y < 0) {
+		bpos.y++;
+		toAdd = toAdd + Vector3<int>(0, -1, 0);
+	}
+	if (bpos.z < 0) {
+		bpos.z++;
+		toAdd = toAdd + Vector3<int>(0, 0, -1);
+	}
+	return (bpos / CHUNKSIZE) + toAdd;
 }

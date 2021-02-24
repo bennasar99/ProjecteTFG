@@ -1,6 +1,7 @@
 #pragma once
 #include "Math.h"
 #include <stdio.h>
+#include <tuple>
 
 template <class T = float>
 class Vector3
@@ -15,12 +16,14 @@ public:
 	Vector3<T> operator+(const Vector3<U>& b);
 	template <class U>
 	Vector3<T> operator-(const Vector3<U>& b);
+	bool operator<(const Vector3<T>& b);
 	float operator*(const Vector3<T>& b);
 	Vector3 operator*(T b);
 	Vector3 operator/(T b);
 	Vector3 operator%(int b);
 	bool operator!=(const Vector3<T>& b);
 	bool operator==(const Vector3<T>& b);
+	Vector3<T> abs();
 
 	static Vector3 cross(Vector3 a, Vector3 b);
 	static float angle(Vector3 a, Vector3 b);
@@ -80,6 +83,11 @@ inline Vector3<T> Vector3<T>::operator-(const Vector3<U>& b) {
 	return Vector3(this->x - b.x, this->y - b.y, this->z - b.z);
 }
 
+template <class T>
+inline bool Vector3<T>::operator<(const Vector3<T>& b) {
+	return std::tuple(this->x, this->y, this->z) < std::tuple(b.x, b.y, b.z);
+}
+
 //Normalitza un vector
 template <class T>
 inline Vector3<T> Vector3<T>::normalize(Vector3<T> a) {
@@ -108,7 +116,19 @@ inline Vector3<T> Vector3<T>::operator/(T b) {
 //Mòdul d'un vector per un nombre
 template <class T>
 inline Vector3<T> Vector3<T>::operator%(int b) {
-	return Vector3((int)this->x % b, (int)this->y % b, (int)this->z % b);
+	int x = this->x % b;
+	if (x < 0) {
+		x += b;
+	}
+	int y = this->y % b;
+	if (y < 0) {
+		y += b;
+	}
+	int z = this->z % b;
+	if (z < 0) {
+		z += b;
+	}
+	return Vector3(x, y, z);
 }
 
 template <class T>
@@ -163,6 +183,12 @@ inline void Vector3<float>::ceil() {
 inline Vector3<int> Vector3<float>::toInt() {
 	return Vector3<int>(int(x), int(y), int(z));
 }
+
+template <class T>
+inline Vector3<T> Vector3<T>::abs() {
+	return Vector3<T>(std::abs(x), std::abs(y), std::abs(z));
+}
+
 
 //Escriu l'informació del vector
 inline void Vector3<float>::print() {

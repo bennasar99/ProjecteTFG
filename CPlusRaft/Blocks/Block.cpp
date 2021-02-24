@@ -205,7 +205,7 @@ bool Block::isSolid(Bloc tipus) {
 
 //Indica si a un bloc se li pot aplicar marching cubes. Ex: Als transparents i solids (gel) no s'ha de permetre
 bool Block::isMarcheable(Bloc tipus) {
-	if (isSolid(tipus) && !isTransparent(tipus)) {
+	if (isSolid(tipus) && !canSeeThrough(tipus)) {
 		return true;
 	}
 	return false;
@@ -393,7 +393,7 @@ void Block::drawMarching(Bloc id, ChunkMesh* cM, Vector3<int> relPos, Chunk* ch)
 	if (id == Bloc::RES) {
 		int freq[NBLOCS] = {};
 		for (int i = 0; i < 8; i++) {
-			if (!Block::isSolid(neighbors[i])) {
+			if (!Block::isMarcheable(neighbors[i])) {
 				continue;
 			}
 			freq[static_cast<int>(neighbors[i])]++;

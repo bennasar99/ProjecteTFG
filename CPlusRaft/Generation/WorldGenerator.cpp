@@ -99,11 +99,11 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 	case Bioma::PLANA:
 		randmax = 100;
 		break;
-
 	}
 
 	//Minerals
-	int num = rand() % ((CHUNKSIZE*4) / (cPos.y+1)); //Com + abaix més probable
+	int prob = std::max(cPos.y + 1, 1);
+	int num = rand() % ((CHUNKSIZE*4) / prob); //Com + abaix més probable
 	for (int i = 0; i < num; i++) {
 		Vector3<int> pos = Vector3<int>(rand() % CHUNKSIZE, rand() % CHUNKSIZE, rand() % CHUNKSIZE);
 		Bloc bt = world->getBlock(cPos * CHUNKSIZE + pos);
@@ -116,49 +116,45 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 	Vector3<int> pos = Vector3<int>(0, 0, 0);
 	for (pos.x = 0; pos.x < CHUNKSIZE; pos.x++) {
 		for (pos.z = 0; pos.z < CHUNKSIZE; pos.z++) {
-			//Intentar que com més abaix + (molt més) probable que sigui sòlid
-			//density = heightNoise->GetNoise((float)pos.x + CHUNKSIZE * (float)cPos.x, CHUNKSIZE * (float)cPos.y, (float)pos.z + CHUNKSIZE * (float)cPos.z);
-			//if (density > threshold) { //Afegim cosa
-				//Agafam la coordenada Y amb un bloc i aire damunt més gran
-				bool trobat = false;
-				for (pos.y = 15; (pos.y >= 0)/*&&(!trobat)*/; pos.y--) {
-					Vector3<int> tpos = cPos * CHUNKSIZE + pos + Vector3<int>(0, 1, 0);
-					Bloc b1 = chunk->getBlock(pos);
-					Bloc b2 = chunk->getBlockWorld(tpos);
-					if (b1 == Bloc::TERRA && b2 == Bloc::RES){
-						trobat = true;
-						int random = rand() % randmax;
-						if (random == 4 || random == 5 || random == 6 || random == 7 || random == 8) {
-							//chunk->setBlock(new SpreadBlock(Bloc::HERBA, tpos), tpos);
-							//world->setBlock(Bloc::HERBA, tpos, nullptr, false);
+			//Agafam la coordenada Y amb un bloc i aire damunt més gran
+			bool trobat = false;
+			for (pos.y = 15; (pos.y >= 0)/*&&(!trobat)*/; pos.y--) {
+				Vector3<int> tpos = cPos * CHUNKSIZE + pos + Vector3<int>(0, 1, 0);
+				Bloc b1 = chunk->getBlock(pos);
+				Bloc b2 = chunk->getBlockWorld(tpos);
+				if (b1 == Bloc::TERRA && b2 == Bloc::RES){
+					trobat = true;
+					int random = rand() % randmax;
+					if (random == 4 || random == 5 || random == 6 || random == 7 || random == 8) {
+						//chunk->setBlock(new SpreadBlock(Bloc::HERBA, tpos), tpos);
+						world->setBlock(Bloc::HERBA, tpos, nullptr, false);
+					}
+					else if (random == 9) {
+						//Tronc
+						//chunk->setBlock(new SolidBlock(Bloc::FUSTAARBRE), tpos);
+						world->setBlock(Bloc::FUSTAARBRE, tpos, nullptr, false);
+						int rand2 = rand() % 5 + 1;
+						for (int i = 1; i <= rand2; i++) {
+							Vector3<int> fpos = tpos + Vector3<int>(0, i, 0);
+							world->setBlock(Bloc::FUSTAARBRE, fpos, nullptr, false);
 						}
-						else if (random == 9) {
-							//Tronc
-							//chunk->setBlock(new SolidBlock(Bloc::FUSTAARBRE), tpos);
-							world->setBlock(Bloc::FUSTAARBRE, tpos, nullptr, false);
-							int rand2 = rand() % 5 + 1;
-							for (int i = 1; i <= rand2; i++) {
-								Vector3<int> fpos = tpos + Vector3<int>(0, i, 0);
-								world->setBlock(Bloc::FUSTAARBRE, fpos, nullptr, false);
-							}
-							//Fulles
-							int altura = rand() % 3 + 1;
-							int amplada = (rand() % (rand2)) + 1;
-							for (int y = 1; y <= altura; y++) {
-								for (int x = -amplada; x <= amplada; x++) {
-									for (int z = -amplada; z <= amplada; z++) {
-										Vector3<int> lpos = tpos + Vector3<int>(0, rand2 + y, 0)
-											+ Vector3<int>(x, 0, 0) + Vector3<int>(0, 0, z);
-										if (chunk->getBlockWorld(lpos) == Bloc::RES) {
-											world->setBlock(Bloc::FULLAARBRE, lpos, nullptr, false);
-										}
+						//Fulles
+						int altura = rand() % 3 + 1;
+						int amplada = (rand() % (rand2)) + 1;
+						for (int y = 1; y <= altura; y++) {
+							for (int x = -amplada; x <= amplada; x++) {
+								for (int z = -amplada; z <= amplada; z++) {
+									Vector3<int> lpos = tpos + Vector3<int>(0, rand2 + y, 0)
+										+ Vector3<int>(x, 0, 0) + Vector3<int>(0, 0, z);
+									if (chunk->getBlockWorld(lpos) == Bloc::RES) {
+										world->setBlock(Bloc::FULLAARBRE, lpos, nullptr, false);
 									}
 								}
 							}
 						}
 					}
 				}
-			//}
+			}
 		}
 	}
 	chunk->updateMesh();

@@ -34,6 +34,7 @@
 
 using namespace std;
 #define REGIONSIZE 16
+#define SPAWNSIZE 100
 #define DAYTIME 120 //Durada del dia (segons)
 
 class Block;
@@ -41,12 +42,12 @@ class LightBlock;
 class Pendul;
 
 enum class ChunkState {
+	BUIT,
 	LLEST,
 	BLOQUEJAT,
 	TERRENY,
 	PENDENT,
-	CARREGAT,
-	BUIT
+	CARREGAT
 };
 
 class World {
@@ -60,8 +61,15 @@ private:
 	WorldGenerator wGen;
 
 	//Chunk** chunks;
-	std::map< int, Chunk*> chunks;
-	ChunkState *estat;
+	struct Vector3Compare
+	{
+		bool operator() (const Vector3<int>& lhs, const Vector3<int>& rhs) const
+		{
+			return std::make_tuple(lhs.x, lhs.y, lhs.z) < std::make_tuple(rhs.x, rhs.y, rhs.z);
+		}
+	};
+	map<Vector3<int>, Chunk*, Vector3Compare> chunks;
+	map<Vector3<int>, ChunkState, Vector3Compare> estat;
 	short pendents = 0;
 
 	int sol = 0;
@@ -75,7 +83,6 @@ private:
 	std::list<Entity*> entities;
 	std::list<Vector3<int>> vChunks; //Llista de chunks visibles
 
-	int getDesp(Vector3<int> pos);
 	Vector3<int> spawn; //Spawn point
 
 	int seed;
@@ -85,12 +92,10 @@ private:
 	std::mutex mutex;
 
 	void updateGeneration();
+	Vector3<int> getChunkPos(Vector3<int> bpos);
 
 public:
 	//bool checkthreads = false;
-
-	//Han de ser nombres parells
-	Vector3<int> size;
 
 	Camera* camera;
 
@@ -143,6 +148,7 @@ public:
 	Vector3<int> getRegion(Vector3<int> cPos);
 	bool saveRegion(Vector3<int> rPos);
 	bool loadRegion(Vector3<int> rPos);
+	bool loadFile(std::string path);
 
 	void redrawChunks();
 

@@ -193,7 +193,7 @@ void Display(GLFWwindow* window)
 
 	// dibuixar els 3 eixos
 	if (axisVisible) {
-		world->drawAxis(Vector3<float>((float)(world->size.x * CHUNKSIZE) / 2, (float)(world->size.y * CHUNKSIZE) / 2 + 1, (float)(world->size.z * CHUNKSIZE) / 2), 50.0f);
+		world->drawAxis(Vector3<float>((float)(SPAWNSIZE * CHUNKSIZE) / 2, (float)(SPAWNSIZE * CHUNKSIZE) / 2 + 1, (float)(SPAWNSIZE * CHUNKSIZE) / 2), 50.0f);
 	}
 
 	glPopMatrix();
