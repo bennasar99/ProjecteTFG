@@ -7,7 +7,7 @@
 
 class Chunk;
 
-#define NBLOCS 24
+#define NBLOCS 26
 
 enum class Bloc {
 	RES,
@@ -23,7 +23,9 @@ enum class Bloc {
 	FULLAARBRE,
 	FUSTA,
 	FUSTAARBRE,
-	PEDRA,
+	PEDRAW, //Walk Stone
+	PEDRAS, //Smooth Stone
+	PEDRA, //Stone
 	ALTAVEU,
 	NEU,
 	GEL,

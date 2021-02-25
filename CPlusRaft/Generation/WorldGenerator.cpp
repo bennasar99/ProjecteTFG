@@ -258,8 +258,9 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 					threshold += 1.0f;// / dist;
 				}
 			
+				float fdensity = density / threshold;
 				//printf("density %f threshold %f\n", density, threshold);
-				if (density/threshold < 1) {
+				if (fdensity < 1) {
 					if (CHUNKSIZE * cPos.y + y > sealvl) {
 						if (bio == Bioma::MAR || bio == Bioma::OCEA) {
 							//continue;
@@ -270,13 +271,26 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 						chunk->setBlock(new SolidBlock(Bloc::PEDRA), pos);
 					}
 					else if (bio == Bioma::ARTIC) {
-						chunk->setBlock(new SolidBlock(Bloc::NEU), pos);
+						if (fdensity > 0.98f) {
+							chunk->setBlock(new SolidBlock(Bloc::NEU), pos);
+						}
+						else if (fdensity > 0.95f) {
+							chunk->setBlock(new SolidBlock(Bloc::TERRA), pos);
+						}
+						else {
+							chunk->setBlock(new SolidBlock(Bloc::PEDRA), pos);
+						}
 					}
 					else if (bio == Bioma::DESERT) {
 						chunk->setBlock(new SolidBlock(Bloc::ARENA), pos);
 					}
 					else {
-						chunk->setBlock(new SolidBlock(Bloc::TERRA), pos);
+						if (fdensity > 0.95f) {
+							chunk->setBlock(new SolidBlock(Bloc::TERRA), pos);
+						}
+						else {
+							chunk->setBlock(new SolidBlock(Bloc::PEDRA), pos);
+						}
 					}
 				}
 				else {

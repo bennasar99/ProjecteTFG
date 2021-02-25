@@ -28,8 +28,18 @@ bool Block::getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<fl
 		//color[0] = 0.76f; color[1] = 0.6f; color[2] = 0.42f; color[3] = 1;
 		color = { 0.76f, 0.6f, 0.42f, 1 };
 		break;
-	case Bloc::PEDRA:
+	case Bloc::PEDRAW:
 		texNum = 5;
+		//color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
+		color = { 0.5f, 0.5f, 0.5f, 1 };
+		break;
+	case Bloc::PEDRA:
+		texNum = 15;
+		//color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
+		color = { 0.5f, 0.5f, 0.5f, 1 };
+		break;
+	case Bloc::PEDRAS:
+		texNum = 16;
 		//color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
 		color = { 0.5f, 0.5f, 0.5f, 1 };
 		break;

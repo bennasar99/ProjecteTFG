@@ -78,12 +78,20 @@ void World::save() {
 	path += "/chunks";
 	std::filesystem::create_directory(path.c_str());
 
-	for (int rX = ceil((float)this->spawn.x - SPAWNSIZE / 2) / REGIONSIZE; rX < ceil((float)this->spawn.x + SPAWNSIZE / 2) / REGIONSIZE; rX++) {
-		for (int rY = ceil((float)this->spawn.y - SPAWNSIZE / 2) / REGIONSIZE; rY < ceil((float)this->spawn.y + SPAWNSIZE / 2) / REGIONSIZE; rY++) {
-			for (int rZ = ceil((float)this->spawn.z - SPAWNSIZE / 2) / REGIONSIZE; rZ < ceil((float)this->spawn.z + SPAWNSIZE / 2) / REGIONSIZE; rZ++) {
-				saveRegion(Vector3<int>(rX, rY, rZ));
-			}
+	std::list<Vector3<int>> regions;
+	std::map<Vector3<int>, Chunk*>::iterator cit;
+	for (cit = chunks.begin(); cit != chunks.end(); cit++) {
+		if (cit->second != nullptr && cit->second->getDirty()) {
+			regions.push_front(getRegion(cit->first));
 		}
+	}
+	regions.unique([](Vector3<int> &v1, Vector3<int> &v2) { //NO FUNCIONA
+		return (v1 == v2);
+		});
+
+	std::list<Vector3<int>>::iterator it;
+	for (it = regions.begin(); it != regions.end(); it++) {
+		saveRegion(*it);
 	}
 
 	//Cream yml del món
@@ -823,9 +831,6 @@ void World::drawMap(float scrAspect, Entity *ent, int y) {
 	glPopMatrix();
 }
 
-Vector3<int> World::getRegion(Vector3<int> cPos) {
-	return Vector3<int>(floor((float)cPos.x / (float)REGIONSIZE), floor((float)cPos.y / (float)REGIONSIZE), floor((float)cPos.z / (float)REGIONSIZE));
-}
 
 bool World::saveRegion(Vector3<int> rPos) {
 	const int chunkSize = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
@@ -961,4 +966,21 @@ Vector3<int> World::getChunkPos(Vector3<int> bpos) {
 		toAdd = toAdd + Vector3<int>(0, 0, -1);
 	}
 	return (bpos / CHUNKSIZE) + toAdd;
+}
+
+Vector3<int> World::getRegion(Vector3<int> cpos) {
+	Vector3<int> toAdd = Vector3<int>(0, 0, 0);
+	if (cpos.x < 0) {
+		cpos.x++;
+		toAdd = toAdd + Vector3<int>(-1, 0, 0);
+	}
+	if (cpos.y < 0) {
+		cpos.y++;
+		toAdd = toAdd + Vector3<int>(0, -1, 0);
+	}
+	if (cpos.z < 0) {
+		cpos.z++;
+		toAdd = toAdd + Vector3<int>(0, 0, -1);
+	}
+	return (cpos / REGIONSIZE + toAdd);
 }
