@@ -673,7 +673,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 	}
 	else {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) { //Botó dret, eliminar blocs
-			if (world->deleteBlock(Vector3<int>((int)ba.x, (int)ba.y, (int)ba.z), true)) {
+			if (world->deleteBlock(Vector3<int>(floor(ba.x), floor(ba.y), floor(ba.z)), true)) {
 				SoundManager::playSound(So::DESTRUEIX, ba, true);
 			}
 		}
@@ -690,7 +690,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 					//epos.floor();
 				}
 				if (ent == nullptr || epos != bp) {
-					world->setBlock(tipusbloc, Vector3<int>((int)bp.x, (int)bp.y, (int)bp.z));
+					world->setBlock(tipusbloc, Vector3<int>(floor(bp.x), floor(bp.y), floor(bp.z)));
 					SoundManager::playSound(So::COLOCA, bp, true);
 				}
 			}

@@ -81,13 +81,21 @@ void World::save() {
 	std::list<Vector3<int>> regions;
 	std::map<Vector3<int>, Chunk*>::iterator cit;
 	for (cit = chunks.begin(); cit != chunks.end(); cit++) {
-		if (cit->second != nullptr && cit->second->getDirty()) {
+		if (cit->second != nullptr && estat[cit->first] == ChunkState::LLEST && cit->second->getDirty()) {
 			regions.push_front(getRegion(cit->first));
 		}
 	}
-	regions.unique([](Vector3<int> &v1, Vector3<int> &v2) { //NO FUNCIONA
-		return (v1 == v2);
+
+	struct comparator {
+		bool operator() (Vector3<int> v1, Vector3<int> v2)
+		{
+			return (v1 == v2);
+		}
+	};
+	regions.sort([](Vector3<int>& v1, Vector3<int>& v2) {
+		return make_tuple(v1.x, v1.y, v1.z) < make_tuple(v2.x, v2.y, v2.z);
 		});
+	regions.unique(comparator());
 
 	std::list<Vector3<int>>::iterator it;
 	for (it = regions.begin(); it != regions.end(); it++) {
@@ -358,11 +366,13 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, Block* parent, bool listUpdat
 	//NOU CODI CHUNKS:
 	//pos.floor();
 	Vector3<int> cPos = getChunkPos(pos);
+
 	//cpos.floor();
 	Vector3<int> bpos = pos % CHUNKSIZE;
 
 	if (listUpdate) {
-		printf("%d %d %d\n", cPos.x, cPos.y, cPos.z);
+		printf("set block on chunk %d %d %d\n", cPos.x, cPos.y, cPos.z);
+		printf("set block on pos %d %d %d\n", bpos.x, bpos.y, bpos.z);
 	}
 
 	if (chunks[cPos] == nullptr){
@@ -403,7 +413,7 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, Block* parent, bool listUpdat
 
 //Assignam un bloc (per punter) a la posició indicada
 bool World::setBlock(Block* bloc, Vector3<int> pos, bool listUpdate) {
-	//pos.floor();
+	
 	Vector3<int> cPos = getChunkPos(pos);
 	//cpos.floor();
 	Vector3<int> bpos = pos % CHUNKSIZE;
@@ -859,6 +869,7 @@ bool World::saveRegion(Vector3<int> rPos) {
 					file.write(reinterpret_cast<char*>(&size), sizeof(size));
 					file.write(reinterpret_cast<char*>(compr), comprLen * sizeof(Byte));
 					nChunks++;
+					ch->setDirty(false);
 				}
 				else {
 					buffer[0] = -1;

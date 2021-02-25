@@ -107,7 +107,7 @@ Chunk::~Chunk() {
 
 //TODO actualitzar display list
 bool Chunk::delBlock(Vector3<int> bpos, bool destroy) {
-	printf("%d %d %d\n", bpos.x, bpos.y, bpos.z);
+	printf("del %d %d %d\n", bpos.x, bpos.y, bpos.z);
   	if (this->blocs[bpos.x][bpos.y][bpos.z] != nullptr) {      
 		if (destroy) {
 			this->blocs[bpos.x][bpos.y][bpos.z]->destroy(this->world);
