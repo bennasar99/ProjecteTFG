@@ -57,10 +57,13 @@ Vector3<int> Chunk::getPos() {
 	return cpos;
 }
 
-bool Chunk::setBlock(Block* bloc, Vector3<int> pos) {
+bool Chunk::setBlock(Block* bloc, Vector3<int> pos, bool overwrite) {
 	this->dirty = true;
 	//Hi ha blocs amb les seves pròpies classes, sinó s'utilitza la classe genèrica
 	if (this->blocs[pos.x][pos.y][pos.z] != nullptr) {
+		if (!overwrite) {
+			return false;
+		}
 		this->blocs[pos.x][pos.y][pos.z]->destroy(this->world);
 		delete this->blocs[pos.x][pos.y][pos.z];
 		this->nblocs--;
@@ -193,7 +196,7 @@ bool Chunk::readFromByteData(char* arr) {
 				//printf("%d ", arr[desp]);
 				Bloc tipus = static_cast<Bloc>(arr[desp++]);
 				if (tipus != Bloc::RES) {
-					world->setBlock(tipus, (this->cpos * CHUNKSIZE) + Vector3<int>(x, y, z), nullptr, false);
+					world->setBlock(tipus, (this->cpos * CHUNKSIZE) + Vector3<int>(x, y, z), true, false);
 				}
 			}
 		}

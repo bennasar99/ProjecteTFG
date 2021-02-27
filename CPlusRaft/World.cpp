@@ -145,8 +145,14 @@ void World::drawLights(){
 	//Sol, establim la seva posició segons el moment del dia
 	this->solpos = Vector3<float>(cosf((daytime / (DAYTIME/2)) * 3.1416f), sinf((daytime / (DAYTIME/2)) * 3.1416f), 0.0f);
 	GLfloat spos[4] = { solpos.x, solpos.y, solpos.z, 0.0f };
-	glLightfv(sol, GL_POSITION, spos);
 	glPopMatrix();
+
+	//Establim llum ambient segons el moment del dia.
+	glLightfv(sol, GL_POSITION, spos);
+	float ambient = 0.3f + sinf((daytime / (DAYTIME / 2))* M_PI) * 2.7f;
+	ambient = std::max(0.3f, ambient);
+	GLfloat lluma[4] = { ambient, ambient, ambient, 1.0f };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lluma); //Posar a 0.1
 }
 
 //Establim les propietats d'una llum determinada
@@ -330,19 +336,14 @@ void World::destroy() {
 }
 
 //Assignam un llum (GL_LIGHT0-7) al sol
-void World::setSol(int sol) {
-	this->sol = sol;
-	GLfloat soldiff[4] = { 1, 1, 1, 1.0f };
-	glLightfv(sol, GL_DIFFUSE, soldiff);
-	glLightf(sol, GL_SPOT_CUTOFF, 180.0f);
-	glLightf(sol, GL_SPOT_EXPONENT, 0.0f);
-	glEnable(sol); //pensa a tornar posar Enable
-}
-
-//Col·locam un bloc a la posició indicada
-bool World::setBlock(Bloc tipus, Vector3<int> pos) {
-	return this->setBlock(tipus, pos, 0, true);
-}
+//void World::setSol(int sol) {
+//	this->sol = sol;
+//	GLfloat soldiff[4] = { 1, 1, 1, 1.0f };
+//	glLightfv(sol, GL_DIFFUSE, soldiff);
+//	glLightf(sol, GL_SPOT_CUTOFF, 180.0f);
+//	glLightf(sol, GL_SPOT_EXPONENT, 0.0f);
+//	glEnable(sol); //pensa a tornar posar Enable
+//}
 
 //Eliminam el bloc de la posició indicada
 bool World::deleteBlock(Vector3<int> pos, bool destroy) { //Eliminar Bloc::RES?
@@ -359,7 +360,7 @@ bool World::deleteBlock(Vector3<int> pos, bool destroy) { //Eliminar Bloc::RES?
 }
 
 //Col·locam un bloc d'un tipus determinat a la posició indicada
-bool World::setBlock(Bloc tipus, Vector3<int> pos, Block* parent, bool listUpdate) {
+bool World::setBlock(Bloc tipus, Vector3<int> pos, bool overwrite, bool listUpdate) {
 
 	//TONI!! -16 ha de ser des CHunk -1, no -2!!!!!
 
@@ -529,7 +530,7 @@ void World::updateVisibility() {
 
 	//Obtenim el volum de possible visibilitat de la càmera
 	Vector3<int> cMin = getChunkPos(Vector3<int>(camera->xmin, camera->ymin, camera->zmin));
-	Vector3<int> cMax = getChunkPos(Vector3<int>(camera->xmax, camera->ymax, camera->zmax));
+	Vector3<int> cMax = getChunkPos(Vector3<int>(camera->xmax, camera->ymax, camera->zmax)) + Vector3(1,1,1);
 
 	std::list<Vector3<int>> vChunks;
 	//printf("%d %d %d, %d %d %d\n", cMin.x, cMin.y, cMin.z, cMax.x, cMax.y, cMax.z);
@@ -601,27 +602,31 @@ void World::drawAxis(Vector3<float> pos, float axisSize) {
 
 //Dibuixa l'esfera del sol i modifica el color del cel
 void World::drawSol(Vector3<float> pos, float dist) {
-	if (daytime >= 0.0f && daytime <= DAYTIME) {
-		glPushMatrix();
+	glPushMatrix();
 
-		//El sol no s'ha de veure afectat per la boira o l'il·luminació
-		glDisable(GL_FOG);
-		glDisable(GL_LIGHTING);
-		glTranslatef(pos.x, pos.y, pos.z);
-		glTranslatef(solpos.x * dist, solpos.y * dist, solpos.z);
-		glColor3f(1, 1, 0);
-		drawSphere(1, 5, 5);
-		glEnable(GL_LIGHTING);
-		glEnable(GL_FOG);
+	//El sol no s'ha de veure afectat per la boira o l'il·luminació
+	glDisable(GL_FOG);
+	glDisable(GL_LIGHTING);
+	glTranslatef(pos.x, pos.y, pos.z);
+	glTranslatef(solpos.x * dist, solpos.y * dist, solpos.z);
+	glColor3f(1, 1, 0);
+	drawSphere(1, 5, 5);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_FOG);
 		
-		//Establim el color del cel (+ blanc com + adalt sigui el sol)
-		glClearColor(1-solpos.y/1.5f, solpos.y / 3.0f, solpos.y, 1);
+	//Establim el color del cel (+ blanc com + adalt sigui el sol)
+	//Vespre: 	0, 0, 54.5, dia: 	52.9, 80.8, 92.2, alba/posta: 	100, 64.7, 0
+	float aY = abs(sinf((daytime / (DAYTIME / 2)) * M_PI));
+	float aX = abs(cosf((daytime / (DAYTIME / 2)) * M_PI));
+	if (daytime > DAYTIME / 2) { //Vespre: 	0, 0, 54.5, alba/posta: 	100, 64.7, 0
+		glClearColor(1*aX, 0.647*aX, 0.545f * aY, 1);
+	}
+	else { //dia: 	52.9, 80.8, 92.2, alba/posta: 	100, 64.7, 0
+		glClearColor(0.529f + 0.471f * aX, 0.647f + 0.1538f * aY, 0.92 * aY, 1);
+	}
+	//glClearColor(1-solpos.y/1.5f, solpos.y / 3.0f, solpos.y, 1);
 
-		glPopMatrix();
-	}
-	else {
-		glClearColor(0, 0, 0.15f,1);
-	}
+	glPopMatrix();
 }
 
 //Interacció amb un bloc

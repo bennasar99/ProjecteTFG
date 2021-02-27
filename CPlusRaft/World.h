@@ -101,9 +101,8 @@ public:
 
 	void drawBloc(Bloc tipus);
 
-	bool setBlock(Bloc tipus, Vector3<int> pos);
-	bool setBlock(Bloc tipus, Vector3<int> pos, Block* parent, bool listUpdate);
-	bool setBlock(Block* bloc, Vector3<int> pos, bool listUpdate);
+	bool setBlock(Bloc tipus, Vector3<int> pos, bool overwrite = true, bool listUpdate = true);
+	bool setBlock(Block* bloc, Vector3<int> pos, bool listUpdate = true);
 	Bloc getBlock(Vector3<int> pos);
 	Bloc getBlock(Vector3<float> pos);
 	Block* getBlockPointer(Vector3<int> pos, bool remove);
@@ -130,7 +129,7 @@ public:
 	Entity* getNearestEntity(Vector3<float> pos, float range, bool controllable);
 
 	//Sol
-	void setSol(int sol);
+	//void setSol(int sol);
 	void drawSol(Vector3<float> pos, float dist); //Respecte una posició i a una distància determinada
 
 	//Chunks

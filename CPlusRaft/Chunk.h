@@ -46,7 +46,7 @@ public:
 
 	Vector3<int> getPos();
 
-	bool setBlock(Block* bloc, Vector3<int> bpos);
+	bool setBlock(Block* bloc, Vector3<int> bpos, bool overwrite = true);
 	bool delBlock(Vector3<int> bpos, bool destroy);
 	Bloc getBlock(Vector3<int> bpos);
 

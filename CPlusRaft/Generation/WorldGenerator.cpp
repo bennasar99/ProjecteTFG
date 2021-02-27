@@ -127,16 +127,16 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 					int random = rand() % randmax;
 					if (random == 4 || random == 5 || random == 6 || random == 7 || random == 8) {
 						//chunk->setBlock(new SpreadBlock(Bloc::HERBA, tpos), tpos);
-						world->setBlock(Bloc::HERBA, tpos, nullptr, false);
+						world->setBlock(Bloc::HERBA, tpos, false, false);
 					}
 					else if (random == 9) {
 						//Tronc
 						//chunk->setBlock(new SolidBlock(Bloc::FUSTAARBRE), tpos);
-						world->setBlock(Bloc::FUSTAARBRE, tpos, nullptr, false);
+						world->setBlock(Bloc::FUSTAARBRE, tpos, false, false);
 						int rand2 = rand() % 5 + 1;
 						for (int i = 1; i <= rand2; i++) {
 							Vector3<int> fpos = tpos + Vector3<int>(0, i, 0);
-							world->setBlock(Bloc::FUSTAARBRE, fpos, nullptr, false);
+							world->setBlock(Bloc::FUSTAARBRE, fpos, false, false);
 						}
 						//Fulles
 						int altura = rand() % 3 + 1;
@@ -147,7 +147,7 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 									Vector3<int> lpos = tpos + Vector3<int>(0, rand2 + y, 0)
 										+ Vector3<int>(x, 0, 0) + Vector3<int>(0, 0, z);
 									if (chunk->getBlockWorld(lpos) == Bloc::RES) {
-										world->setBlock(Bloc::FULLAARBRE, lpos, nullptr, false);
+										world->setBlock(Bloc::FULLAARBRE, lpos, false, false);
 									}
 								}
 							}

@@ -840,7 +840,7 @@ void setLighting() {
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);
 
 	//Sol
-	world->setSol(GL_LIGHT1); //Triam quina llum farà de sol (llum direccional)
+	//world->setSol(GL_LIGHT1); //Triam quina llum farà de sol (llum direccional) DESACTIVAT: Ara llum ambient
 }
 
 //Hook pel moviment del ratolí
