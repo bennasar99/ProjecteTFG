@@ -13,6 +13,13 @@ Mesh::Mesh(Primitiva prim) {
 	this->vao = 0;
 }
 
+Mesh::~Mesh() {
+	if (this->vbo != 0) {
+		glDeleteBuffers(1, &this->vbo);
+		glDeleteVertexArrays(1, &this->vao);
+	}
+}
+
 //Estructura vertex: x,y,z, nx,ny,nz, R,G,B,A, tx,ty (12 floats)
 void Mesh::addVertex(float* vert, float* norm, float* col, float* text) {
 	for (int i = 0; i < 3; i++) {

@@ -95,6 +95,7 @@ void Chunk::update(float delta) {
 	lastYupd %= CHUNKSIZE;
 }
 
+//Destructor
 Chunk::~Chunk() {
 	for (int x = 0; x < CHUNKSIZE; x++) {
 		for (int y = 0; y < CHUNKSIZE; y++) {
@@ -106,6 +107,7 @@ Chunk::~Chunk() {
 			}
 		}
 	}
+	//delete[] blocs;
 }
 
 //TODO actualitzar display list

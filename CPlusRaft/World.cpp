@@ -215,12 +215,55 @@ void World::update(float delta, Vector3<float> pos) {
 	updTimer = 50;*/ //10 tps
 
 	//NOU CODI CHUNKS
-	Vector3<int> cPos = getChunkPos(pos.toInt());
-	//pos.floor();
+	Vector3<int> pcPos = getChunkPos(pos.toInt());
+
+	//Descàrrega de chunks
+	Vector3<int> prPos = getRegion(pcPos); //Obtenim la regió actual del jugador
+	int range = ceil(ceil(camera->getViewDist() / CHUNKSIZE) / REGIONSIZE);  //"Distància de visió en regions"
+
+	std::map<Vector3<int>, bool, Vector3Compare> toSave;
+	std::vector<Chunk*> toDelete;
+
+	std::map<Vector3<int>, Chunk*>::iterator cit;
+	for (cit = chunks.begin(); cit != chunks.end(); cit++) {
+		Chunk* ch = cit->second;
+		if (ch == nullptr) {
+			continue;
+		}
+		Vector3<int> cPos = cit->first;
+		Vector3<int> rPos = getRegion(cPos);
+		float dist = Vector3<int>::module(prPos - rPos);
+		if (dist <= range) { //Si està dins el rang de regions properes, no feim res
+			continue;
+		}
+		bool dirty = ch->getDirty();
+		if (dirty && estat[cit->first] == ChunkState::LLEST) { //S'ha de guardar el chunk abans de descarregar-lo de memòria
+			toSave[rPos] = true;
+		}
+		toDelete.push_back(ch);
+	}
+
+	std::map<Vector3<int>, bool>::iterator it2;
+	for (it2 = toSave.begin(); it2 != toSave.end(); it2++) {
+		if (it2->second == false) {
+			continue;
+		}
+		saveRegion(it2->first);
+	}
+
+	std::vector<Chunk*>::iterator it3;
+	for (it3 = toDelete.begin(); it3 != toDelete.end(); it3++) {
+		Vector3<int> cPos = (*it3)->getPos();
+		chunks.erase(cPos);
+		estat.erase(cPos);
+		Chunk* ch = *it3;
+		delete ch;
+	}
+
 	int dist = floor(camera->getViewDist() / CHUNKSIZE / 3);
-	for (int x = cPos.x - dist; x < cPos.x + dist; x++) {
-		for (int y = cPos.y - dist; y < cPos.y + dist; y++) {
-			for (int z = cPos.z - dist; z < cPos.z + dist; z++) {
+	for (int x = pcPos.x - dist; x < pcPos.x + dist; x++) {
+		for (int y = pcPos.y - dist; y < pcPos.y + dist; y++) {
+			for (int z = pcPos.z - dist; z < pcPos.z + dist; z++) {
 				Vector3<int> cPos = Vector3<int>(x, y, z);
 				Chunk* ch = chunks[cPos];
 				if (ch != 0 && estat[cPos] == ChunkState::LLEST) {
@@ -624,7 +667,6 @@ void World::drawSol(Vector3<float> pos, float dist) {
 	else { //dia: 	52.9, 80.8, 92.2, alba/posta: 	100, 64.7, 0
 		glClearColor(0.529f + 0.471f * aX, 0.647f + 0.1538f * aY, 0.92 * aY, 1);
 	}
-	//glClearColor(1-solpos.y/1.5f, solpos.y / 3.0f, solpos.y, 1);
 
 	glPopMatrix();
 }
@@ -863,6 +905,8 @@ bool World::saveRegion(Vector3<int> rPos) {
 				Chunk* ch = chunks[cPos];
 				if (ch != nullptr && estat[cPos] == ChunkState::LLEST && ch->nblocs > 0 && ch->getDirty()) {
 					buffer[0] = static_cast<int>(ch->getBiome());
+					//Vector3<int> pos = cPos % REGIONSIZE;
+					//int loc = (pos.x % REGIONSIZE) + REGIONSIZE * ((pos.y * REGIONSIZE) + REGIONSIZE * (pos.z));
 					file.write(buffer, 1);
 					ch->getByteData(buffer);
 					//Comprimir buffer

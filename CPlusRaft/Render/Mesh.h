@@ -35,4 +35,5 @@ public:
 
 	Mesh(Primitiva prim);
 	Mesh();
+	~Mesh();
 };
