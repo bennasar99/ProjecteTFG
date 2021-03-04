@@ -44,10 +44,15 @@ class Pendul;
 enum class ChunkState {
 	BUIT,
 	LLEST,
-	BLOQUEJAT,
 	TERRENY,
 	PENDENT,
 	CARREGAT
+};
+
+enum class RegionState {
+	BUIDA,
+	DIRTY,
+	CARREGADA
 };
 
 class World {
@@ -69,7 +74,8 @@ private:
 		}
 	};
 	map<Vector3<int>, Chunk*, Vector3Compare> chunks;
-	map<Vector3<int>, ChunkState, Vector3Compare> estat;
+	map<Vector3<int>, ChunkState, Vector3Compare> cestat;
+	map<Vector3<int>, bool, Vector3Compare> rloaded; //True si ja s'ha intentat carregar la regió de fixer
 	short pendents = 0;
 
 	int sol = 0;
@@ -137,6 +143,8 @@ public:
 	void updateNeighborChunks(Vector3<int> cpos);
 
 	void update(float delta, Vector3<float> camPos);
+
+	/*void setRegionDirty(Vector3<int> rPos);*/
 
 	//void generate(int seed);
 	void save();
