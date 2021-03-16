@@ -24,6 +24,11 @@ WorldGenerator::WorldGenerator(int seed, World* world) {
 	this->biomeNoise.SetFrequency(0.005f); //0.1
 	this->biomeNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
+	this->caveNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
+	this->caveNoise.SetSeed(seed * 5);
+	this->caveNoise.SetFrequency(0.05f); //0.01
+	//this->caveNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_Distance2);
+
 	this->normalNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	this->oceanGenNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	this->mountainNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
@@ -45,13 +50,6 @@ Bioma WorldGenerator::getBiomeAt(int bX, int bZ) {
 	float ocean = oceanNoise.GetNoise((float)bX, (float)bZ);
 	float climate = climateNoise.GetNoise((float)bX, (float)bZ);
 	float biome = biomeNoise.GetNoise((float)bX, (float)bZ);
-	/*GLfloat ocean[16*16];
-	GLfloat climate[16*16];
-	GLfloat biome[16*16];
-
-	biomeGen->GenUniformGrid2D(biome, cX, cZ, 16, 16, 0.1f, this->seed);
-	climateGen->GenUniformGrid2D(climate, cX, cZ, 16, 16, 0.1f, this->seed);
-	oceanGen->GenUniformGrid2D(ocean, cX, cZ, 16, 16, 0.04f, this->seed);*/
 
 	if (ocean < -0.25f) {
 		return Bioma::OCEA;
@@ -101,24 +99,12 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 		break;
 	}
 
-	//Minerals
-	int prob = std::max(cPos.y + 1, 1);
-	int num = rand() % ((CHUNKSIZE*4) / prob); //Com + abaix més probable
-	for (int i = 0; i < num; i++) {
-		Vector3<int> pos = Vector3<int>(rand() % CHUNKSIZE, rand() % CHUNKSIZE, rand() % CHUNKSIZE);
-		Bloc bt = world->getBlock(cPos * CHUNKSIZE + pos);
-		if (Block::isSolid(bt)) {
-			Bloc ores[3] = { Bloc::OR, Bloc::FERRO, Bloc::CARBO };
-			chunk->setBlock(new SolidBlock(ores[rand() % 3]), pos);
-		}
-	}
-
 	Vector3<int> pos = Vector3<int>(0, 0, 0);
 	for (pos.x = 0; pos.x < CHUNKSIZE; pos.x++) {
 		for (pos.z = 0; pos.z < CHUNKSIZE; pos.z++) {
 			//Agafam la coordenada Y amb un bloc i aire damunt més gran
 			bool trobat = false;
-			for (pos.y = 15; (pos.y >= 0)/*&&(!trobat)*/; pos.y--) {
+			for (pos.y = CHUNKSIZE-1; (pos.y >= 0)/*&&(!trobat)*/; pos.y--) {
 				Vector3<int> tpos = cPos * CHUNKSIZE + pos + Vector3<int>(0, 1, 0);
 				Bloc b1 = chunk->getBlock(pos);
 				Bloc b2 = chunk->getBlockWorld(tpos);
@@ -184,6 +170,7 @@ float WorldGenerator::getDensity(Bioma bio, Vector3<int> pos) {
 
 }
 
+
 float WorldGenerator::getThreshold(Bioma bio) {
 	float threshold = 0;
 	switch (bio) {
@@ -225,9 +212,20 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 	int nblocs = 0;
 	for (int x = 0; x < CHUNKSIZE; x++) {
 		for (int z = 0; z < CHUNKSIZE; z++) {
+
 			if (transition) { //si és un chunk de transició entre biomes, cada bloc pot ser d'un bioma diferent
 				bio = getBiomeAt(cPos.x * CHUNKSIZE + x, cPos.z * CHUNKSIZE + z);
 			}
+
+			//float height = 1;
+			//if (!WorldGenerator::isBiome3D(bio)) {
+			//	height = getHeight(bio, x + cPos.x * CHUNKSIZE, z + cPos.z * CHUNKSIZE);
+			//	if (height < (cPos.y) * CHUNKSIZE && (cPos.y)*CHUNKSIZE > sealvl) { //No importa generar la columna
+			//		continue;
+			//	}
+			//}
+
+
 			for (int y = 0; y < CHUNKSIZE; y++) {
 
 				Vector3<int> pos = Vector3<int>(x, y, z);
@@ -253,7 +251,11 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 						}
 					}
 				}
-				else {
+				//else/* if (!WorldGenerator::isBiome3D(bio))*/ {
+				//	density += (float)bpos.y / height;
+				//	threshold += 1.0f;
+				//}
+				else { //Bioma 3D
 					density += getDensity(bio, bpos);// / dist;
 					threshold += 1.0f;// / dist;
 				}
@@ -261,37 +263,53 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 				float fdensity = density / threshold;
 				//printf("density %f threshold %f\n", density, threshold);
 				if (fdensity < 1) {
-					if (CHUNKSIZE * cPos.y + y > sealvl) {
-						if (bio == Bioma::MAR || bio == Bioma::OCEA) {
-							//continue;
-						}
+					if (caveNoise.GetNoise((float)bpos.x, (float)bpos.y, (float)bpos.z) > -0.4f) { //-0.4
+						continue;
 					}
+
 					nblocs++;
+
+					Bloc toSet;
 					if (bio == Bioma::MUNTANYA) {
-						chunk->setBlock(new SolidBlock(Bloc::PEDRA), pos);
+						toSet = Bloc::PEDRA;
 					}
 					else if (bio == Bioma::ARTIC) {
-						if (fdensity > 0.98f) {
-							chunk->setBlock(new SolidBlock(Bloc::NEU), pos);
+						if (fdensity <= 0.95f) {
+							toSet = Bloc::PEDRA;
 						}
-						else if (fdensity > 0.95f) {
-							chunk->setBlock(new SolidBlock(Bloc::TERRA), pos);
+						else if (fdensity <= 0.98f) {
+							toSet = Bloc::TERRA;
 						}
 						else {
-							chunk->setBlock(new SolidBlock(Bloc::PEDRA), pos);
+							toSet = Bloc::NEU;
 						}
 					}
 					else if (bio == Bioma::DESERT) {
-						chunk->setBlock(new SolidBlock(Bloc::ARENA), pos);
-					}
-					else {
-						if (fdensity > 0.95f) {
-							chunk->setBlock(new SolidBlock(Bloc::TERRA), pos);
+						if (fdensity <= 0.92f) {
+							toSet = Bloc::PEDRA;
 						}
 						else {
-							chunk->setBlock(new SolidBlock(Bloc::PEDRA), pos);
+							toSet = Bloc::ARENA;
 						}
 					}
+					else {
+						if (fdensity <= 0.95f) {
+							toSet = Bloc::PEDRA;
+						}
+						else {
+							toSet = Bloc::TERRA;
+						}
+					}
+
+					//Minerals
+					int threshold = 94 + (cPos.y);
+					if (toSet == Bloc::PEDRA) {
+						if (rand() % 100 > threshold) {
+							Bloc ores[3] = { Bloc::OR, Bloc::FERRO, Bloc::CARBO };
+							toSet = ores[rand() % 3];
+						}
+					}
+					chunk->setBlock(new SolidBlock(toSet), pos);
 				}
 				else {
 					if ((CHUNKSIZE*cPos.y + y) <= sealvl) {
@@ -306,23 +324,22 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 						}
 						nblocs++;
 					}
-					if ((CHUNKSIZE * cPos.y + y) == sealvl) {
-						waterblocksup++;
-					}
+					/*else if (!WorldGenerator::isBiome3D(bio) && !transition) {
+						y = CHUNKSIZE;
+					}*/
 				}
 			}
-		}
-	}
-	if (waterblocksup > (16 * 16) / 2 && chunk->getBiome() != Bioma::OCEA) {
-		if (bio != Bioma::ARTIC) {
-			//chunk->setBiome(Bioma::MAR);
-		}
-		else {
-			//chunk->setBiome(Bioma::GEL);
 		}
 	}
 	if (nblocs == 0) {
 		//return nullptr;
 	}
 	return chunk;
+}
+
+bool WorldGenerator::isBiome3D(Bioma bio) {
+	if (bio == Bioma::MUNTANYA /*|| bio == Bioma::ARTIC*/) { //Include list
+		return true;
+	}
+	return false;
 }

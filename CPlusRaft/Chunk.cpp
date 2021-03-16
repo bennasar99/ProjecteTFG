@@ -58,7 +58,7 @@ Vector3<int> Chunk::getPos() {
 }
 
 bool Chunk::setBlock(Block* bloc, Vector3<int> pos, bool overwrite) {
-	this->dirty = true;
+	//this->dirty = true;
 	//Hi ha blocs amb les seves pròpies classes, sinó s'utilitza la classe genèrica
 	if (this->blocs[pos.x][pos.y][pos.z] != nullptr) {
 		if (!overwrite) {
@@ -97,10 +97,11 @@ void Chunk::update(float delta) {
 
 //Destructor
 Chunk::~Chunk() {
+	cMesh.erase();
 	for (int x = 0; x < CHUNKSIZE; x++) {
 		for (int y = 0; y < CHUNKSIZE; y++) {
 			for (int z = 0; z < CHUNKSIZE; z++) {
-				if (blocs[x][y][z] != 0) {
+				if (blocs[x][y][z] != nullptr) {
 					blocs[x][y][z]->destroy(this->world);
 					delete blocs[x][y][z];
 				}
@@ -208,6 +209,9 @@ bool Chunk::readFromByteData(char* arr) {
 }
 
 void Chunk::updateMesh() {
+	if (this->nblocs <= 0 && !Block::getMCEnabled()) {
+		return; //No cal fer res
+	}
 	cMesh.eraseO();
 	std::list<dT> transparent;
 	int nb = 0;

@@ -1,7 +1,7 @@
 #include "Block.h"
 #include "../World.h"
 
-bool Block::marching = true;
+bool Block::marching = false;
 TextureAtlas blockAtlas = TextureAtlas(1, 22);
 
 //Les texCoords és retornen en ordre xb, yb, xt, yt i el color en RGBA

@@ -80,6 +80,9 @@ void World::save() {
 
 	std::list<Vector3<int>> regions;
 	std::map<Vector3<int>, Chunk*>::iterator cit;
+
+	regions.push_front(getRegion(getChunkPos(camera->getPos().toInt()))); //Guardam la regió en la que està el jugador
+
 	for (cit = chunks.begin(); cit != chunks.end(); cit++) {
 		if (cit->second != nullptr && cestat[cit->first] == ChunkState::LLEST && cit->second->getDirty()) {
 			regions.push_front(getRegion(cit->first));
@@ -219,10 +222,12 @@ void World::update(float delta, Vector3<float> pos) {
 
 	//Descàrrega de chunks
 	Vector3<int> prPos = getRegion(pcPos); //Obtenim la regió actual del jugador
-	int range = ceil(ceil(camera->getViewDist() / CHUNKSIZE) / REGIONSIZE);  //"Distància de visió en regions"
+	int range = ceil(ceilf(camera->getViewDist() / CHUNKSIZE) / REGIONSIZE) + 1;  //"Distància de visió en regions"
+	//printf("RANGE %d\n", range);
 
-	std::map<Vector3<int>, bool, Vector3Compare> toSave;
-	std::vector<Chunk*> toDelete;
+	std::list<Vector3<int>> toSave;
+	std::list<Vector3<int>> toDelete;
+	//std::vector<Chunk*> toDelete;
 
 	std::map<Vector3<int>, Chunk*>::iterator cit;
 	for (cit = chunks.begin(); cit != chunks.end(); cit++) {
@@ -232,35 +237,33 @@ void World::update(float delta, Vector3<float> pos) {
 		}
 		Vector3<int> cPos = cit->first;
 		Vector3<int> rPos = getRegion(cPos);
-		float dist = Vector3<int>::module(prPos - rPos);
-		if (dist <= range+1) { //Si està dins el rang de regions properes, no feim res
+		float dist = Vector3<int>::module(rPos - prPos);
+		//printf("Region dist %f\n", dist);
+		if (dist <= range) { //Si està dins el rang de regions properes, no feim res
+			//toDelete.remove(rPos);
 			continue;
 		}
-		bool dirty = ch->getDirty();
-		if (dirty && cestat[cit->first] == ChunkState::LLEST) { //S'ha de guardar el chunk abans de descarregar-lo de memòria
-			toSave[rPos] = true;
-		}
-		toDelete.push_back(ch);
+		toDelete.push_front(rPos);
+		//bool dirty = ch->getDirty();
 	}
 
-	std::map<Vector3<int>, bool>::iterator it2;
-	for (it2 = toSave.begin(); it2 != toSave.end(); it2++) {
-		if (it2->second == false) {
-			continue;
-		}
-		saveRegion(it2->first);
-		printf("Saving region %d %d %d\n", it2->first.x, it2->first.y, it2->first.z);
-		rloaded.erase(it2->first); //La regió s'ha d'intentar tornar carregar si el jugador hi torna
+	toDelete.sort();
+	toDelete.unique();
+	toSave.sort();
+	toSave.unique();
+
+	std::list<Vector3<int>>::iterator it2;
+	//for (it2 = toSave.begin(); it2 != toSave.end(); it2++) {
+	//	saveRegion(*it2);
+	//	printf("Saving region %d %d %d\n", (*it2).x, (*it2).y, (*it2).z);
+	//	rloaded.erase(*it2); //La regió s'ha d'intentar tornar carregar si el jugador hi torna
+	//}
+	for (it2 = toDelete.begin(); it2 != toDelete.end(); it2++) {
+		saveRegion(*it2, true);
+		printf("Saving and unloading region %d %d %d\n", (*it2).x, (*it2).y, (*it2).z);
+		rloaded.erase(*it2); //La regió s'ha d'intentar tornar carregar si el jugador hi torna
 	}
 
-	std::vector<Chunk*>::iterator it3;
-	for (it3 = toDelete.begin(); it3 != toDelete.end(); it3++) {
-		Vector3<int> cPos = (*it3)->getPos();
-		chunks.erase(cPos);
-		cestat.erase(cPos);
-		Chunk* ch = *it3;
-		delete ch;
-	}
 
 	int dist = floor(camera->getViewDist() / CHUNKSIZE / 3);
 	for (int x = pcPos.x - dist; x < pcPos.x + dist; x++) {
@@ -289,12 +292,25 @@ void World::updateGeneration() {
 				if (cnk[i].wait_for(std::chrono::nanoseconds(0)) == std::future_status::ready) {
 					Chunk* ch = cnk[i].get();
 					Vector3 cPos = ch->getPos();
+					int range = ceil(ceil(camera->getViewDist() / CHUNKSIZE) / REGIONSIZE);
+					if (Vector3<int>::dist(getRegion(cPos), getRegion(getChunkPos(camera->getPos().toInt()))) > range) { //Descartam el chunk
+						//printf("%f\n", Vector3<int>::dist(getRegion(cPos), getRegion(camera->getPos().toInt())));
+						//pendents--;
+						//delete ch;
+						//continue;
+					}
 					if (ch != nullptr) {
 						pendents--;
 						if (cestat[cPos] == ChunkState::PENDENT) {
-							cestat[cPos] = ChunkState::TERRENY;
+							if (ch->nblocs <= 0 || ch->nblocs >= CHUNKSIZE*CHUNKSIZE*CHUNKSIZE) { //Si no té blocs o no te buits, no cal generar detall
+								cestat[cPos] = ChunkState::LLEST;
+								ch->setDirty(false);
+							}
+							else {
+								cestat[cPos] = ChunkState::TERRENY;
+							}
 						}
-						else if (cestat[cPos] == ChunkState::TERRENY) {
+						else if (cestat[cPos] == ChunkState::PENDENT2) {
 							ch->updateMesh();
 							cestat[cPos] = ChunkState::LLEST;
 							ch->setDirty(false);
@@ -302,7 +318,7 @@ void World::updateGeneration() {
 						else if (cestat[cPos] == ChunkState::CARREGAT) {
 							ch->updateMesh();
 							cestat[cPos] = ChunkState::LLEST;
-							ch->setDirty(false);
+							ch->setDirty(true);
 						}
 						/*if (ch->nblocs <= 0) { //Amb marching cubes no es pot fer ja que un chunk pot haver de dibuixar triangles sense tenir blocs
 							cestat[cPos] = ChunkState::LLEST;
@@ -323,14 +339,33 @@ void World::updateGeneration() {
 		for (chunki = vChunks.begin(); (chunki != vChunks.end()); chunki++) {
 			Vector3<int> cPos = *chunki;
 			Vector3<int> rPos = getRegion(cPos);
-			if (!rloaded[rPos]) {
+			if (!rloaded[rPos] && cestat[cPos] == ChunkState::BUIT) {
 				printf("EXISTEIX regió %d %d %d\n", rPos.x, rPos.y, rPos.z);
 				loadRegion(rPos);
+				//std::async(std::launch::async, &World::loadRegion, this, rPos);
+				/*for (int cX = rPos.x * CHUNKSIZE; cX < (rPos.x + 1) * CHUNKSIZE; cX++) {
+					for (int cY = rPos.y * CHUNKSIZE; cY < (rPos.y + 1) * CHUNKSIZE; cY++) {
+						for (int cZ = rPos.z * CHUNKSIZE; cZ < (rPos.z + 1) * CHUNKSIZE; cZ++) {
+							cestat[Vector3<int>(cX, cY, cZ)] = ChunkState::PENDENT;
+						}
+					}
+				}*/
 				continue;
 			}
 			Chunk* ch = chunks[cPos];
-			if (ch == nullptr) {
-				if (cestat[cPos] == ChunkState::BUIT && pendents < genCores) {
+			if (ch == nullptr && cestat[cPos] == ChunkState::BUIT) {
+
+				//Optimització, si el chunk d'abaix d'aquest no té blocs llavors no generam aquest
+				Vector3<int> dpos = cPos - Vector3<int>(0, 1, 0);
+				Chunk* dchunk = chunks[dpos];
+				if (dchunk != nullptr) {
+					if (dchunk->nblocs <= 0) {
+						chunks[cPos] = new Chunk(this, cPos);
+						cestat[cPos] = ChunkState::LLEST;
+						continue;
+					}
+				}
+				if (pendents < genCores) {
 					bool trobat = false;
 					for (int i = 0; (i < genCores) && !trobat; i++) {
 						if (!cnk[i].valid()) {
@@ -347,12 +382,13 @@ void World::updateGeneration() {
 				bool trobat = false;
 				bool possible = true;
 
+
 				//IDEA: llista de canvis pendents per cada Chunk, s'aplicaran en acabar la generació, així aquest control podria no fer falta
 				Vector3<int> nPos;
 				for (nPos.x = cPos.x - 1; nPos.x <= cPos.x + 1 && possible; nPos.x++) {
 					for (nPos.y = cPos.y - 1; nPos.y <= cPos.y + 1 && possible; nPos.y++) {
 						for (nPos.z = cPos.z - 1; nPos.z <= cPos.z + 1 && possible; nPos.z++) {
-							if (cestat[nPos] != ChunkState::LLEST && cestat[nPos] != ChunkState::TERRENY) {
+							if (cestat[nPos] != ChunkState::LLEST && cestat[nPos] != ChunkState::TERRENY && cestat[nPos] != ChunkState::PENDENT2) {
 								possible = false;
 							}
 						}
@@ -362,6 +398,7 @@ void World::updateGeneration() {
 					for (int i = 0; (i < genCores) && !trobat; i++) {
 						if (!cnk[i].valid()) {
 							trobat = true;
+							cestat[cPos] = ChunkState::PENDENT2;
 							cnk[i] = std::async(std::launch::async, &WorldGenerator::generateDetail, &wGen, ch);
 							pendents++;
 						}
@@ -453,6 +490,7 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, bool overwrite, bool listUpda
 	if (listUpdate) {
 		ch->updateMesh();
 		updateNeighborChunks(cPos, bpos);
+		ch->setDirty(true);
 	}
 
 	//Actualitzam maxpos i minpos
@@ -496,7 +534,7 @@ Bloc World::getBlock(Vector3<int> pos) {
 	//cpos.floor();
 	Vector3<int> bpos = pos % CHUNKSIZE;
 	Chunk* ch = chunks[cPos];
-	if (ch == nullptr || cestat[cPos] != ChunkState::LLEST) {
+	if (ch == nullptr || (cestat[cPos] != ChunkState::LLEST && cestat[cPos] != ChunkState::TERRENY && cestat[cPos] != ChunkState::PENDENT2)) {
 		return Bloc::RES;
 	}
 	return ch->getBlock(bpos);
@@ -580,8 +618,8 @@ void World::draw(Vector3<float> pos, float dist) {
 void World::updateVisibility() {
 
 	//Obtenim el volum de possible visibilitat de la càmera
-	Vector3<int> cMin = getChunkPos(Vector3<int>(camera->xmin, camera->ymin, camera->zmin));
-	Vector3<int> cMax = getChunkPos(Vector3<int>(camera->xmax, camera->ymax, camera->zmax)) + Vector3(1,1,1);
+	Vector3<int> cMin = getChunkPos(Vector3<int>(camera->xmin, camera->ymin, camera->zmin))/* - Vector3<int>(1,1,1)*/;
+	Vector3<int> cMax = getChunkPos(Vector3<int>(camera->xmax, camera->ymax, camera->zmax))/* + Vector3(1,1,1)*/;
 
 	std::list<Vector3<int>> vChunks;
 	//printf("%d %d %d, %d %d %d\n", cMin.x, cMin.y, cMin.z, cMax.x, cMax.y, cMax.z);
@@ -590,9 +628,12 @@ void World::updateVisibility() {
 	for (cPos.x = cMin.x; cPos.x <= cMax.x; cPos.x++) { //Optimització possible: si els chunks circumdants no son visibles, aquest no ho és
 		for (cPos.z = cMin.z; cPos.z <= cMax.z; cPos.z++) {
 			for (cPos.y = cMin.y; cPos.y <= cMax.y; cPos.y++) {
-				Vector3<float> pos = Vector3<float>(cPos.x, cPos.y, cPos.z) * CHUNKSIZE;
-				float dist = Vector3<float>::module(camera->getPos() - (pos + Vector3<float>(CHUNKSIZE/2,CHUNKSIZE/2, CHUNKSIZE/2)));
-				if ((dist < CHUNKSIZE * 4) || (camera->isVisible(pos, 100) ||
+				Vector3<float> pos = Vector3<float>(cPos.x, cPos.y, cPos.z);
+				Vector3<int> camPos = this->getChunkPos(camera->getPos().toInt());
+				int dist = Vector3<int>::module(camPos - pos.toInt());
+				pos = pos * CHUNKSIZE;
+				if ((dist <= 5) || (camera->isVisible(pos, 100) ||
+						camera->isVisible(pos + Vector3<float>(CHUNKSIZE/2, CHUNKSIZE/2, CHUNKSIZE/2), 100) ||
 						camera->isVisible(pos + Vector3<float>(CHUNKSIZE, 0, 0), 100) ||
 						camera->isVisible(pos + Vector3<float>(0, 0, CHUNKSIZE), 100) ||
 						camera->isVisible(pos + Vector3<float>(CHUNKSIZE, 0, CHUNKSIZE), 100) ||
@@ -824,7 +865,7 @@ void World::drawMap(float scrAspect, Entity *ent, int y) {
 			glPushMatrix();
 			glTranslatef(mX * dX, mZ * dZ, 0);
 			Chunk* ch = chunks[cPos];
-			if (ch == nullptr) {
+			if (ch == nullptr || cestat.find(cPos) == cestat.end()) {
 				glColor3f(0,0,0);
 			}
 			else {
@@ -897,7 +938,7 @@ void World::drawMap(float scrAspect, Entity *ent, int y) {
 }
 
 
-bool World::saveRegion(Vector3<int> rPos) {
+bool World::saveRegion(Vector3<int> rPos, bool unload) {
 	const int chunkSize = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
 	char buffer[chunkSize];
 	std::fstream file; 
@@ -911,22 +952,35 @@ bool World::saveRegion(Vector3<int> rPos) {
 				Vector3<int> rPos = getRegion(Vector3<int>(x, y, z));
 				Vector3 cPos = Vector3<int>(x, y, z);
 				Chunk* ch = chunks[cPos];
-				if (ch != nullptr && cestat[cPos] == ChunkState::LLEST && ch->nblocs > 0 && ch->getDirty()) {
-					buffer[0] = static_cast<int>(ch->getBiome());
-					//Vector3<int> pos = cPos % REGIONSIZE;
-					//int loc = (pos.x % REGIONSIZE) + REGIONSIZE * ((pos.y * REGIONSIZE) + REGIONSIZE * (pos.z));
-					file.write(buffer, 1);
-					ch->getByteData(buffer);
-					//Comprimir buffer
-					Byte compr[CHUNKSIZE*CHUNKSIZE*CHUNKSIZE];
-					uLong comprLen = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
-					uLong srcLen = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
-					int err = compress(reinterpret_cast<Bytef*>(compr), &comprLen, reinterpret_cast<Bytef*>(buffer), srcLen);
-					int size = (int)comprLen;
-					file.write(reinterpret_cast<char*>(&size), sizeof(size));
-					file.write(reinterpret_cast<char*>(compr), comprLen * sizeof(Byte));
-					nChunks++;
-					ch->setDirty(false);
+				if (ch != nullptr){
+					if (cestat[cPos] == ChunkState::LLEST || cestat[cPos] == ChunkState::TERRENY) {
+						if (ch->nblocs > 0 && ch->getDirty()) {
+							buffer[0] = static_cast<int>(ch->getBiome());
+							//Vector3<int> pos = cPos % REGIONSIZE;
+							//int loc = (pos.x % REGIONSIZE) + REGIONSIZE * ((pos.y * REGIONSIZE) + REGIONSIZE * (pos.z));
+							file.write(buffer, 1);
+							ch->getByteData(buffer);
+							//Comprimir buffer
+							Byte compr[CHUNKSIZE * CHUNKSIZE * CHUNKSIZE];
+							uLong comprLen = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
+							uLong srcLen = CHUNKSIZE * CHUNKSIZE * CHUNKSIZE;
+							int err = compress(reinterpret_cast<Bytef*>(compr), &comprLen, reinterpret_cast<Bytef*>(buffer), srcLen);
+							int size = (int)comprLen;
+							file.write(reinterpret_cast<char*>(&size), sizeof(size));
+							file.write(reinterpret_cast<char*>(compr), comprLen * sizeof(Byte));
+							nChunks++;
+							ch->setDirty(false);
+						}
+						else {
+							buffer[0] = -1;
+							file.write(buffer, 1);
+						}
+						if (unload) {
+							cestat.erase(cPos);
+							delete chunks[cPos];
+							chunks.erase(cPos);
+						}
+					}
 				}
 				else {
 					buffer[0] = -1;
@@ -936,6 +990,11 @@ bool World::saveRegion(Vector3<int> rPos) {
 			}
 		}
 	}
+
+	if (unload) {
+		rloaded.erase(rPos);
+	}
+
 	file.close();
 	if (nChunks == 0) {
 		std::remove(path.c_str());
@@ -1003,6 +1062,7 @@ bool World::loadFile(std::string path) {
 				ch->updateMesh();
 				updateNeighborChunks(cPos);
 				cestat[cPos] = ChunkState::LLEST;
+				ch->setDirty(true);
 			}
 		}
 	}

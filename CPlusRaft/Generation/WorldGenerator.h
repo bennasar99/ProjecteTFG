@@ -30,6 +30,8 @@ private:
 	FastNoiseLite oceanGenNoise;
 	FastNoiseLite mountainNoise;
 
+	FastNoiseLite caveNoise;
+
 	World *world;
 	
 	int seed;
@@ -46,4 +48,6 @@ public:
 
 	Chunk* generateDetail(Chunk* chunk);
 	Chunk* generateTerrain(Vector3<int> cPos);
+
+	static bool isBiome3D(Bioma bio);
 };

@@ -23,7 +23,7 @@ GLFWwindow* window;
 //Clipping planes
 const float zNear = 0.001f;
 float zFar = 280.0f;
-float viewDist = 16;
+float viewDist = 16; //Distància de visió (en chunks)
 
 const float axisSize = zFar;
 

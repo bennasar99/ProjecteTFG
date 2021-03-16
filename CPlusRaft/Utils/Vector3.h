@@ -16,18 +16,19 @@ public:
 	Vector3<T> operator+(const Vector3<U>& b);
 	template <class U>
 	Vector3<T> operator-(const Vector3<U>& b);
-	bool operator<(const Vector3<T>& b);
+	bool operator<(const Vector3<T>& b) const;
 	float operator*(const Vector3<T>& b);
 	Vector3 operator*(T b);
 	Vector3 operator/(T b);
 	Vector3 operator%(int b);
-	bool operator!=(const Vector3<T>& b);
-	bool operator==(const Vector3<T>& b);
+	bool operator!=(const Vector3<T>& b) const;
+	bool operator==(const Vector3<T>& b) const;
 	Vector3<T> abs();
 
 	static Vector3 cross(Vector3 a, Vector3 b);
 	static float angle(Vector3 a, Vector3 b);
 	static float module(Vector3 a);
+	static float dist(Vector3 a, Vector3 b);
 	static Vector3 normalize(Vector3 a);
 
 	bool isPositive();
@@ -84,7 +85,7 @@ inline Vector3<T> Vector3<T>::operator-(const Vector3<U>& b) {
 }
 
 template <class T>
-inline bool Vector3<T>::operator<(const Vector3<T>& b) {
+inline bool Vector3<T>::operator<(const Vector3<T>& b) const {
 	return std::tuple(this->x, this->y, this->z) < std::tuple(b.x, b.y, b.z);
 }
 
@@ -132,12 +133,12 @@ inline Vector3<T> Vector3<T>::operator%(int b) {
 }
 
 template <class T>
-inline bool Vector3<T>::operator!=(const Vector3<T>& b) {
-	return(this->x != b.x || this->y != b.y || this->z != b.z);
+inline bool Vector3<T>::operator!=(const Vector3<T>& b) const {
+	return (this->x != b.x || this->y != b.y || this->z != b.z);
 }
 
 template <class T>
-inline bool Vector3<T>::operator==(const Vector3<T>& b) {
+inline bool Vector3<T>::operator==(const Vector3<T>& b) const {
 	return(this->x == b.x && this->y == b.y && this->z == b.z);
 }
 
@@ -160,6 +161,12 @@ inline float Vector3<T>::angle(Vector3<T> a, Vector3<T> b) {
 	float modA = Vector3::module(a), modB = Vector3::module(b);
 	float cosA = n1 / (modA * modB);
 	return acosf(cosA);
+}
+
+//Distància entre 2 vectors
+template <class T>
+inline float Vector3<T>::dist(Vector3<T> a, Vector3<T> b) {
+	return Vector3<T>::module(a - b);
 }
 
 //Arrodoneix les components del vector

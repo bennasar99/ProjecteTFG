@@ -14,8 +14,11 @@ Mesh::Mesh(Primitiva prim) {
 }
 
 Mesh::~Mesh() {
+	this->erase();
 	if (this->vbo != 0) {
 		glDeleteBuffers(1, &this->vbo);
+	}
+	if (this->vao != 0) {
 		glDeleteVertexArrays(1, &this->vao);
 	}
 }

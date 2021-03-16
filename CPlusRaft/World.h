@@ -46,6 +46,7 @@ enum class ChunkState {
 	LLEST,
 	TERRENY,
 	PENDENT,
+	PENDENT2,
 	CARREGAT
 };
 
@@ -153,7 +154,7 @@ public:
 	void updateVisibility();
 
 	Vector3<int> getRegion(Vector3<int> cPos);
-	bool saveRegion(Vector3<int> rPos);
+	bool saveRegion(Vector3<int> rPos, bool unload = true);
 	bool loadRegion(Vector3<int> rPos);
 	bool loadFile(std::string path);
 
