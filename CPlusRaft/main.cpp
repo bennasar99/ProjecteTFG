@@ -397,7 +397,7 @@ int main(int argc, char** argv)
 		printf("Loading world %s... \n", wname.c_str());
 		world = new World(wname, &camera);
 		//ent = new Player(world, Vector3<float>(400, 120, 400) + Vector3<float>(0, 2.0f, 0));
-		ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 2.0f, 0));
+		ent = new Player(world, Vector3<float>(0, 0, 0) + Vector3<float>(0, 2.0f, 0));
 		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
 	}
 	else {
@@ -412,10 +412,9 @@ int main(int argc, char** argv)
 		}
 		//int seed = std::atoi(sseed.c_str());
 		printf("Seed: %d\n", seed);
-		world = new World(wname, seed, 64, 16, 64, &camera); //Mides per crear mapa de biomes be i que no peti: 100, 6, 100
-		//ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 10.0f, 0));
-		ent = new Player(world, Vector3<float>(400, 80, 400) + Vector3<float>(0, 2.0f, 0));
-		world->save();
+		world = new World(wname, seed, &camera);
+		world->setRandomSpawn();
+		ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 2.0f, 0));
 	}
 	// Inicialitzam el GLFW
 	glfwInit();
@@ -518,6 +517,7 @@ int main(int argc, char** argv)
 	run = false;
 	drw.join();
 	world->save();
+	world->destroy();
 	glfwTerminate();
 	return 0;
 }

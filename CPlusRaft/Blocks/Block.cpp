@@ -377,6 +377,66 @@ bool Block::drawIcon(Bloc id) {
 	return true;
 }
 
+void Block::drawBlock(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[6]) {
+	static GLfloat vert[6][4][3] = {
+	{{-.5f, .5f, .5f},  {-.5f, .5f,-.5f},  {-.5f,-.5f,-.5f}, {-.5f,-.5f, .5f}}, // v1,v6,v7,v2 (left)
+	{{.5f, .5f, .5f},   {.5f, .5f,-.5f},  {-.5f, .5f,-.5f}, {-.5f, .5f, .5f}}, // v0,v5,v6,v1 (top)
+	{{.5f, .5f, .5f},   {.5f,-.5f, .5f},   {.5f,-.5f,-.5f},  {.5f, .5f,-.5f}}, // v0,v3,v4,v5 (right)
+	{{-.5f,-.5f,-.5f},   {.5f,-.5f,-.5f},   {.5f,-.5f, .5f}, {-.5f,-.5f, .5f}}, // v7,v4,v3,v2 (bottom)
+	{{.5f, .5f, .5f},  {-.5f, .5f, .5f},  {-.5f,-.5f, .5f},  {.5f,-.5f, .5f}}, // v0,v1,v2,v3 (front)
+	{{.5f,-.5f,-.5f},  {-.5f,-.5f,-.5f},  {-.5f, .5f,-.5f},  {.5f, .5f,-.5f}}  // v4,v7,v6,v5 (back)
+	};
+
+	// normal array
+	static GLfloat normals[6][4][3] = {
+		{{-1, 0, 0},  {-1, 0, 0},  {-1, 0, 0},  {-1, 0, 0}},  // v1,v6,v7,v2 (left)
+		{{0, 1, 0},   {0, 1, 0},   {0, 1, 0},   {0, 1, 0}},  // v0,v5,v6,v1 (top)
+		{{1, 0, 0},   {1, 0, 0},   {1, 0, 0},   {1, 0, 0}},  // v0,v3,v4,v5 (right)
+		{{0,-1, 0},   {0,-1, 0},   {0,-1, 0},   {0,-1, 0}},  // v7,v4,v3,v2 (bottom)
+		{{0, 0, 1},   {0, 0, 1},   {0, 0, 1},   {0, 0, 1}},  // v0,v1,v2,v3 (front)
+		{{0, 0,-1},   {0, 0,-1},  {0, 0,-1},   {0, 0,-1}}   // v4,v7,v6,v5 (back)
+	};
+
+	std::array<float, 4> color; //RGBA, Abstracció classe Color?
+	std::array<float, 4> tCoords;
+	Block::getBlockInfo(id, tCoords, color);
+	float xb = 0, yb = 0, xt = 0, yt = 0;
+	xb = tCoords[0]; yb = tCoords[1]; xt = tCoords[2]; yt = tCoords[3];
+
+	GLfloat text[6][4][2] =
+	{
+		{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra OK
+		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt OK
+		{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Dreta OK
+		{{xt,yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Abaix OK
+		{{xt, yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Davant OK
+		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}} //Darrera OK
+	};
+
+	for (int i = 0; i < 6; i++) {
+		if (visible[i]) {
+			for (int j = 0; j < 4; j++) {
+				float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
+				vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
+				if (Block::isTransparent(id)) {
+					cM->addVertexT(vPos, normals[i][j], color.data(), text[i][j]);
+				}
+				else {
+					cM->addVertexO(vPos, normals[i][j], color.data(), text[i][j], Primitiva::QUAD);
+				}
+			}
+			if (id == Bloc::AIGUA) { //Els líquids s'han de veure des d'abaix també
+				for (int j = 3; j >= 0; j--) {
+					float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
+					vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
+					cM->addVertexT(vPos, normals[i][j], color.data(), text[i][j]);
+				}
+			}
+		}
+	}
+
+}
+
 void Block::drawMarching(Bloc id, ChunkMesh* cM, Vector3<int> relPos, Chunk* ch) {
 
 	static Vector3<int> toCheck[8] = { Vector3(0, 0, 0), Vector3(1, 0, 0), Vector3(1, 1, 0), Vector3(0, 1, 0),

@@ -9,7 +9,7 @@ class Chunk;
 
 #define NBLOCS 26
 
-enum class Bloc {
+enum class Bloc :uint8_t {
 	RES,
 	AIGUA,
 	CUB,
@@ -64,6 +64,8 @@ public:
 	static bool canSeeThrough(Bloc tipus);
 	static bool isMarcheable(Bloc tipus);
 	static bool drawIcon(Bloc tipus);
+
+	static void drawBlock(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[6]);
 
 	//Marching cubes
 	static void drawMarching(Bloc id, ChunkMesh* cM, Vector3<int> relPos, Chunk* cnk);

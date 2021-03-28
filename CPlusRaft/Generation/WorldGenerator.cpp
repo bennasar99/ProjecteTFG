@@ -3,38 +3,31 @@
 #include "../Chunk.h"
 
 WorldGenerator::WorldGenerator(int seed, World* world) {
-	this->seed = seed;
+	this->setSeed(seed);
 
 	srand(seed);
 
 	//Oceans
 	this->oceanNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-	this->oceanNoise.SetSeed(seed*4);
 	this->oceanNoise.SetFrequency(0.004f); //0.04
 
 	//Clima (calor, templat, fred)
 	this->climateNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
-	this->climateNoise.SetSeed(seed*3);
 	this->climateNoise.SetFrequency(0.005f); //0.01
 	this->climateNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
 	//Bioma (depen del clima)
 	this->biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
-	this->biomeNoise.SetSeed(seed*2);
 	this->biomeNoise.SetFrequency(0.005f); //0.1
 	this->biomeNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
 	this->caveNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
-	this->caveNoise.SetSeed(seed * 5);
 	this->caveNoise.SetFrequency(0.05f); //0.01
 	//this->caveNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_Distance2);
 
 	this->normalNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	this->oceanGenNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	this->mountainNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-	this->normalNoise.SetSeed(seed);
-	this->mountainNoise.SetSeed(seed);
-	this->oceanGenNoise.SetSeed(seed);
 	this->normalNoise.SetFrequency(0.01f); //0.01
 	this->mountainNoise.SetFrequency(0.02f);
 	this->oceanGenNoise.SetFrequency(0.002f);
@@ -85,12 +78,13 @@ Bioma WorldGenerator::getBiomeAt(int bX, int bZ) {
 	}
 }
 
+//TODO: pot petar l'execució si és descarrega el chunk quan ja s'ha entrat aquí
 Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks dels voltants ja estan generats
 	Vector3<int> cPos = chunk->getPos();
 	float density = 0;
 	int randmax; //Com més alt, - densitat de coses
 	Bioma bio = chunk->getBiome();
-	switch (bio) {
+   	switch (bio) {
 	case Bioma::BOSC:
 		randmax = 20;
 		break;
@@ -309,18 +303,18 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 							toSet = ores[rand() % 3];
 						}
 					}
-					chunk->setBlock(new SolidBlock(toSet), pos);
+					chunk->setBlock(toSet, pos);
 				}
 				else {
 					if ((CHUNKSIZE*cPos.y + y) <= sealvl) {
 						if ((CHUNKSIZE * cPos.y + y) == sealvl && bio == Bioma::ARTIC) {
-							chunk->setBlock(new SolidBlock(Bloc::GEL), pos);
+							chunk->setBlock(Bloc::GEL, pos);
 							if (rand() % CHUNKSIZE == 0) {
-								chunk->setBlock(new LiquidBlock(Bloc::AIGUA, pos), pos);
+								chunk->setBlock(Bloc::AIGUA, pos);
 							}
 						}
 						else {
-							chunk->setBlock(new LiquidBlock(Bloc::AIGUA, pos), pos);
+							chunk->setBlock(Bloc::AIGUA, pos);
 						}
 						nblocs++;
 					}
@@ -342,4 +336,20 @@ bool WorldGenerator::isBiome3D(Bioma bio) {
 		return true;
 	}
 	return false;
+}
+
+void WorldGenerator::setSeed(int seed) {
+	this->seed = seed;
+
+	this->oceanNoise.SetSeed(seed * 4);
+	this->climateNoise.SetSeed(seed * 3);
+	this->biomeNoise.SetSeed(seed * 2);
+	this->caveNoise.SetSeed(seed * 5);
+	this->normalNoise.SetSeed(seed);
+	this->mountainNoise.SetSeed(seed);
+	this->oceanGenNoise.SetSeed(seed);
+}
+
+int WorldGenerator::getSeed() {
+	return this->seed;
 }

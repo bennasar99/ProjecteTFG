@@ -5,7 +5,8 @@ Chunk::Chunk(World* world, Vector3<int> pos) {
 	for (int x = 0; x < CHUNKSIZE; x++) {
 		for (int y = 0; y < CHUNKSIZE; y++) {
 			for (int z = 0; z < CHUNKSIZE; z++) {
-				blocs[x][y][z] = nullptr;
+				//blocs[x][y][z] = nullptr;
+				blocs[x][y][z] = Bloc::RES;
 			}
 		}
 	}
@@ -43,6 +44,7 @@ void Chunk::drawT() {
 	if (firstdraw == true) {
 		firstdraw = false;
 		cMesh.update();
+		this->updateTransparency(Vector3<float>(100, 100, 100));
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	glFrontFace(GL_CCW);
@@ -57,34 +59,34 @@ Vector3<int> Chunk::getPos() {
 	return cpos;
 }
 
-bool Chunk::setBlock(Block* bloc, Vector3<int> pos, bool overwrite) {
+bool Chunk::setBlock(Bloc bloc, Vector3<int> pos, bool overwrite) {
 	//this->dirty = true;
 	//Hi ha blocs amb les seves pròpies classes, sinó s'utilitza la classe genèrica
-	if (this->blocs[pos.x][pos.y][pos.z] != nullptr) {
+	//printf("GC %d %d %d\n", pos.x, pos.y, pos.z);
+	if (this->blocs[pos.x][pos.y][pos.z] != Bloc::RES) {
 		if (!overwrite) {
 			return false;
 		}
-		this->blocs[pos.x][pos.y][pos.z]->destroy(this->world);
-		delete this->blocs[pos.x][pos.y][pos.z];
+		/*this->blocs[pos.x][pos.y][pos.z]->destroy(this->world);
+		delete this->blocs[pos.x][pos.y][pos.z];*/
 		this->nblocs--;
 	}
-	if (bloc->getId() != Bloc::RES) {
-		this->blocs[pos.x][pos.y][pos.z] = bloc;
-		this->nblocs++;
-	}
+		
+	this->blocs[pos.x][pos.y][pos.z] = bloc;
+	this->nblocs++;
 
 	return true;
 }
 
 Bloc Chunk::getBlock(Vector3<int> pos) {
-	if (nblocs <= 0 || blocs[pos.x][pos.y][pos.z] == nullptr) {
+	if (nblocs <= 0) {
 		return Bloc::RES;
 	}
-	return blocs[pos.x][pos.y][pos.z]->getId();
+	return blocs[pos.x][pos.y][pos.z];
 }
 
 void Chunk::update(float delta) {
-	for (int x = 0; x < CHUNKSIZE; x++) {
+	/*for (int x = 0; x < CHUNKSIZE; x++) {
 			for (int z = 0; z < CHUNKSIZE; z++) {
 				if (blocs[x][lastYupd][z] != 0) {
 					blocs[x][lastYupd][z]->update(delta, this->world);
@@ -92,34 +94,35 @@ void Chunk::update(float delta) {
 			}
 	}
 	lastYupd++;
-	lastYupd %= CHUNKSIZE;
+	lastYupd %= CHUNKSIZE;*/
 }
 
 //Destructor
 Chunk::~Chunk() {
 	cMesh.erase();
-	for (int x = 0; x < CHUNKSIZE; x++) {
+	cMesh.destroy();
+	/*for (int x = 0; x < CHUNKSIZE; x++) {
 		for (int y = 0; y < CHUNKSIZE; y++) {
-			for (int z = 0; z < CHUNKSIZE; z++) {
+			for (int z = 0; z < CHUNKSIZE; z++) {W
 				if (blocs[x][y][z] != nullptr) {
 					blocs[x][y][z]->destroy(this->world);
 					delete blocs[x][y][z];
 				}
 			}
 		}
-	}
+	}*/
 	//delete[] blocs;
 }
 
 //TODO actualitzar display list
 bool Chunk::delBlock(Vector3<int> bpos, bool destroy) {
 	printf("del %d %d %d\n", bpos.x, bpos.y, bpos.z);
-  	if (this->blocs[bpos.x][bpos.y][bpos.z] != nullptr) {      
-		if (destroy) {
+  	if (this->blocs[bpos.x][bpos.y][bpos.z] != Bloc::RES) {      
+		/*if (destroy) {
 			this->blocs[bpos.x][bpos.y][bpos.z]->destroy(this->world);
-		}
-		delete this->blocs[bpos.x][bpos.y][bpos.z];
-		this->blocs[bpos.x][bpos.y][bpos.z] = 0;
+		}*/
+		/*delete this->blocs[bpos.x][bpos.y][bpos.z];*/
+		this->blocs[bpos.x][bpos.y][bpos.z] = Bloc::RES;
 		//this->den[bpos.x][bpos.y][bpos.z] = 2;
 		nblocs--;
 		this->updateMesh();
@@ -129,10 +132,10 @@ bool Chunk::delBlock(Vector3<int> bpos, bool destroy) {
 }
 
 void Chunk::interact(Vector3<int> bpos) {
-	if (blocs[bpos.x][bpos.y][bpos.z] == 0) {
+	/*if (blocs[bpos.x][bpos.y][bpos.z] == 0) {
 		return;
 	}
-	blocs[bpos.x][bpos.y][bpos.z]->interact(this->world);
+	blocs[bpos.x][bpos.y][bpos.z]->interact(this->world);*/
 }
 
 bool Chunk::isVisible(Vector3<int> bpos) {
@@ -152,20 +155,20 @@ Bloc Chunk::getBlockWorld(Vector3<int> bpos) {
 	if (bpos.x >= cpos.x * CHUNKSIZE && bpos.x < (cpos.x + 1) * CHUNKSIZE && bpos.y >= cpos.y * CHUNKSIZE &&
 		bpos.y < (cpos.y + 1) * CHUNKSIZE && bpos.z >= cpos.z * CHUNKSIZE && bpos.z < (cpos.z + 1) * CHUNKSIZE) {
 		Vector3<int> bposi = bpos % CHUNKSIZE;
-		if (this->blocs[bposi.x][bposi.y][bposi.z] == nullptr) {
+		/*if (this->blocs[bposi.x][bposi.y][bposi.z] == nullptr) {
 			return Bloc::RES;
-		}
+		}*/
 		if (bposi.x < 0 || bposi.y < 0 || bposi.z < 0) {
 			return Bloc::RES;
 		}
-		return this->blocs[bposi.x][bposi.y][bposi.z]->getId();
+		return this->blocs[bposi.x][bposi.y][bposi.z];
 	}
 	else {
 		return this->world->getBlock(bpos);
 	}
 }
 
-bool Chunk::setBlockWorld(Block* bloc, Vector3<int> bpos) {
+bool Chunk::setBlockWorld(Bloc bloc, Vector3<int> bpos) {
 	/*if (bpos.x >= world->size.x * CHUNKSIZE || bpos.y >= world->size.y * CHUNKSIZE || bpos.z >= world->size.z * CHUNKSIZE ||
 		bpos.x < 0 || bpos.y < 0 || bpos.z < 0) {
 		return false;
@@ -199,7 +202,7 @@ bool Chunk::readFromByteData(char* arr) {
 				//printf("%d ", arr[desp]);
 				Bloc tipus = static_cast<Bloc>(arr[desp++]);
 				if (tipus != Bloc::RES) {
-					world->setBlock(tipus, (this->cpos * CHUNKSIZE) + Vector3<int>(x, y, z), true, false);
+					this->setBlock(tipus, Vector3<int>(x, y, z), true); //No s'executa per què setBlock detecta que no està llest
 				}
 			}
 		}
@@ -218,8 +221,11 @@ void Chunk::updateMesh() {
 	for (int x = 0; x < CHUNKSIZE; x++) { //1a Passada: OPACS
 		for (int z = 0; z < CHUNKSIZE; z++) {
 			for (int y = 0; y < CHUNKSIZE; y++) {
-				Bloc bt;
-				if (blocs[x][y][z] == 0) {
+				Bloc bt = blocs[x][y][z];
+				if (bt == Bloc::RES && !Block::getMCEnabled()) {
+					continue;
+				}
+				/*if (blocs[x][y][z] == Bloc::RES) {
 					if (Block::getMCEnabled()) {
 						bt = Bloc::RES;
 					}
@@ -228,8 +234,8 @@ void Chunk::updateMesh() {
 					}
 				}
 				else {
-					bt = blocs[x][y][z]->getId();
-				}
+					bt = blocs[x][y][z];
+				}*/
 				Vector3 bpos = Vector3<int>(x, y, z);
 				if ((Block::isMarcheable(bt) || bt == Bloc::RES) && (Block::getMCEnabled())) {
 					Block::drawMarching(bt, &this->cMesh, bpos, this);
@@ -267,7 +273,8 @@ void Chunk::updateMesh() {
 						}
 					}
 					if (qualcun) {
-						blocs[x][y][z]->draw(&cMesh, visible, Vector3<int>(x, y, z));
+						//blocs[x][y][z]->draw(&cMesh, visible, Vector3<int>(x, y, z));
+						Block::drawBlock(blocs[x][y][z], &cMesh, bpos, visible);
 					}
 					if (Block::getMCEnabled() && Block::canSeeThrough(bt)) { //Amb els sòlids que no cobreixen totalment s'ha d'aplicar MC com si fos aire
 						Block::drawMarching(Bloc::RES, &this->cMesh, bpos, this);
@@ -277,7 +284,6 @@ void Chunk::updateMesh() {
 			}
 		}
 	}
-	
 	{
 		const std::lock_guard<std::mutex> lock(mutex);
 		this->transparent.clear();
@@ -287,10 +293,16 @@ void Chunk::updateMesh() {
 }
 
 void Chunk::updateTransparency(Vector3<float> pPos){
+	//Peta a la construcció de la llista transparent local
 	std::list<dT> transparent;
 	{
 		const std::lock_guard<std::mutex> lock(mutex);
-		transparent = std::list<dT>(this->transparent);
+		if (!this->transparent.empty()) {
+			transparent = std::list<dT>(this->transparent);
+		}
+	}
+	if (transparent.empty()) {
+		return;
 	}
 	cMesh.eraseT();
 	transparent.sort([this,pPos](dT b1, dT b2) {
@@ -314,9 +326,10 @@ void Chunk::updateTransparency(Vector3<float> pPos){
 		}
 		//printf("info %d %d %d count %d \n", info.pos.x, info.pos.y, info.pos.z, count);
 		Vector3<int> bpos = Vector3<int>(info.pos.x, info.pos.y, info.pos.z) % CHUNKSIZE;
-		if (blocs[bpos.x][bpos.y][bpos.z] != nullptr) {
+		if (blocs[bpos.x][bpos.y][bpos.z] != Bloc::RES) {
 			//printf("%d %d %d, ", bpos.y, bpos.y, bpos.z);
-			blocs[bpos.x][bpos.y][bpos.z]->draw(&cMesh, info.visible, bpos);
+			//blocs[bpos.x][bpos.y][bpos.z]->draw(&cMesh, info.visible, bpos);
+			Block::drawBlock(blocs[bpos.x][bpos.y][bpos.z], &cMesh, bpos, info.visible);
 		}
 	}
 	cMesh.updateT();

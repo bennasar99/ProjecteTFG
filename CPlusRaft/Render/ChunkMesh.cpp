@@ -82,3 +82,10 @@ void ChunkMesh::updateO() {
 void ChunkMesh::updateT() {
 	trMesh.update();
 }
+
+void ChunkMesh::destroy() {
+	tMesh.destroy();
+	oMesh.destroy();
+	lMesh.destroy();
+	trMesh.destroy();
+}

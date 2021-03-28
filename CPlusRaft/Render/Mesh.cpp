@@ -102,9 +102,16 @@ void Mesh::draw() {
 
 void Mesh::erase() {
 	this->vert.clear();
-	this->norm.clear();
-	this->col.clear();
-	this->text.clear();
+}
+
+void Mesh::destroy() {
+	this->vert.clear();
+	if (this->vbo != 0) {
+		glDeleteBuffers(1, &this->vbo);
+	}
+	if (this->vao != 0) {
+		glDeleteVertexArrays(1, &this->vao);
+	}
 }
 
 //Retorna la mida (nº vèrtexos)
@@ -114,16 +121,4 @@ int Mesh::getSize() {
 
 float* Mesh::getVertexData() {
 	return this->vert.data();
-}
-
-float* Mesh::getTexCoords() {
-	return this->text.data();
-}
-
-float* Mesh::getColors() {
-	return this->col.data();
-}
-
-float* Mesh::getNormals() {
-	return this->norm.data();
 }

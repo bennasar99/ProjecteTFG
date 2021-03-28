@@ -10,9 +10,6 @@ enum class Primitiva {
 class Mesh {
 private:
 	std::vector<float> vert;
-	std::vector<float> text;
-	std::vector<float> col;
-	std::vector<float> norm;
 
 	unsigned int vbo;
 	unsigned int vao;
@@ -26,12 +23,10 @@ public:
 	void draw();
 
 	float* getVertexData();
-	float* getTexCoords();
-	float* getColors();
-	float* getNormals();
 
 	int getSize();
 	void erase();
+	void destroy();
 
 	Mesh(Primitiva prim);
 	Mesh();

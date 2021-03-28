@@ -26,6 +26,7 @@ public:
 	void erase();
 	void eraseT();
 	void eraseO();
+	void destroy();
 
 	ChunkMesh();
 	~ChunkMesh();

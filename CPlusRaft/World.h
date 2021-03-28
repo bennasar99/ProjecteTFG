@@ -47,13 +47,14 @@ enum class ChunkState {
 	TERRENY,
 	PENDENT,
 	PENDENT2,
-	CARREGAT
+	CARREGAT,
 };
 
 enum class RegionState {
 	BUIDA,
+	PENDENT,
+	LLEST,
 	DIRTY,
-	CARREGADA
 };
 
 class World {
@@ -63,20 +64,13 @@ private:
 
 	int genCores;
 	std::vector< std::future<Chunk*> > cnk;
+	std::vector< std::future<bool> > regLoad;
 
 	WorldGenerator wGen;
 
-	//Chunk** chunks;
-	struct Vector3Compare
-	{
-		bool operator() (const Vector3<int>& lhs, const Vector3<int>& rhs) const
-		{
-			return std::make_tuple(lhs.x, lhs.y, lhs.z) < std::make_tuple(rhs.x, rhs.y, rhs.z);
-		}
-	};
-	map<Vector3<int>, Chunk*, Vector3Compare> chunks;
-	map<Vector3<int>, ChunkState, Vector3Compare> cestat;
-	map<Vector3<int>, bool, Vector3Compare> rloaded; //True si ja s'ha intentat carregar la regió de fixer
+	map<Vector3<int>, Chunk*> chunks;
+	map<Vector3<int>, ChunkState> cestat;
+	map<Vector3<int>, RegionState> restat;
 	short pendents = 0;
 
 	int sol = 0;
@@ -109,7 +103,6 @@ public:
 	void drawBloc(Bloc tipus);
 
 	bool setBlock(Bloc tipus, Vector3<int> pos, bool overwrite = true, bool listUpdate = true);
-	bool setBlock(Block* bloc, Vector3<int> pos, bool listUpdate = true);
 	Bloc getBlock(Vector3<int> pos);
 	Bloc getBlock(Vector3<float> pos);
 	Block* getBlockPointer(Vector3<int> pos, bool remove);
@@ -144,6 +137,7 @@ public:
 	void updateNeighborChunks(Vector3<int> cpos);
 
 	void update(float delta, Vector3<float> camPos);
+	bool setRandomSpawn();
 
 	/*void setRegionDirty(Vector3<int> rPos);*/
 
@@ -154,13 +148,14 @@ public:
 	void updateVisibility();
 
 	Vector3<int> getRegion(Vector3<int> cPos);
-	bool saveRegion(Vector3<int> rPos, bool unload = true);
+	bool doRegion(Vector3<int> rPos, bool save = true, bool unload = true);
 	bool loadRegion(Vector3<int> rPos);
 	bool loadFile(std::string path);
+	bool safeMod(Vector3<int> cPos);
 
 	void redrawChunks();
 
-	World(std::string name, int seed, int sizex, int sizey, int sizez, Camera* camera);
+	World(std::string name, int seed, Camera* camera);
 	World(std::string file, Camera* camera);
 	World();
 };

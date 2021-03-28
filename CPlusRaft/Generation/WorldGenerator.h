@@ -49,5 +49,8 @@ public:
 	Chunk* generateDetail(Chunk* chunk);
 	Chunk* generateTerrain(Vector3<int> cPos);
 
+	void setSeed(int seed);
+	int getSeed();
+
 	static bool isBiome3D(Bioma bio);
 };

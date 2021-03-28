@@ -10,8 +10,9 @@
 
 class Chunk {
 private:
-	Block* blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE] = {};
+	//Block* blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE] = {};
 	//int height[CHUNKSIZE][CHUNKSIZE]; //Heightmap
+	Bloc blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE] = {};
 	
 
 	Bioma bio;
@@ -32,7 +33,7 @@ private:
 			this->pos = pos;
 		};
 	};
-	std::list<dT> transparent;
+	std::list<dT> transparent = {};
 
 	std::mutex mutex;
 
@@ -46,7 +47,7 @@ public:
 
 	Vector3<int> getPos();
 
-	bool setBlock(Block* bloc, Vector3<int> bpos, bool overwrite = true);
+	bool setBlock(Bloc bloc, Vector3<int> bpos, bool overwrite = true);
 	bool delBlock(Vector3<int> bpos, bool destroy);
 	Bloc getBlock(Vector3<int> bpos);
 
@@ -55,7 +56,7 @@ public:
 
 	bool isVisible(Vector3<int> bpos);
 	Bloc getBlockWorld(Vector3<int> bpos);
-	bool setBlockWorld(Block* bloc, Vector3<int> bpos);
+	bool setBlockWorld(Bloc bloc, Vector3<int> bpos);
 
 	bool getByteData(char* arr);
 	bool readFromByteData(char* arr);
