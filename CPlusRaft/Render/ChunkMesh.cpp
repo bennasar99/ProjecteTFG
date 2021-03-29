@@ -8,7 +8,7 @@ ChunkMesh::ChunkMesh() {
 }
 
 //Estructura vertex: x,y,z, nx,ny,nz, R,G,B,A, tx,ty (12 floats)
-void ChunkMesh::addVertexO(float* vert, float* norm, float* col, float* text, Primitiva prim) {
+void ChunkMesh::addVertexO(unsigned short* vert, unsigned short* norm, unsigned char* col, unsigned short* text, Primitiva prim) {
 	switch (prim) {
 	case Primitiva::QUAD:
 		oMesh.addVertex(vert, norm, col, text);
@@ -23,7 +23,7 @@ void ChunkMesh::addVertexO(float* vert, float* norm, float* col, float* text, Pr
 }
 
 //Estructura vertex: x,y,z, nx,ny,nz, R,G,B,A, tx,ty (12 floats)
-void ChunkMesh::addVertexT(float* vert, float* norm, float* col, float* text) {
+void ChunkMesh::addVertexT(unsigned short* vert, unsigned short* norm, unsigned char* col, unsigned short* text) {
 	trMesh.addVertex(vert, norm, col, text);
 }
 
@@ -63,7 +63,7 @@ void ChunkMesh::eraseO() {
 
 
 ChunkMesh::~ChunkMesh() {
-	this->erase();
+	//this->erase();
 }
 
 void ChunkMesh::update() {
@@ -81,11 +81,4 @@ void ChunkMesh::updateO() {
 
 void ChunkMesh::updateT() {
 	trMesh.update();
-}
-
-void ChunkMesh::destroy() {
-	tMesh.destroy();
-	oMesh.destroy();
-	lMesh.destroy();
-	trMesh.destroy();
 }

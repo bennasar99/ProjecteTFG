@@ -45,7 +45,7 @@ void LiquidBlock::setLvl(int lvl) {
 //Funció de dibuixat (Del bloc/objecte tal com és, no icona)
 void LiquidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 	float yt = -0.5f + 1.0f * (this->lvl / 16);
-    GLfloat vert[6][4][3] = {
+	unsigned short vert[6][4][3] = {
     {{-.5f, yt, .5f},  {-.5f, yt,-.5f},  {-.5f,-.5f,-.5f}, {-.5f,-.5f, .5f}}, // v1,v6,v7,v2 (left)
     {{.5f, yt, .5f},   {.5f, yt,-.5f},  {-.5f, yt,-.5f}, {-.5f, yt, .5f}}, // v0,v5,v6,v1 (top)
     {{.5f, yt, .5f},   {.5f,-.5f, .5f},   {.5f,-.5f,-.5f},  {.5f, yt,-.5f}}, // v0,v3,v4,v5 (right)
@@ -55,7 +55,7 @@ void LiquidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
     };
 
     // normal array
-    GLfloat normals[6][4][3] = {
+	unsigned short normals[6][4][3] = {
         {{-1, 0, 0},  {-1, 0, 0},  {-1, 0, 0},  {-1, 0, 0}},  // v1,v6,v7,v2 (left)
         {{0, 1, 0},   {0, 1, 0},   {0, 1, 0},   {0, 1, 0}},  // v0,v5,v6,v1 (top)
         {{1, 0, 0},   {1, 0, 0},   {1, 0, 0},   {1, 0, 0}},  // v0,v3,v4,v5 (right)
@@ -65,11 +65,11 @@ void LiquidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
     };
 
     int texNum = -1; //Per defecte sense textura
-    float color[4] = { 0, 0, 0, 1 }; //RGBA, Abstracció classe Color?
+    unsigned char color[4] = { 0, 0, 0, 255 }; //RGBA, Abstracció classe Color?
 
     switch (this->id) {
 		case Bloc::AIGUA: //AIGUA
-			color[0] = 0; color[1] = 0; color[2] = 1; color[3] = 0.7f;
+			color[0] = 0; color[1] = 0; color[2] = 255; color[3] = 190;
 			break;
 	}
 
@@ -78,7 +78,7 @@ void LiquidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 	yt = 0;
 	//xb = texCoords[0]; yb = texCoords[1]; xt = texCoords[2]; yt = texCoords[3];
 
-	GLfloat text[6][4][2] =
+	unsigned short text[6][4][2] =
 	{
 		{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra OK
 		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt OK
@@ -93,12 +93,12 @@ void LiquidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 			//Doble dibuixat, com que podem entrar dins un liquid, volem que des de dins també es vegi el liquid
 			//(ex: davall aigua) tot i tenir cull face activat.
 			for (int j = 0; j < 4; j++) {
-				float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
+				unsigned short vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
 				vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
 				cM->addVertexT(vPos, normals[i][j], color, text[i][j]);
 			}
 			for (int j = 3; j >= 0; j--) {
-				float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
+				unsigned short vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
 				vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
 				cM->addVertexT(vPos, normals[i][j], color, text[i][j]);
 			}

@@ -358,3 +358,31 @@ void drawSphere(double r, int lats, int longs) {
 		glEnd();
 	}
 }
+
+//Agafat de https://stackoverflow.com/questions/22210684/16-bit-floats-and-gl-half-float
+//Afegit cas per f == 0, sinó retorna 2
+unsigned short toHFloat(float f)
+{
+	unsigned short   fltInt16 = 0;
+	int     fltInt32;
+
+	if (f == 0.0f) {
+		return 0;
+	}
+
+	memcpy(&fltInt32, &f, sizeof(float));
+	fltInt16 = ((fltInt32 & 0x7fffffff) >> 13) - (0x38000000 >> 13);
+	fltInt16 |= ((fltInt32 & 0x80000000) >> 16);
+
+	return fltInt16;
+}
+
+//EI!! Cas f == 0?
+float toFloat(unsigned short fltInt16) {
+	int fltInt32 = ((fltInt16 & 0x8000) << 16);
+	fltInt32 |= ((fltInt16 & 0x7fff) << 13) + 0x38000000;
+
+	float fRet;
+	memcpy(&fRet, &fltInt32, sizeof(float));
+	return fRet;
+}

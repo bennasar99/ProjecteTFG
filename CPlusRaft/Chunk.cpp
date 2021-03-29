@@ -99,8 +99,7 @@ void Chunk::update(float delta) {
 
 //Destructor
 Chunk::~Chunk() {
-	cMesh.erase();
-	cMesh.destroy();
+	//cMesh.erase();
 	/*for (int x = 0; x < CHUNKSIZE; x++) {
 		for (int y = 0; y < CHUNKSIZE; y++) {
 			for (int z = 0; z < CHUNKSIZE; z++) {W

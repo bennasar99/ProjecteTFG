@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 
+
 enum class Primitiva {
 	LINIA,
 	QUAD,
@@ -9,24 +10,25 @@ enum class Primitiva {
 
 class Mesh {
 private:
-	std::vector<float> vert;
+	std::vector<unsigned short> vert;
+	std::vector<GLubyte> col;
 
 	unsigned int vbo;
 	unsigned int vao;
 
 	Primitiva prim;
 
+
 public:
-	void addVertex(float* vert, float* norm, float* col, float* text);
+	void addVertex(unsigned short* vert, unsigned short* norm, unsigned char* col, unsigned short* text);
 
 	void update();
 	void draw();
 
-	float* getVertexData();
+	unsigned short* getVertexData();
 
 	int getSize();
 	void erase();
-	void destroy();
 
 	Mesh(Primitiva prim);
 	Mesh();

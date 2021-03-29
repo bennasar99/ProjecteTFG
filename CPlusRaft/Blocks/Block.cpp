@@ -1,109 +1,112 @@
 #include "Block.h"
 #include "../World.h"
+#include "../Utils.h"
 
 bool Block::marching = false;
 TextureAtlas blockAtlas = TextureAtlas(1, 22);
 
 //Les texCoords és retornen en ordre xb, yb, xt, yt i el color en RGBA
-bool Block::getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<float, 4> &color) {
+bool Block::getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<unsigned char, 4> &color) {
 	int texNum = -1; //Per defecte sense textura
 	//float color[4] = { 0, 0, 0, 1 }; //RGBA, Abstracció classe Color?
 
 	switch (id) {
 	case Bloc::CUB: //Cub vermell
-		//color[0] = 1; color[1] = 0; color[2] = 0; color[3] = 1;
-		color = { 1, 0, 0, 1 };
+		//color = { 1, 0, 0, 1 };
+		color = { 255, 0, 0, 255 };
 		break;
 	case Bloc::TERRA: //Cub marró
 		texNum = 6;
-		//color[0] = 0.5f; color[1] = 0.35f; color[2] = 0.05f; color[3] = 1;
-		color = { 0.5f, 0.35f, 0.05f, 1 };
+		//color = { 0.5f, 0.35f, 0.05f, 1 };
+		color = { 127, 90, 12, 255 };
 		break;
 	case Bloc::VIDRE: //cub transparent/opac (vidre?)
-		//color[0] = 0; color[1] = 0; color[2] = 0; color[3] = 1;
-		color = { 0, 0, 0, 1 };
+		//color = { 0, 0, 0, 1 };
+		color = { 0, 0, 0, 255 };
 		break;
 	case Bloc::FUSTA:
 		texNum = 3;
-		//color[0] = 0.76f; color[1] = 0.6f; color[2] = 0.42f; color[3] = 1;
-		color = { 0.76f, 0.6f, 0.42f, 1 };
+		//color = { 0.76f, 0.6f, 0.42f, 1 };
+		color = { 190, 160, 100, 255 };
 		break;
 	case Bloc::PEDRAW:
 		texNum = 5;
-		//color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
-		color = { 0.5f, 0.5f, 0.5f, 1 };
+		//color = { 0.5f, 0.5f, 0.5f, 1 };
+		color = { 127, 127, 127, 255 };
 		break;
 	case Bloc::PEDRA:
 		texNum = 15;
-		//color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
-		color = { 0.5f, 0.5f, 0.5f, 1 };
+		//color = { 0.5f, 0.5f, 0.5f, 1 };
+		color = { 127, 127, 127, 255 };
 		break;
 	case Bloc::PEDRAS:
 		texNum = 16;
-		//color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
-		color = { 0.5f, 0.5f, 0.5f, 1 };
+		//color = { 0.5f, 0.5f, 0.5f, 1 };
+		color = { 127, 127, 127, 255 };
 		break;
 	case Bloc::FUSTAARBRE:
 		texNum = 4;
-		//color[0] = 0.76f; color[1] = 0.6f; color[2] = 0.42f; color[3] = 1;
-		color = { 0.76f, 0.6f, 0.42f, 1 };
+		//color = { 0.76f, 0.6f, 0.42f, 1 };
+		color = { 190, 160, 100, 255 };
 		break;
 	case Bloc::FULLAARBRE:
 		texNum = 2;
-		//color[0] = 0; color[1] = 0.5f; color[2] = 0; color[3] = 1;
-		color = { 0, 0.5f, 0, 1 };
+		//color = { 0, 0.5f, 0, 1 };
+		color = { 0, 127, 0, 255 };
 		break;
 	case Bloc::NEU:
 		texNum = 1;
-		//color[0] = 1; color[1] = 1; color[2] = 1; color[3] = 1;
-		color = { 1,1,1,1 };
+		//color = { 1,1,1,1 };
+		color = { 255, 255, 255, 255 };
 		break;
 	case Bloc::GEL:
 		texNum = 7;
-		//color[0] = 0; color[1] = 0; color[2] = 1; color[3] = 0.8f;
-		color = { 0,0,1,0.8f };
+		//color = { 0,0,1,0.8f };
+		color = { 0, 0, 255, 210 };
 		break;
 	case Bloc::ARENA:
-		//color[0] = 0.929f; color[1] = 0.788f; color[2] = 0.686f; color[3] = 1;
-		color = { 0.929f, 0.788f, 0.686f, 1 };
+		//color = { 0.929f, 0.788f, 0.686f, 1 };
+		color = { 240, 200, 180, 255 };
 		texNum = 18;
 		break;
 	case Bloc::OR:
-		//color[0] = 1; color[1] = 0.843f; color[2] = 0; color[3] = 1;
-		color = { 1, 0.843f, 0, 1 };
+		//color = { 1, 0.843f, 0, 1 };
+		color = { 255, 210, 0, 255 };
 		texNum = 12;
 		break;
 	case Bloc::FANG:
-		//color[0] = 0.5f; color[1] = 0.35f; color[2] = 0.05f; color[3] = 1;
-		color = { 0.5f, 0.35f, 0.05f, 1 };
+		//color = { 0.5f, 0.35f, 0.05f, 1 };
+		color = { 127, 80, 12, 255 };
 		texNum = 8;
 		break;
 	case Bloc::FERRO:
-		//color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
-		color = { 0.5f, 0.5f, 0.5f, 1 };
+		//color = { 0.5f, 0.5f, 0.5f, 1 };
+		color = { 127, 127, 127, 255 };
 		texNum = 9;
 		break;
 	case Bloc::GRAVILLA:
-		//color[0] = 0.5f; color[1] = 0.5f; color[2] = 0.5f; color[3] = 1;
-		color = { 0.5f, 0.5f, 0.5f, 1 };
+		//color = { 0.5f, 0.5f, 0.5f, 1 };
+		color = { 127, 127, 127, 255 };
 		texNum = 14;
 		break;
 	case Bloc::CARBO:
-		//color[0] = 0.21f; color[1] = 0.271f; color[2] = 0.31f; color[3] = 1;
-		color = { 0.21f, 0.271f, 0.31f, 1 };
+		//color = { 0.21f, 0.271f, 0.31f, 1 };
+		color = { 51, 65, 75, 255 };
 		texNum = 10;
 		break;
 	case Bloc::ALTAVEU: //Cub vermell
-		color = { 0.5f, 0.5f, 0.5f, 1 };
+		//color = { 0.5f, 0.5f, 0.5f, 1 };
+		color = { 127, 127, 127, 255 };
 		texNum = 0;
 		break;
 	case Bloc::AIGUA: //Aigua
-		color = { 0, 0, 1, 0.7f };
+		//color = { 0, 0, 1, 0.7f };
+		color = { 0, 0, 255, 185 };
 		break;
 	default:
 		texCoords[0] = 0; texCoords[1] = 1; texCoords[0] = 2; texCoords[0] = 3;
-		//color[0] = 1; color[1] = 1; color[2] = 1; color[3] = 1;
-		color = { 1, 1, 1, 1 };
+		//color = { 1, 1, 1, 1 };
+		color = { 255, 255, 255, 255 };
 		return false; //Tipus invàlid
 		break;
 	}
@@ -149,7 +152,7 @@ void Block::interact(World* world) {
 };
 
 void Block::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
-	GLfloat vert[6][4][3] = {
+	unsigned short vert[6][4][3] = {
 		{{-.5f, .5f, .5f},  {-.5f, .5f,-.5f},  {-.5f,-.5f,-.5f}, {-.5f,-.5f, .5f}}, // v1,v6,v7,v2 (left)
 		{{.5f, .5f, .5f},   {.5f, .5f,-.5f},  {-.5f, .5f,-.5f}, {-.5f, .5f, .5f}}, // v0,v5,v6,v1 (top)
 		{{.5f, .5f, .5f},   {.5f,-.5f, .5f},   {.5f,-.5f,-.5f},  {.5f, .5f,-.5f}}, // v0,v3,v4,v5 (right)
@@ -159,7 +162,7 @@ void Block::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 	};
 
 	// normal array
-	GLfloat normals[6][4][3] = {
+	unsigned short normals[6][4][3] = {
 		{{-1, 0, 0},  {-1, 0, 0},  {-1, 0, 0},  {-1, 0, 0}},  // v1,v6,v7,v2 (left)
 		{{0, 1, 0},   {0, 1, 0},   {0, 1, 0},   {0, 1, 0}},  // v0,v5,v6,v1 (top)
 		{{1, 0, 0},   {1, 0, 0},   {1, 0, 0},   {1, 0, 0}},  // v0,v3,v4,v5 (right)
@@ -168,12 +171,12 @@ void Block::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 		{{0, 0,-1},   {0, 0,-1},  {0, 0,-1},   {0, 0,-1}}   // v4,v7,v6,v5 (back)
 	};
 
-	std::array<float, 4> color = { 0, 0, 0, 1 };
+	std::array<unsigned char, 4> color = { 0, 0, 0, 255 };
 	std::array<float, 4> texCoords;
 	getBlockInfo(this->id, texCoords, color);
 	float xb = texCoords[0], yb = texCoords[1], xt = texCoords[2], yt = texCoords[3];
 
-	GLfloat text[6][4][2] =
+	unsigned short text[6][4][2] =
 	{
 		{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra OK
 		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt OK
@@ -187,7 +190,7 @@ void Block::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 		if (visible[i]) {
 			for (int j = 0; j < 4; j++) {
 				float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
-				vPos[0] += (float)relPos.x; vPos[1] += (float)relPos.y; vPos[2] += (float)relPos.z;
+				vPos[0] += (unsigned short)relPos.x; vPos[1] += (unsigned short)relPos.y; vPos[2] += (unsigned short)relPos.z;
 				//cM->addVertexO(vPos, normals[i][j], color, text[i][j], Primitiva::QUAD);
 			}
 		}
@@ -231,11 +234,11 @@ bool Block::isCube(Bloc tipus) {
 
 
 bool Block::drawIcon(Bloc id) {
-	std::array<float, 4> color;
+	std::array<unsigned char, 4> color;
 	std::array<float, 4> texCoords;
 	Block::getBlockInfo(id, texCoords, color);
 	if (Block::isCube(id)) {
-		glColor4fv(color.data());
+		glColor4ubv(reinterpret_cast<GLubyte*>(color.data()));
 
 		glFrontFace(GL_CCW);
 
@@ -378,7 +381,7 @@ bool Block::drawIcon(Bloc id) {
 }
 
 void Block::drawBlock(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[6]) {
-	static GLfloat vert[6][4][3] = {
+	static float vert[6][4][3] = {
 	{{-.5f, .5f, .5f},  {-.5f, .5f,-.5f},  {-.5f,-.5f,-.5f}, {-.5f,-.5f, .5f}}, // v1,v6,v7,v2 (left)
 	{{.5f, .5f, .5f},   {.5f, .5f,-.5f},  {-.5f, .5f,-.5f}, {-.5f, .5f, .5f}}, // v0,v5,v6,v1 (top)
 	{{.5f, .5f, .5f},   {.5f,-.5f, .5f},   {.5f,-.5f,-.5f},  {.5f, .5f,-.5f}}, // v0,v3,v4,v5 (right)
@@ -388,22 +391,22 @@ void Block::drawBlock(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[
 	};
 
 	// normal array
-	static GLfloat normals[6][4][3] = {
-		{{-1, 0, 0},  {-1, 0, 0},  {-1, 0, 0},  {-1, 0, 0}},  // v1,v6,v7,v2 (left)
-		{{0, 1, 0},   {0, 1, 0},   {0, 1, 0},   {0, 1, 0}},  // v0,v5,v6,v1 (top)
-		{{1, 0, 0},   {1, 0, 0},   {1, 0, 0},   {1, 0, 0}},  // v0,v3,v4,v5 (right)
-		{{0,-1, 0},   {0,-1, 0},   {0,-1, 0},   {0,-1, 0}},  // v7,v4,v3,v2 (bottom)
-		{{0, 0, 1},   {0, 0, 1},   {0, 0, 1},   {0, 0, 1}},  // v0,v1,v2,v3 (front)
-		{{0, 0,-1},   {0, 0,-1},  {0, 0,-1},   {0, 0,-1}}   // v4,v7,v6,v5 (back)
+	static float normals[6][4][3] = {
+		{{-1.0f, 0, 0},  {-1.0f, 0, 0},  {-1.0f, 0, 0},  {-1.0f, 0, 0}},  // v1,v6,v7,v2 (left)
+		{{0, 1.0f, 0},   {0, 1.0f, 0},   {0, 1.0f, 0},   {0, 1.0f, 0}},  // v0,v5,v6,v1 (top)
+		{{1.0f, 0, 0},   {1.0f, 0, 0},   {1.0f, 0, 0},   {1.0f, 0, 0}},  // v0,v3,v4,v5 (right)
+		{{0,-1.0f, 0},   {0,-1.0f, 0},   {0,-1.0f, 0},   {0,-1.0f, 0}},  // v7,v4,v3,v2 (bottom)
+		{{0, 0, 1.0f},   {0, 0, 1.0f},   {0, 0, 1.0f},   {0, 0, 1.0f}},  // v0,v1,v2,v3 (front)
+		{{0, 0,-1.0f},   {0, 0,-1.0f},  {0, 0,-1.0f},   {0, 0,-1.0f}}   // v4,v7,v6,v5 (back)
 	};
 
-	std::array<float, 4> color; //RGBA, Abstracció classe Color?
+	std::array<unsigned char, 4> color; //RGBA, Abstracció classe Color?
 	std::array<float, 4> tCoords;
 	Block::getBlockInfo(id, tCoords, color);
 	float xb = 0, yb = 0, xt = 0, yt = 0;
 	xb = tCoords[0]; yb = tCoords[1]; xt = tCoords[2]; yt = tCoords[3];
 
-	GLfloat text[6][4][2] =
+	float text[6][4][2] =
 	{
 		{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra OK
 		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt OK
@@ -416,20 +419,24 @@ void Block::drawBlock(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[
 	for (int i = 0; i < 6; i++) {
 		if (visible[i]) {
 			for (int j = 0; j < 4; j++) {
-				float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
-				vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
+				unsigned short normalsN[3] = { toHFloat(normals[i][j][0]), toHFloat(normals[i][j][1]), toHFloat(normals[i][j][2]) };
+				//printf("norm %f %f %f\n", toFloat(normalsN[0]), toFloat(normalsN[1]), toFloat(normalsN[2]));
+				unsigned short textN[2] = { toHFloat(text[i][j][0]), toHFloat(text[i][j][1]) };
+				unsigned short vPos[3] = { toHFloat(vert[i][j][0] + float(relPos.x)), toHFloat(vert[i][j][1] + float(relPos.y)), toHFloat(vert[i][j][2] + float(relPos.z)) };
+				//vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
 				if (Block::isTransparent(id)) {
-					cM->addVertexT(vPos, normals[i][j], color.data(), text[i][j]);
+					cM->addVertexT(vPos, normalsN, color.data(), textN);
 				}
 				else {
-					cM->addVertexO(vPos, normals[i][j], color.data(), text[i][j], Primitiva::QUAD);
+					cM->addVertexO(vPos, normalsN, color.data(), textN, Primitiva::QUAD);
 				}
 			}
 			if (id == Bloc::AIGUA) { //Els líquids s'han de veure des d'abaix també
 				for (int j = 3; j >= 0; j--) {
-					float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
-					vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
-					cM->addVertexT(vPos, normals[i][j], color.data(), text[i][j]);
+					unsigned short normalsN[3] = { toHFloat(normals[i][j][0]), toHFloat(normals[i][j][1]), toHFloat(normals[i][j][2]) };
+					unsigned short textN[2] = { toHFloat(text[i][j][0]), toHFloat(text[i][j][1]) };
+					unsigned short vPos[3] = { toHFloat(vert[i][j][0] + float(relPos.x)), toHFloat(vert[i][j][1] + float(relPos.y)), toHFloat(vert[i][j][2] + float(relPos.z)) };
+					cM->addVertexT(vPos, normalsN, color.data(), textN);
 				}
 			}
 		}
@@ -482,11 +489,11 @@ void Block::drawMarching(Bloc id, ChunkMesh* cM, Vector3<int> relPos, Chunk* ch)
 		bt = id;
 	}
 
-	std::array<float, 4> color; //RGBA, Abstracció classe Color?
+	std::array<unsigned char, 4> color; //RGBA, Abstracció classe Color?
 	std::array<float, 4> tCoords;
 	Block::getBlockInfo(bt, tCoords, color);
 	float xb = tCoords[0], yb = tCoords[1], xt = tCoords[2], yt = tCoords[3];
-	float text[4][2]{
+	unsigned short text[4][2]{
 		{xb, yb},
 		{xb, yt},
 		{xt, yb},
@@ -500,9 +507,9 @@ void Block::drawMarching(Bloc id, ChunkMesh* cM, Vector3<int> relPos, Chunk* ch)
 	for (it = toDraw.begin(); it != toDraw.end(); it++) {
 
 		Vector3 normalV = *it2;
-		float normal[3] = { -normalV.x, -normalV.y, -normalV.z };
+		unsigned short normal[3] = { -normalV.x, -normalV.y, -normalV.z };
 		Vector3 pos = *it;
-		float vPos[3] = { pos.x, pos.y, pos.z };
+		unsigned short vPos[3] = { pos.x, pos.y, pos.z };
 		vPos[0] += relPos.x - 0.5f; vPos[1] += relPos.y - 0.5f; vPos[2] += relPos.z - 0.5f; //-0.5f per compensar
 		cM->addVertexO(vPos, normal, color.data(), text[i], Primitiva::TRIANGLE);
 		i++;

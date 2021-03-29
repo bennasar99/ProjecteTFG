@@ -79,7 +79,7 @@ void SpreadBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 	};
 
     int texNum = -1; //Per defecte sense textura
-    float color[4] = { 0, 1, 0, 1 }; //Verd
+    unsigned char color[4] = { 0, 255, 0, 255 }; //Verd
 
 	//float* texCoords = TextureManager::getTexCoords(texNum);
 	float xb = 0, yb = 0, xt = 0, yt = 0;
@@ -87,9 +87,9 @@ void SpreadBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 
 	for (int i = 0; i < 17; i++) {
 		for (int j = 0; j < 2; j++) {
-			float normal[3] = { 0,1,0 };
-			float text[2] = { 0,0 };
-			float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
+			unsigned short normal[3] = { 0,1,0 };
+			unsigned short text[2] = { 0,0 };
+			unsigned short vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
 			vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
 			cM->addVertexO(vPos, normal, color, text, Primitiva::LINIA);
 		}

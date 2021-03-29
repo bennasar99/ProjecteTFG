@@ -57,7 +57,7 @@ public:
 	Bloc getId();
 	void setId(Bloc id);
 
-	static bool getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<float, 4>& color);
+	static bool getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<unsigned char, 4>& color);
 	static bool isTransparent(Bloc tipus);
 	static bool isSolid(Bloc tipus);
 	static bool isCube(Bloc tipus);

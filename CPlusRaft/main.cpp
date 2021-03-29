@@ -402,6 +402,11 @@ int main(int argc, char** argv)
 	}
 	else {
 		//Si no, el cream
+		float f = 0.0f;
+		printf("float %f\n", f);
+		unsigned short s = toHFloat(f);
+		float f2 = toFloat(s);
+		printf("float2 %f\n", f2);
 		printf("Creating world %s... \n", wname.c_str());
 		printf("Seed: ");
 		std::string sseed;
@@ -501,6 +506,7 @@ int main(int argc, char** argv)
 	//fShader.use();
 	//Shader vShader = Shader(GL_VERTEX_SHADER, "vertex.glsl");
 	//vShader.use();
+	
 
 	std::thread drw(Draw);
 	glfwMakeContextCurrent(NULL);

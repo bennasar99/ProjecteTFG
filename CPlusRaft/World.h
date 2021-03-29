@@ -32,6 +32,8 @@
 #include "Utils/ThreadManager.h"
 #include "lib/zlib/zlib.h"
 
+#include "ChunkManager.h"
+
 using namespace std;
 #define REGIONSIZE 16
 #define SPAWNSIZE 100
@@ -41,25 +43,9 @@ class Block;
 class LightBlock;
 class Pendul;
 
-enum class ChunkState {
-	BUIT,
-	LLEST,
-	TERRENY,
-	PENDENT,
-	PENDENT2,
-	CARREGAT,
-};
-
-enum class RegionState {
-	BUIDA,
-	PENDENT,
-	LLEST,
-	DIRTY,
-};
-
 class World {
 private:
-
+	std::shared_mutex sMutex;
 	double lastTime;
 
 	int genCores;
@@ -67,10 +53,9 @@ private:
 	std::vector< std::future<bool> > regLoad;
 
 	WorldGenerator wGen;
+	ChunkManager cM;
 
 	map<Vector3<int>, Chunk*> chunks;
-	map<Vector3<int>, ChunkState> cestat;
-	map<Vector3<int>, RegionState> restat;
 	short pendents = 0;
 
 	int sol = 0;

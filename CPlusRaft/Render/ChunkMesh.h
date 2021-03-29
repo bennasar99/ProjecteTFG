@@ -14,8 +14,8 @@ private:
 	Primitiva prim;
 
 public:
-	void addVertexO(float* vert, float* norm, float* col, float* text, Primitiva prim);
-	void addVertexT(float* vert, float* norm, float* col, float* text);
+	void addVertexO(unsigned short* vert, unsigned short* norm, unsigned char* col, unsigned short* text, Primitiva prim);
+	void addVertexT(unsigned short* vert, unsigned short* norm, unsigned char* col, unsigned short* text);
 
 	void drawO();
 	void drawT();
@@ -26,7 +26,6 @@ public:
 	void erase();
 	void eraseT();
 	void eraseO();
-	void destroy();
 
 	ChunkMesh();
 	~ChunkMesh();

@@ -1,30 +1,34 @@
 #include <GL/glew.h>
 #include "Mesh.h"
-
+#include "../Utils/ThreadManager.h"
 Mesh::Mesh() {
 	this->prim = Primitiva::TRIANGLE;
 	this->vbo = 0;
 	this->vao = 0;
+	this->vert.shrink_to_fit();
 }
 
 Mesh::Mesh(Primitiva prim) {
 	this->prim = prim;
 	this->vbo = 0;
 	this->vao = 0;
+	this->vert.shrink_to_fit();
 }
 
 Mesh::~Mesh() {
-	this->erase();
-	if (this->vbo != 0) {
-		glDeleteBuffers(1, &this->vbo);
-	}
 	if (this->vao != 0) {
-		glDeleteVertexArrays(1, &this->vao);
+		ThreadManager::removeVAO(this->vao);
+		//glDeleteVertexArrays(0, &this->vao);
 	}
+	if (this->vbo != 0) {
+		ThreadManager::removeVBO(this->vbo);
+		//glDeleteBuffers(0, &this->vbo);
+	}
+	//this->erase();
 }
 
 //Estructura vertex: x,y,z, nx,ny,nz, R,G,B,A, tx,ty (12 floats)
-void Mesh::addVertex(float* vert, float* norm, float* col, float* text) {
+void Mesh::addVertex(unsigned short* vert, unsigned short* norm, unsigned char* col, unsigned short* text) {
 	for (int i = 0; i < 3; i++) {
 		this->vert.push_back(vert[i]);
 	}
@@ -32,7 +36,8 @@ void Mesh::addVertex(float* vert, float* norm, float* col, float* text) {
 		this->vert.push_back(norm[i]);
 	}
 	for (int i = 0; i < 4; i++) {
-		this->vert.push_back(col[i]);
+		//this->vert.push_back((float)col[i]);
+		this->col.push_back(col[i]);
 	}
 	for (int i = 0; i < 2; i++) {
 		this->vert.push_back(text[i]);
@@ -40,36 +45,53 @@ void Mesh::addVertex(float* vert, float* norm, float* col, float* text) {
 }
 
 void Mesh::update() {
-	//Eliminam el VAO i el VBO
-	glDeleteBuffers(1, &this->vbo);
-	glDeleteVertexArrays(1, &this->vao);
+	if (this->vert.size() == 0) {
+		return;
+	}
 
+
+	//Eliminam el VAO i el VBO
+	if (this->vbo != 0) {
+		glDeleteBuffers(1, &this->vbo);
+	}
+
+	if (this->vao == 0) {
+		glGenVertexArrays(1, &this->vao);
+	}
+	if (this->vbo == 0) {
+		glGenBuffers(1, &this->vbo);
+	}
 	//Generam el VAO i el VBO
-	glGenVertexArrays(1, &this->vao);
-	glGenBuffers(1, &this->vbo);
 
 	//Mides array
-	size_t vS = this->vert.size() * sizeof(float);
+	size_t vS = this->vert.size() * sizeof(unsigned short);
+	size_t cS = this->col.size() * sizeof(unsigned char);
 
 	glBindVertexArray(this->vao); //Attach al VAO
 
 	//Preparació VBO
 	glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
-	glBufferData(GL_ARRAY_BUFFER, vS, 0, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vS + cS, 0, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, vS, this->vert.data());
+	glBufferSubData(GL_ARRAY_BUFFER, vS, cS, this->col.data());
 	
 	//Punters VAO
-	void* nO = (void*)(3 * sizeof(float));
-	void* cO = (void*)(6 * sizeof(float));
-	void* tO = (void*)(10 * sizeof(float));
+	void* nO = (void*)(3 * sizeof(unsigned short));
+	void* tO = (void*)(6 * sizeof(unsigned short));
+	void* cO = (void*)(8 * sizeof(unsigned short));
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glVertexPointer(3, GL_FLOAT, sizeof(float) * 12, 0);
-	glNormalPointer(GL_FLOAT, sizeof(float) * 12, nO);
-	glColorPointer(4, GL_FLOAT, sizeof(float) * 12, cO);
-	glTexCoordPointer(2, GL_FLOAT, sizeof(float) * 12, tO);
+
+	size_t sepV = sizeof(unsigned short) * 8;
+	size_t sepC = sizeof(unsigned char) * 4;
+
+	//TODO: tipus menys pesats HALF FLOAT
+	glVertexPointer(3, GL_HALF_FLOAT, sepV , 0); //Min = short
+	glNormalPointer(GL_HALF_FLOAT, sepV, nO); //Min = byte
+	glTexCoordPointer(2, GL_HALF_FLOAT, sepV, tO); //Min = short
+	glColorPointer(4, GL_UNSIGNED_BYTE, sepC, (void*)vS); //Min = (unsigned) byte
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //Deattach VBO
 	glBindVertexArray(0); //Deattach VAO
@@ -84,16 +106,18 @@ void Mesh::update() {
 void Mesh::draw() {
 	glBindVertexArray(this->vao);
 
+	size_t count = this->vert.size() / 8;
+
 	//size dividit entre 12 per què hem de tenir en compte totes les dades (3 pos + 3 normal + 4 color + 2 text)
 	switch (this->prim) {
 	case Primitiva::QUAD:
-		glDrawArrays(GL_QUADS, 0, this->vert.size() / 12);
+		glDrawArrays(GL_QUADS, 0, count );
 		break;
 	case Primitiva::LINIA:
-		glDrawArrays(GL_LINES, 0, this->vert.size() / 12);
+		glDrawArrays(GL_LINES, 0, count);
 		break;
 	case Primitiva::TRIANGLE:
-		glDrawArrays(GL_TRIANGLES, 0, this->vert.size() / 12);
+		glDrawArrays(GL_TRIANGLES, 0, count);
 		break;
 	}
 
@@ -102,23 +126,15 @@ void Mesh::draw() {
 
 void Mesh::erase() {
 	this->vert.clear();
+	this->col.clear();
 }
 
-void Mesh::destroy() {
-	this->vert.clear();
-	if (this->vbo != 0) {
-		glDeleteBuffers(1, &this->vbo);
-	}
-	if (this->vao != 0) {
-		glDeleteVertexArrays(1, &this->vao);
-	}
-}
 
 //Retorna la mida (nº vèrtexos)
 int Mesh::getSize() {
 	return this->vert.size() / 3;
 }
 
-float* Mesh::getVertexData() {
+unsigned short* Mesh::getVertexData() {
 	return this->vert.data();
 }
