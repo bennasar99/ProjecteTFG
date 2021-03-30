@@ -185,8 +185,7 @@ void Block::draw(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[6]) {
 			for (int j = 0; j < 2; j++) {
 				unsigned short normal[3] = { 0,1,0 };
 				unsigned short text[2] = { 0,0 };
-				unsigned short vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
-				vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
+				unsigned short vPos[3] = { toHFloat(vert[i][j][0] + relPos.x), toHFloat(vert[i][j][1] + relPos.y), toHFloat(vert[i][j][2] + relPos.z) };
 				cM->addVertexO(vPos, normal, color, text, Primitiva::LINIA);
 			}
 		}
