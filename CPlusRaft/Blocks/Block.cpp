@@ -151,49 +151,52 @@ void Block::interact(World* world) {
 	}*/
 };
 
-void Block::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
-	unsigned short vert[6][4][3] = {
-		{{-.5f, .5f, .5f},  {-.5f, .5f,-.5f},  {-.5f,-.5f,-.5f}, {-.5f,-.5f, .5f}}, // v1,v6,v7,v2 (left)
-		{{.5f, .5f, .5f},   {.5f, .5f,-.5f},  {-.5f, .5f,-.5f}, {-.5f, .5f, .5f}}, // v0,v5,v6,v1 (top)
-		{{.5f, .5f, .5f},   {.5f,-.5f, .5f},   {.5f,-.5f,-.5f},  {.5f, .5f,-.5f}}, // v0,v3,v4,v5 (right)
-		{{-.5f,-.5f,-.5f},   {.5f,-.5f,-.5f},   {.5f,-.5f, .5f}, {-.5f,-.5f, .5f}}, // v7,v4,v3,v2 (bottom)
-		{{.5f, .5f, .5f},  {-.5f, .5f, .5f},  {-.5f,-.5f, .5f},  {.5f,-.5f, .5f}}, // v0,v1,v2,v3 (front)
-		{{.5f,-.5f,-.5f},  {-.5f,-.5f,-.5f},  {-.5f, .5f,-.5f},  {.5f, .5f,-.5f}}  // v4,v7,v6,v5 (back)
-	};
+void Block::draw(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[6]) {
+	switch (id) {
+	case Bloc::HERBA: {
+		GLfloat vert[17][2][3] = {
+			{ {0.5, 0.5, 0.5}, {0.5, -0.5, 0.5} },
+			{ {-0.5, 0.5, 0.5}, {-0.5, -0.5, 0.5}},
+			{ {0.5, 0.5, -0.5}, {0.5, -0.5, -0.5} },
+			{ {-0.5, 0.5, -0.5}, { -0.5, -0.5, -0.5}},
+			{ {0.0, 0.5, 0.0}, { 0.0, -0.5, 0.0}},
+			{ {0.5, 0.5, 0.0}, { 0.5, -0.5, 0.0}},
+			{ {0.0, 0.5, 0.5}, { 0.0, -0.5, 0.5}},
+			{ {-0.5, 0.5, 0.0}, { -0.5, -0.5, 0.0}},
+			{ {0.0, 0.5, -0.5}, { 0.0, -0.5, -0.5}},
+			{ {0.25, 0.5, 0.25}, { 0.25, -0.5, 0.25}},
+			{ {-0.25, 0.5, 0.25}, { -0.25, -0.5, 0.25}},
+			{ {0.25, 0.5, -0.25}, { 0.25, -0.5, -0.25}},
+			{ {-0.25, 0.5, -0.25}, { -0.25, -0.5, -0.25}},
+			{ {0.25, 0.5, 0}, { 0.25, -0.5, 0}},
+			{ {0, 0.5, 0.25}, { 0, -0.5, 0.25}},
+			{ {-0.25, 0.5, 0}, { -0.25, -0.5, 0}},
+			{ {0, 0.5, -0.25}, { 0, -0.5, -0.25}}
+		};
 
-	// normal array
-	unsigned short normals[6][4][3] = {
-		{{-1, 0, 0},  {-1, 0, 0},  {-1, 0, 0},  {-1, 0, 0}},  // v1,v6,v7,v2 (left)
-		{{0, 1, 0},   {0, 1, 0},   {0, 1, 0},   {0, 1, 0}},  // v0,v5,v6,v1 (top)
-		{{1, 0, 0},   {1, 0, 0},   {1, 0, 0},   {1, 0, 0}},  // v0,v3,v4,v5 (right)
-		{{0,-1, 0},   {0,-1, 0},   {0,-1, 0},   {0,-1, 0}},  // v7,v4,v3,v2 (bottom)
-		{{0, 0, 1},   {0, 0, 1},   {0, 0, 1},   {0, 0, 1}},  // v0,v1,v2,v3 (front)
-		{{0, 0,-1},   {0, 0,-1},  {0, 0,-1},   {0, 0,-1}}   // v4,v7,v6,v5 (back)
-	};
+		int texNum = -1; //Per defecte sense textura
+		unsigned char color[4] = { 0, 255, 0, 255 }; //Verd
 
-	std::array<unsigned char, 4> color = { 0, 0, 0, 255 };
-	std::array<float, 4> texCoords;
-	getBlockInfo(this->id, texCoords, color);
-	float xb = texCoords[0], yb = texCoords[1], xt = texCoords[2], yt = texCoords[3];
+		//float* texCoords = TextureManager::getTexCoords(texNum);
+		float xb = 0, yb = 0, xt = 0, yt = 0;
+		//xb = texCoords[0]; yb = texCoords[1]; xt = texCoords[2]; yt = texCoords[3];
 
-	unsigned short text[6][4][2] =
-	{
-		{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra OK
-		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt OK
-		{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Dreta OK
-		{{xt,yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Abaix OK
-		{{xt, yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Davant OK
-		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}} //Darrera OK
-	};
-
-	for (int i = 0; i < 6; i++) {
-		if (visible[i]) {
-			for (int j = 0; j < 4; j++) {
-				float vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
-				vPos[0] += (unsigned short)relPos.x; vPos[1] += (unsigned short)relPos.y; vPos[2] += (unsigned short)relPos.z;
-				//cM->addVertexO(vPos, normals[i][j], color, text[i][j], Primitiva::QUAD);
+		for (int i = 0; i < 17; i++) {
+			for (int j = 0; j < 2; j++) {
+				unsigned short normal[3] = { 0,1,0 };
+				unsigned short text[2] = { 0,0 };
+				unsigned short vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
+				vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
+				cM->addVertexO(vPos, normal, color, text, Primitiva::LINIA);
 			}
 		}
+		break;
+	}
+	case Bloc::HERBAFULL:
+		break;
+	default:
+		Block::drawBlock(id, cM, relPos, visible);
+		break;
 	}
 }
 
@@ -493,7 +496,7 @@ void Block::drawMarching(Bloc id, ChunkMesh* cM, Vector3<int> relPos, Chunk* ch)
 	std::array<float, 4> tCoords;
 	Block::getBlockInfo(bt, tCoords, color);
 	float xb = tCoords[0], yb = tCoords[1], xt = tCoords[2], yt = tCoords[3];
-	unsigned short text[4][2]{
+	float text[4][2]{
 		{xb, yb},
 		{xb, yt},
 		{xt, yb},
@@ -507,11 +510,11 @@ void Block::drawMarching(Bloc id, ChunkMesh* cM, Vector3<int> relPos, Chunk* ch)
 	for (it = toDraw.begin(); it != toDraw.end(); it++) {
 
 		Vector3 normalV = *it2;
-		unsigned short normal[3] = { -normalV.x, -normalV.y, -normalV.z };
+		unsigned short normal[3] = { toHFloat(-normalV.x), toHFloat(-normalV.y), toHFloat(-normalV.z) };
 		Vector3 pos = *it;
-		unsigned short vPos[3] = { pos.x, pos.y, pos.z };
-		vPos[0] += relPos.x - 0.5f; vPos[1] += relPos.y - 0.5f; vPos[2] += relPos.z - 0.5f; //-0.5f per compensar
-		cM->addVertexO(vPos, normal, color.data(), text[i], Primitiva::TRIANGLE);
+		unsigned short vPos[3] = { toHFloat(pos.x + relPos.x - 0.5f), toHFloat(pos.y + relPos.y - 0.5f), toHFloat(pos.z + relPos.z -0.5f) }; //-0.5f per compensar
+		unsigned short textN[2] = { toHFloat(text[i][0]), toHFloat(text[i][1]) };
+		cM->addVertexO(vPos, normal, color.data(), textN, Primitiva::TRIANGLE);
 		i++;
 		if (i == 3) {
 			i = 0;

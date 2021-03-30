@@ -218,7 +218,7 @@ void World::update(float delta, Vector3<float> pos) {
 
 	std::list<Vector3<int>> toDelete;
 	{
-		std::shared_lock lock(sMutex);
+		//std::shared_lock lock(sMutex);
 		std::map<Vector3<int>, Chunk*>::iterator cit;
 		for (cit = chunks.begin(); cit != chunks.end(); cit++) {
 			Chunk* ch = cit->second;
@@ -571,8 +571,8 @@ Bloc World::getBlock(Vector3<int> pos) {
 	//cpos.floor();
 	Vector3<int> bpos = pos % CHUNKSIZE;
 	Chunk* ch = chunks[cPos];
-	if (ch == nullptr || (cM.getChunkState(cPos) != ChunkState::LLEST && cM.getChunkState(cPos) != ChunkState::TERRENY && cM.getChunkState(cPos) != ChunkState::PENDENT2 && cM.getChunkState(cPos) != ChunkState::CARREGAT)) {
-		return Bloc::RES;
+	if (ch == nullptr /*|| (cM.getChunkState(cPos) != ChunkState::LLEST && cM.getChunkState(cPos) != ChunkState::TERRENY && cM.getChunkState(cPos) != ChunkState::PENDENT2 && cM.getChunkState(cPos) != ChunkState::CARREGAT)*/) {
+		return Bloc::LIMIT;
 	}
 	return ch->getBlock(bpos);
 }
@@ -599,7 +599,7 @@ Block* World::getBlockPointer(Vector3<int> pos, bool remove) {
 
 //Dibuixa el món visible
 void World::draw(Vector3<float> pos, float dist) {
-	ThreadManager::removeBuffers();
+	RenderManager::removeBuffers();
 	std::list<Entity*>::iterator ent;
 	for (ent = entities.begin(); (ent != entities.end()); ent++) {
 		Vector3<float> pos = (*ent)->getPos();
@@ -805,17 +805,20 @@ Entity* World::getNearestEntity(Vector3<float> pos, float range, bool controllab
 }
 
 void World::updateNeighborChunks(Vector3<int> cPos) {
+	//printf("Update des de %d %d %d\n", cPos.x, cPos.y, cPos.z);
 	Vector3<int> oPos;
 	for (oPos.x = cPos.x - 1; oPos.x <= (cPos.x + 1); oPos.x++) {
 		for (oPos.y = cPos.y - 1; oPos.y <= (cPos.y + 1); oPos.y++) {
 			for (oPos.z = cPos.z - 1; oPos.z <= (cPos.z + 1); oPos.z++) {
+				Vector3<int> rPos = getRegion(cPos);
 				if (oPos == cPos) {
 					continue;
 				}
-				if (chunks[oPos] == nullptr || (cM.getChunkState(oPos) != ChunkState::LLEST && cM.getChunkState(oPos) != ChunkState::CARREGAT)) {
+				if (chunks[oPos] == nullptr || (cM.getRegionState(rPos) != RegionState::LLEST && cM.getRegionState(rPos) != RegionState::DIRTY) /* || (cM.getChunkState(oPos) != ChunkState::LLEST && cM.getChunkState(oPos) != ChunkState::CARREGAT && cM.getChunkState(oPos) != ChunkState::PENDENT2 && cM.getChunkState(oPos) != ChunkState::TERRENY)*/) {
 					continue;
 				}
 				chunks[oPos]->updateMesh();
+				//printf("Actualitzam %d %d %d\n", oPos.x, oPos.y, oPos.z);
 			}
 		}
 	}
@@ -841,6 +844,7 @@ void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
 	else if (bpos.z == 0) {
 		toUpdate.push_front(cpos - Vector3<int>(0, 0, 1));
 	}
+	//printf("Update des de %d %d %d\n", cpos.x, cpos.y, cpos.z);
 	std::list<Vector3<int>>::iterator chunki;
 	for (chunki = toUpdate.begin(); (chunki != toUpdate.end()); chunki++) {
 		if (!safeMod(*chunki)) {
@@ -851,7 +855,7 @@ void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
 			ch = new Chunk(this, *chunki);
 			chunks[*chunki] = ch;
 		}
-
+		//printf("Actualitzam %d %d %d\n", (*chunki).x, (*chunki).y, (*chunki).z);
 		ch->updateMesh();
 	}
 }
@@ -1022,7 +1026,7 @@ bool World::doRegion(Vector3<int> rPos, bool save, bool unload) {
 						//vChunks.remove(cPos); //Per si de cas
 						cM.removeChunk(cPos);
 						{
-							std::unique_lock lock(sMutex);
+							//std::unique_lock lock(sMutex); //SI PETA TORNAR ACTIVAR AQUÍ I A S'ALTRA
 							delete chunks[cPos];
 							chunks.erase(cPos);
 						}
@@ -1075,7 +1079,6 @@ bool World::loadFile(std::string path) {
 	size_t f4 = s3.find(".", 1);
 	int rZ = atoi(s3.substr(0, f4).c_str());
 	Vector3<int> rPos = Vector3<int>(rX, rY, rZ);
-	printf("Loaded region %d %d %d\n", rPos.x, rPos.y, rPos.z);
 	std::vector<Chunk*> cR; //Chunks de la regió (per fer updateMesh després
 	for (int x = rPos.x * REGIONSIZE; x < (rPos.x + 1) * REGIONSIZE; x++) {
 		for (int y = rPos.y * REGIONSIZE; y < (rPos.y + 1) * REGIONSIZE; y++) {
@@ -1119,7 +1122,7 @@ bool World::loadFile(std::string path) {
 		ch->updateMesh();
 		Vector3<int> cPos = ch->getPos();
 		if (cPos.x % REGIONSIZE == 0 || cPos.x % REGIONSIZE == REGIONSIZE - 1 || cPos.y % REGIONSIZE == 0 || cPos.y % REGIONSIZE == REGIONSIZE - 1 || cPos.z % REGIONSIZE == 0 || cPos.z % REGIONSIZE == REGIONSIZE - 1) {
-			//updateNeighborChunks(cPos); //PETA perquè se fa updatemesh quan l'altre una regió circumdant ho pot estar fent
+			updateNeighborChunks(cPos); //PETA perquè se fa updatemesh quan l'altre una regió circumdant ho pot estar fent
 		}
 		cM.setChunkState(cPos, ChunkState::LLEST);
 	}

@@ -1,6 +1,6 @@
 #include <GL/glew.h>
 #include "Mesh.h"
-#include "../Utils/ThreadManager.h"
+#include "../Utils/RenderManager.h"
 Mesh::Mesh() {
 	this->prim = Primitiva::TRIANGLE;
 	this->vbo = 0;
@@ -17,11 +17,11 @@ Mesh::Mesh(Primitiva prim) {
 
 Mesh::~Mesh() {
 	if (this->vao != 0) {
-		ThreadManager::removeVAO(this->vao);
+		RenderManager::removeVAO(this->vao);
 		//glDeleteVertexArrays(0, &this->vao);
 	}
 	if (this->vbo != 0) {
-		ThreadManager::removeVBO(this->vbo);
+		RenderManager::removeVBO(this->vbo);
 		//glDeleteBuffers(0, &this->vbo);
 	}
 	//this->erase();
@@ -35,24 +35,18 @@ void Mesh::addVertex(unsigned short* vert, unsigned short* norm, unsigned char* 
 	for (int i = 0; i < 3; i++) {
 		this->vert.push_back(norm[i]);
 	}
+	for (int i = 0; i < 2; i++) {
+		this->vert.push_back(text[i]);
+	}
 	for (int i = 0; i < 4; i++) {
 		//this->vert.push_back((float)col[i]);
 		this->col.push_back(col[i]);
-	}
-	for (int i = 0; i < 2; i++) {
-		this->vert.push_back(text[i]);
 	}
 }
 
 void Mesh::update() {
 	if (this->vert.size() == 0) {
 		return;
-	}
-
-
-	//Eliminam el VAO i el VBO
-	if (this->vbo != 0) {
-		glDeleteBuffers(1, &this->vbo);
 	}
 
 	if (this->vao == 0) {
@@ -79,6 +73,7 @@ void Mesh::update() {
 	void* nO = (void*)(3 * sizeof(unsigned short));
 	void* tO = (void*)(6 * sizeof(unsigned short));
 	void* cO = (void*)(8 * sizeof(unsigned short));
+
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -126,7 +121,9 @@ void Mesh::draw() {
 
 void Mesh::erase() {
 	this->vert.clear();
+	this->vert.shrink_to_fit();
 	this->col.clear();
+	this->col.shrink_to_fit();
 }
 
 

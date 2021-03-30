@@ -29,6 +29,7 @@
 #include "lib/FastNoiseLite.h"
 #include "ryml.hpp"
 #include "Utils/Vector3.h"
+#include "Utils/RenderManager.h"
 #include "Utils/ThreadManager.h"
 #include "lib/zlib/zlib.h"
 
@@ -78,11 +79,10 @@ private:
 	std::mutex mutex;
 
 	void updateGeneration();
-	Vector3<int> getChunkPos(Vector3<int> bpos);
 
 public:
 	//bool checkthreads = false;
-
+	Vector3<int> getChunkPos(Vector3<int> bpos);
 	Camera* camera;
 
 	void drawBloc(Bloc tipus);

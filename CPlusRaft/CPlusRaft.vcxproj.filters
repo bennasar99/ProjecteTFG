@@ -132,6 +132,9 @@
     <ClInclude Include="ChunkManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\RenderManager.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -214,6 +217,9 @@
     </ClCompile>
     <ClCompile Include="ChunkManager.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\RenderManager.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

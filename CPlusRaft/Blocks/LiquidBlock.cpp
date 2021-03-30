@@ -97,11 +97,11 @@ void LiquidBlock::draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {
 				vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
 				cM->addVertexT(vPos, normals[i][j], color, text[i][j]);
 			}
-			for (int j = 3; j >= 0; j--) {
+			/*for (int j = 3; j >= 0; j--) {
 				unsigned short vPos[3] = { vert[i][j][0], vert[i][j][1], vert[i][j][2] };
 				vPos[0] += relPos.x; vPos[1] += relPos.y; vPos[2] += relPos.z;
 				cM->addVertexT(vPos, normals[i][j], color, text[i][j]);
-			}
+			}*/
 		}
 	}
 

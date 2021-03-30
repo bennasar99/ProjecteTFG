@@ -52,11 +52,12 @@ public:
 	virtual void update(float delta, World* world);
 	virtual void destroy(World* world);
 	virtual void interact(World* world);
-	virtual void draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos);
+	virtual void draw(ChunkMesh* cM, bool visible[6], Vector3<int> relPos) {};
 
 	Bloc getId();
 	void setId(Bloc id);
 
+	static void draw(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[6]);
 	static bool getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<unsigned char, 4>& color);
 	static bool isTransparent(Bloc tipus);
 	static bool isSolid(Bloc tipus);

@@ -6,8 +6,9 @@
 #include <algorithm>
 #include <mutex>
 
+
 //Gestió dels fils
-class ThreadManager {
+class RenderManager {
 private:
 	static int cores; //True si la tecla està pitjada
 
@@ -16,11 +17,13 @@ private:
 
 	static std::mutex mutex;
 
-	ThreadManager() {}
+	RenderManager() {}
 
 public:
 
-	static int getCoreCount();
-	static void initialize();
+	static void removeVAO(unsigned int vao);
+	static void removeVBO(unsigned int vbo);
+	static void removeBuffers();
+
 };
 

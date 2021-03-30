@@ -17,24 +17,3 @@ void ThreadManager::initialize() {
 	cores = std::max(cores, 1);
 	printf("Detectats %d fils\n", cores);
 }
-
-void ThreadManager::removeVAO(unsigned int vao) {
-	const std::lock_guard<std::mutex> lock(mutex);
-	ThreadManager::vaos.push_back(vao);
-}
-
-void ThreadManager::removeVBO(unsigned int vbo) {
-	const std::lock_guard<std::mutex> lock(mutex);
-	ThreadManager::vaos.push_back(vbo);
-}
-
-void ThreadManager::removeBuffers() {
-	const std::lock_guard<std::mutex> lock(mutex);
-	std::vector<unsigned int>::iterator it;
-	for (it = ThreadManager::vbos.begin(); it != ThreadManager::vbos.begin(); it++) {
-		glDeleteBuffers(1, &(*it));
-	}
-	for (it = ThreadManager::vaos.begin(); it != ThreadManager::vaos.begin(); it++) {
-		//glDeleteBuffers(1, &(*it));
-	}
-}

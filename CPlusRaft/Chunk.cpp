@@ -22,8 +22,10 @@ void Chunk::drawO() {
 	}
 	if (firstdraw == true) {
 		firstdraw = false;
-		cMesh.update();
+		cMesh.updateO();
 		this->updateTransparency(Vector3<float>(100, 100, 100));
+		Vector3<int> cPos = this->getPos();
+		//printf("First draw a %d %d %d\n", cPos.x, cPos.y, cPos.z);
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	glTranslatef(0.5f, 0.5f, 0.5f);
@@ -43,8 +45,8 @@ void Chunk::drawT() {
 	}
 	if (firstdraw == true) {
 		firstdraw = false;
-		cMesh.update();
 		this->updateTransparency(Vector3<float>(100, 100, 100));
+		cMesh.update();
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	glFrontFace(GL_CCW);
@@ -211,7 +213,7 @@ bool Chunk::readFromByteData(char* arr) {
 }
 
 void Chunk::updateMesh() {
-	if (this->nblocs <= 0 && !Block::getMCEnabled()) {
+	if (this->nblocs <= 0 && !Block::getMCEnabled()) { //CAs chunk que queda buit?
 		return; //No cal fer res
 	}
 	cMesh.eraseO();
@@ -266,14 +268,15 @@ void Chunk::updateMesh() {
 				}
 				else {
 					for (int i = 0; i < 6; i++) {
-						if (Block::canSeeThrough(getBlockWorld(toCheck[i]))) {
+						Bloc bt = getBlockWorld(toCheck[i]);
+						if (Block::canSeeThrough(bt) || bt == Bloc::LIMIT) { //Aquí dibuixam el límit dels chunks no carregats
 							visible[i] = true;
 							qualcun = true;
 						}
 					}
 					if (qualcun) {
 						//blocs[x][y][z]->draw(&cMesh, visible, Vector3<int>(x, y, z));
-						Block::drawBlock(blocs[x][y][z], &cMesh, bpos, visible);
+						Block::draw(blocs[x][y][z], &cMesh, bpos, visible);
 					}
 					if (Block::getMCEnabled() && Block::canSeeThrough(bt)) { //Amb els sòlids que no cobreixen totalment s'ha d'aplicar MC com si fos aire
 						Block::drawMarching(Bloc::RES, &this->cMesh, bpos, this);
@@ -296,13 +299,13 @@ void Chunk::updateTransparency(Vector3<float> pPos){
 	std::list<dT> transparent;
 	{
 		const std::lock_guard<std::mutex> lock(mutex);
-		if (!this->transparent.empty()) {
+		//if (!this->transparent.empty()) { //AIXO FA ERROR DE LA MAR perque A LO 1R té algo a sa llista pes buits des chunk següent i després no i es cMesh no s'actualitza bé
 			transparent = std::list<dT>(this->transparent);
-		}
+		//}
 	}
-	if (transparent.empty()) {
+	/*if (transparent.empty()) { //I AIXO
 		return;
-	}
+	}*/
 	cMesh.eraseT();
 	transparent.sort([this,pPos](dT b1, dT b2) {
 		//printf("dist %f\n", Vector3<float>::module(b1.pos - pPos));
@@ -328,7 +331,7 @@ void Chunk::updateTransparency(Vector3<float> pPos){
 		if (blocs[bpos.x][bpos.y][bpos.z] != Bloc::RES) {
 			//printf("%d %d %d, ", bpos.y, bpos.y, bpos.z);
 			//blocs[bpos.x][bpos.y][bpos.z]->draw(&cMesh, info.visible, bpos);
-			Block::drawBlock(blocs[bpos.x][bpos.y][bpos.z], &cMesh, bpos, info.visible);
+			Block::draw(blocs[bpos.x][bpos.y][bpos.z], &cMesh, bpos, info.visible);
 		}
 	}
 	cMesh.updateT();
