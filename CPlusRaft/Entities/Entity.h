@@ -4,7 +4,7 @@
 
 class World;
 
-enum class Entitat {
+enum class Entitat : uint8_t {
 	JUGADOR,
 };
 

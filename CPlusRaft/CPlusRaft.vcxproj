@@ -165,6 +165,7 @@
     <ClInclude Include="ChunkManager.h" />
     <ClInclude Include="Entities\Entity.h" />
     <ClInclude Include="Entities\Player.h" />
+    <ClInclude Include="Entities\Sheep.h" />
     <ClInclude Include="Generation\WorldGenerator.h" />
     <ClInclude Include="lib\stb_image.h" />
     <ClInclude Include="Light.h" />
@@ -195,6 +196,7 @@
     <ClCompile Include="ChunkManager.cpp" />
     <ClCompile Include="Entities\Entity.cpp" />
     <ClCompile Include="Entities\Player.cpp" />
+    <ClCompile Include="Entities\Sheep.cpp" />
     <ClCompile Include="Generation\WorldGenerator.cpp" />
     <ClCompile Include="lib\stb_image.cpp" />
     <ClCompile Include="Light.cpp" />

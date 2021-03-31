@@ -3,12 +3,13 @@
 #include "Blocks/Block.h"
 #include "Render/ChunkMesh.h"
 #include "Utils/Vector3.h"
+#include "Chunk.h"
 #include "Generation/WorldGenerator.h"
 #include <list>
 #include <shared_mutex>
 #include <map>
 
-enum class ChunkState {
+enum class ChunkState : uint8_t {
 	BUIT,
 	LLEST,
 	TERRENY,
@@ -17,7 +18,7 @@ enum class ChunkState {
 	CARREGAT,
 };
 
-enum class RegionState {
+enum class RegionState : uint8_t {
 	BUIDA,
 	PENDENT,
 	LLEST,
@@ -30,6 +31,7 @@ private:
 	//int height[CHUNKSIZE][CHUNKSIZE]; //Heightmap
 	std::map<Vector3<int>, ChunkState> cestat;
 	std::map<Vector3<int>, RegionState> restat;
+	std::map < Vector3<int>, std::array<std::array<int, CHUNKSIZE>, CHUNKSIZE > > height;
 	/*map<Vector3<int>, Chunk*> chunks;*/
 
 	std::shared_mutex cSMutex;

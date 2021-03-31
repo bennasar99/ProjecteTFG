@@ -373,14 +373,6 @@ void World::updateGeneration() {
 
 					}
 				}
-				//std::async(std::launch::async, &World::loadRegion, this, rPos);
-				/*for (int cX = rPos.x * CHUNKSIZE; cX < (rPos.x + 1) * CHUNKSIZE; cX++) {
-					for (int cY = rPos.y * CHUNKSIZE; cY < (rPos.y + 1) * CHUNKSIZE; cY++) {
-						for (int cZ = rPos.z * CHUNKSIZE; cZ < (rPos.z + 1) * CHUNKSIZE; cZ++) {
-							cestat[Vector3<int>(cX, cY, cZ)] = ChunkState::PENDENT;
-						}
-					}
-				}*/
 				continue;
 			}
 			Chunk* ch = chunks[cPos];
@@ -504,9 +496,6 @@ bool World::deleteBlock(Vector3<int> pos, bool destroy) { //Eliminar Bloc::RES?
 //Col·locam un bloc d'un tipus determinat a la posició indicada
 bool World::setBlock(Bloc tipus, Vector3<int> pos, bool overwrite, bool listUpdate) {
 
-	//TONI!! -16 ha de ser des CHunk -1, no -2!!!!!
-
-	//NOU CODI CHUNKS:
 	//pos.floor();
 	Vector3<int> cPos = getChunkPos(pos);
 
@@ -514,7 +503,6 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, bool overwrite, bool listUpda
 		return false;
 	}
 
-	//cpos.floor();
 	Vector3<int> bpos = pos % CHUNKSIZE;
 
 	if (listUpdate) {
