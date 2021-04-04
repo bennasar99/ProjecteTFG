@@ -17,7 +17,13 @@ void ChunkManager::setChunkState(Vector3<int> cPos, ChunkState cS) {
 
 ChunkState ChunkManager::getChunkState(Vector3<int> cPos) {
 	std::shared_lock lock(cSMutex);
-	return cestat[cPos];
+	std::map<Vector3<int>, ChunkState>::const_iterator iter = cestat.find(cPos);
+
+	if (iter == cestat.end())
+	{
+		return ChunkState::BUIT;
+	}
+	return iter->second;
 }
 
 void ChunkManager::setRegionState(Vector3<int> rPos, RegionState rS) {
@@ -27,7 +33,14 @@ void ChunkManager::setRegionState(Vector3<int> rPos, RegionState rS) {
 
 RegionState ChunkManager::getRegionState(Vector3<int> rPos) {
 	std::shared_lock lock(rSMutex);
-	return restat[rPos];
+
+	std::map<Vector3<int>, RegionState>::const_iterator iter = restat.find(rPos);
+
+	if (iter == restat.end())
+	{
+		return RegionState::BUIDA;
+	}
+	return iter->second;
 }
 
 void ChunkManager::removeChunk(Vector3<int> cPos) {

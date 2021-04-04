@@ -11,6 +11,7 @@
 #include <future> 
 #include <algorithm>
 #include <map>
+#include <concurrent_unordered_map.h>
 
 #include "Light.h"
 #include "Blocks/Block.h"
@@ -56,7 +57,17 @@ private:
 	WorldGenerator wGen;
 	ChunkManager cM;
 
-	map<Vector3<int>, Chunk*> chunks;
+	struct v3_hash {
+		std::size_t operator()(const Vector3<int>& vec) const {
+			/*size_t res = 17;
+			res = res * 31 + hash<int>()(vec.x);
+			res = res * 31 + hash<int>()(vec.y);
+			res = res * 31 + hash<int>()(vec.z);*/
+			return vec.x + 128 * (vec.y + 128 * vec.z);
+		}
+	};
+
+	concurrency::concurrent_unordered_map<Vector3<int>, Chunk*, v3_hash> chunks;
 	short pendents = 0;
 
 	int sol = 0;
@@ -139,6 +150,7 @@ public:
 	bool safeMod(Vector3<int> cPos);
 
 	void redrawChunks();
+	Chunk* getChunk(Vector3<int> cPos);
 
 	World(std::string name, int seed, Camera* camera);
 	World(std::string file, Camera* camera);

@@ -21,8 +21,11 @@ void Chunk::drawO() {
 		return;
 	}
 	if (firstdraw == true) {
+		printf("FIRSTDRAW\n");
 		firstdraw = false;
-		cMesh.updateO();
+		oMutex.lock();
+			cMesh.updateO();
+		oMutex.unlock();
 		this->updateTransparency(Vector3<float>(100, 100, 100));
 		Vector3<int> cPos = this->getPos();
 		//printf("First draw a %d %d %d\n", cPos.x, cPos.y, cPos.z);
@@ -42,11 +45,6 @@ void Chunk::drawO() {
 void Chunk::drawT() {
 	if (nblocs <= 0) {
 		return;
-	}
-	if (firstdraw == true) {
-		firstdraw = false;
-		this->updateTransparency(Vector3<float>(100, 100, 100));
-		cMesh.update();
 	}
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 	glFrontFace(GL_CCW);
@@ -217,81 +215,75 @@ void Chunk::updateMesh() {
 		return; //No cal fer res
 	}
 	cMesh.eraseO();
-	std::list<dT> transparent;
-	int nb = 0;
-	for (int x = 0; x < CHUNKSIZE; x++) { //1a Passada: OPACS
-		for (int z = 0; z < CHUNKSIZE; z++) {
-			for (int y = 0; y < CHUNKSIZE; y++) {
-				Bloc bt = blocs[x][y][z];
-				if (bt == Bloc::RES && !Block::getMCEnabled()) {
-					continue;
-				}
-				/*if (blocs[x][y][z] == Bloc::RES) {
-					if (Block::getMCEnabled()) {
-						bt = Bloc::RES;
-					}
-					else {
+	{
+		const std::lock_guard<std::mutex> lock(oMutex);
+		const std::lock_guard<std::mutex> lock2(tMutex);
+		std::list<dT> transparent;
+		int nb = 0;
+		for (int x = 0; x < CHUNKSIZE; x++) { //1a Passada: OPACS
+			for (int z = 0; z < CHUNKSIZE; z++) {
+				for (int y = 0; y < CHUNKSIZE; y++) {
+					Bloc bt = blocs[x][y][z];
+					if (bt == Bloc::RES && !Block::getMCEnabled()) {
 						continue;
 					}
-				}
-				else {
-					bt = blocs[x][y][z];
-				}*/
-				Vector3 bpos = Vector3<int>(x, y, z);
-				if ((Block::isMarcheable(bt) || bt == Bloc::RES) && (Block::getMCEnabled())) {
-					Block::drawMarching(bt, &this->cMesh, bpos, this);
-					continue;
-				}
-				//Ordre: Esquerra, Damunt, Dreta, Abaix, Davant, Darrera
-				Vector3<int> pos = cpos * CHUNKSIZE + bpos;
-				Vector3<int> toCheck[6] = { pos - Vector3<int>(1,0,0), pos + Vector3<int>(0,1,0), pos + Vector3<int>(1,0,0), pos - Vector3<int>(0,1,0),
-					pos + Vector3<int>(0,0,1), pos - Vector3<int>(0,0,1) };
 
-				bool qualcun = false;
-				bool visible[6] = { false, false, false, false, false, false };
-				bool solid = Block::isSolid(bt);
-				if (Block::isTransparent(bt)) {
-					dT info = dT(Vector3<float>(pos.x, pos.y, pos.z));
-					for (int i = 0; i < 6; i++) {
-						Bloc bo = getBlockWorld(toCheck[i]);
-						if (bo != bt && Block::canSeeThrough(bo) && !Block::isSolid(bo)) {
-							info.visible[i] = true;
-							qualcun = true;
+					Vector3 bpos = Vector3<int>(x, y, z);
+					if ((Block::isMarcheable(bt) || bt == Bloc::RES) && (Block::getMCEnabled())) {
+						Block::drawMarching(bt, &this->cMesh, bpos, this);
+						continue;
+					}
+					//Ordre: Esquerra, Damunt, Dreta, Abaix, Davant, Darrera
+					Vector3<int> pos = cpos * CHUNKSIZE + bpos;
+					Vector3<int> toCheck[6] = { pos - Vector3<int>(1,0,0), pos + Vector3<int>(0,1,0), pos + Vector3<int>(1,0,0), pos - Vector3<int>(0,1,0),
+						pos + Vector3<int>(0,0,1), pos - Vector3<int>(0,0,1) };
+
+					bool qualcun = false;
+					bool visible[6] = { false, false, false, false, false, false };
+					bool solid = Block::isSolid(bt);
+					if (Block::isTransparent(bt)) {
+						dT info = dT(Vector3<float>(pos.x, pos.y, pos.z));
+						for (int i = 0; i < 6; i++) {
+							Bloc bo = getBlockWorld(toCheck[i]);
+							if (bo != bt && Block::canSeeThrough(bo) && !Block::isSolid(bo)) {
+								info.visible[i] = true;
+								qualcun = true;
+							}
+						}
+						if (qualcun) {
+							transparent.push_back(info);
+						}
+						if (Block::getMCEnabled() && !Block::isSolid(bt)) { //Dins els liquids transparents s'ha d'aplicar MC com si fos aire
+							Block::drawMarching(Bloc::RES, &this->cMesh, bpos, this);
 						}
 					}
-					if (qualcun) {
-						transparent.push_back(info);
-					}
-					if (Block::getMCEnabled() && !Block::isSolid(bt)) { //Dins els liquids transparents s'ha d'aplicar MC com si fos aire
-						Block::drawMarching(Bloc::RES, &this->cMesh, bpos, this);
-					}
-				}
-				else {
-					for (int i = 0; i < 6; i++) {
-						Bloc bt = getBlockWorld(toCheck[i]);
-						if (Block::canSeeThrough(bt) || bt == Bloc::LIMIT) { //Aquí dibuixam el límit dels chunks no carregats
-							visible[i] = true;
-							qualcun = true;
+					else {
+						for (int i = 0; i < 6; i++) {
+							Bloc bt = getBlockWorld(toCheck[i]);
+							if (Block::canSeeThrough(bt) || bt == Bloc::LIMIT) { //Aquí dibuixam el límit dels chunks no carregats
+								visible[i] = true;
+								qualcun = true;
+							}
+						}
+						if (qualcun) {
+							//blocs[x][y][z]->draw(&cMesh, visible, Vector3<int>(x, y, z));
+							Block::draw(blocs[x][y][z], &cMesh, bpos, visible);
+						}
+						if (Block::getMCEnabled() && Block::canSeeThrough(bt)) { //Amb els sòlids que no cobreixen totalment s'ha d'aplicar MC com si fos aire
+							Block::drawMarching(Bloc::RES, &this->cMesh, bpos, this);
 						}
 					}
-					if (qualcun) {
-						//blocs[x][y][z]->draw(&cMesh, visible, Vector3<int>(x, y, z));
-						Block::draw(blocs[x][y][z], &cMesh, bpos, visible);
-					}
-					if (Block::getMCEnabled() && Block::canSeeThrough(bt)) { //Amb els sòlids que no cobreixen totalment s'ha d'aplicar MC com si fos aire
-						Block::drawMarching(Bloc::RES, &this->cMesh, bpos, this);
-					}
+					nb++;
 				}
-				nb++;
 			}
 		}
+		{
+			const std::lock_guard<std::mutex> lock(mutex);
+			this->transparent.clear();
+			this->transparent = transparent;
+		}
+		this->firstdraw = true;
 	}
-	{
-		const std::lock_guard<std::mutex> lock(mutex);
-		this->transparent.clear();
-		this->transparent = transparent;
-	}
-	this->firstdraw = true;
 }
 
 void Chunk::updateTransparency(Vector3<float> pPos){
@@ -334,7 +326,9 @@ void Chunk::updateTransparency(Vector3<float> pPos){
 			Block::draw(blocs[bpos.x][bpos.y][bpos.z], &cMesh, bpos, info.visible);
 		}
 	}
+	tMutex.lock();
 	cMesh.updateT();
+	tMutex.unlock();
 	//if ((pPos / CHUNKSIZE).toInt() == this->getPos()) {
 		//printf("first %d %d last %d %d pPos %d %d\n", (int)first.x, (int)first.z, (int)last.x, (int)last.z, (int)pPos.x, (int)pPos.z);
 	//}

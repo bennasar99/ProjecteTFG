@@ -36,6 +36,8 @@ private:
 	std::list<dT> transparent = {};
 
 	std::mutex mutex;
+	std::mutex oMutex;
+	std::mutex tMutex;
 
 public:
 

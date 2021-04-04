@@ -3,7 +3,7 @@
 #include "../Utils.h"
 
 bool Block::marching = false;
-TextureAtlas blockAtlas = TextureAtlas(1, 22);
+TextureAtlas blockAtlas = TextureAtlas(5,5);
 
 //Les texCoords és retornen en ordre xb, yb, xt, yt i el color en RGBA
 bool Block::getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<unsigned char, 4> &color) {
@@ -410,12 +410,15 @@ void Block::drawBlock(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[
 
 	float text[6][4][2] =
 	{
-		{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra OK
-		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt OK
+		//{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra BAD
+		{{xt, yb}, {xt,yt}, {xb,yt}, {xb,yb}}, //Esquerra NOU
+		//{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt BAD
+		{{xt,yt}, {xb,yt}, {xb,yb}, {xt,yb}}, //Damunt NOU
 		{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Dreta OK
 		{{xt,yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Abaix OK
 		{{xt, yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Davant OK
-		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}} //Darrera OK
+		{{xt, yt}, {xb,yt}, {xb,yb}, {xt,yb}}, //Darrera NOU
+		//{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}} //Darrera BAD
 	};
 
 	for (int i = 0; i < 6; i++) {

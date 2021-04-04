@@ -78,7 +78,7 @@ void World::save() {
 	std::filesystem::create_directory(path.c_str());
 
 	std::list<Vector3<int>> regions;
-	std::map<Vector3<int>, Chunk*>::iterator cit;
+	concurrency::concurrent_unordered_map<Vector3<int>, Chunk*>::iterator cit;
 
 	regions.push_front(getRegion(getChunkPos(camera->getPos().toInt()))); //Guardam la regió en la que està el jugador
 
@@ -184,7 +184,7 @@ void World::delLight(Light* light) {
  * Actualitza l'cestat intern de les estructures del món, a més de la distància de les llums
  */
 void World::update(float delta, Vector3<float> pos) {
-
+	printf("mapsize %d \n", chunks.size());
 	daytime += ((float)delta);
 	if (daytime >= DAYTIME) {
 		daytime = 0; //Reiniciam el temps del dia
@@ -219,7 +219,7 @@ void World::update(float delta, Vector3<float> pos) {
 	std::list<Vector3<int>> toDelete;
 	{
 		//std::shared_lock lock(sMutex);
-		std::map<Vector3<int>, Chunk*>::iterator cit;
+		concurrency::concurrent_unordered_map<Vector3<int>, Chunk*>::iterator cit;
 		for (cit = chunks.begin(); cit != chunks.end(); cit++) {
 			Chunk* ch = cit->second;
 			if (ch == nullptr) {
@@ -281,7 +281,7 @@ void World::update(float delta, Vector3<float> pos) {
 		for (int y = pcPos.y - dist; y < pcPos.y + dist; y++) {
 			for (int z = pcPos.z - dist; z < pcPos.z + dist; z++) {
 				Vector3<int> cPos = Vector3<int>(x, y, z);
-				Chunk* ch = chunks[cPos];
+				Chunk* ch = getChunk(cPos);
 				if (ch != nullptr && cM.getChunkState(cPos) == ChunkState::LLEST) {
 					ch->update(delta);
 				}
@@ -375,16 +375,17 @@ void World::updateGeneration() {
 				}
 				continue;
 			}
-			Chunk* ch = chunks[cPos];
+
+			Chunk* ch = getChunk(cPos);
 			if (ch == nullptr && cM.getChunkState(cPos) == ChunkState::BUIT) {
 
 				//Optimització, si el chunk d'abaix d'aquest no té blocs llavors no generam aquest (excepte a muntanya)
 				Vector3<int> dpos = cPos - Vector3<int>(0, 1, 0);
-				Chunk* dchunk = chunks[dpos];
+				Chunk* dchunk = getChunk(dpos);
 				if (dchunk != nullptr && dchunk->getBiome() != Bioma::MUNTANYA) {
 					if (dchunk->nblocs <= 0) {
 						chunks[cPos] = new Chunk(this, cPos);
-						chunks[cPos]->setBiome(dchunk->getBiome());
+						getChunk(cPos)->setBiome(dchunk->getBiome());
 						cM.setChunkState(cPos, ChunkState::LLEST);
 						continue;
 					}
@@ -437,7 +438,7 @@ void World::updateGeneration() {
 //Alliberam la memòria de tots els blocs i entitats
 void World::destroy() {
 	int count = 0;
-	std::map<Vector3<int>, Chunk*>::iterator cit;
+	concurrency::concurrent_unordered_map<Vector3<int>, Chunk*>::iterator cit;
 	for (cit = chunks.begin(); cit != chunks.end(); cit++) {
 		delete cit->second;
 		count++;
@@ -472,7 +473,7 @@ bool World::safeMod(Vector3<int> cPos) {
 		return false;
 	}
 
-	if (chunks[cPos] == nullptr) {
+	if (getChunk(cPos) == nullptr) {
 		return false;
 	}
 
@@ -486,7 +487,7 @@ bool World::deleteBlock(Vector3<int> pos, bool destroy) { //Eliminar Bloc::RES?
 	Vector3<int> cPos = getChunkPos(pos);
 	//cpos.floor();
 	Vector3<int> bpos = pos % CHUNKSIZE;
-	Chunk* ch = chunks[cPos];
+	Chunk* ch = getChunk(cPos);
 	if (ch == nullptr) {
 		return false;
 	}
@@ -499,9 +500,9 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, bool overwrite, bool listUpda
 	//pos.floor();
 	Vector3<int> cPos = getChunkPos(pos);
 
-	if (!safeMod(cPos)) {
-		return false;
-	}
+	//if (!safeMod(cPos)) {
+	//	return false;
+	//}
 
 	Vector3<int> bpos = pos % CHUNKSIZE;
 
@@ -510,10 +511,10 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, bool overwrite, bool listUpda
 		printf("set block on pos %d %d %d\n", bpos.x, bpos.y, bpos.z);
 	}
 
-	if (chunks[cPos] == nullptr && cM.getChunkState(cPos) == ChunkState::LLEST){
+	if (getChunk(cPos) == nullptr && cM.getChunkState(cPos) == ChunkState::LLEST){
 		chunks[cPos] = new Chunk(this, cPos);
 	}
-	Chunk* ch = chunks[cPos];
+	Chunk* ch = getChunk(cPos);
 
 	/*Block* bloc;
 	switch (tipus) {
@@ -558,7 +559,7 @@ Bloc World::getBlock(Vector3<int> pos) {
 	Vector3<int> cPos = getChunkPos(pos);
 	//cpos.floor();
 	Vector3<int> bpos = pos % CHUNKSIZE;
-	Chunk* ch = chunks[cPos];
+	Chunk* ch = getChunk(cPos);
 	if (ch == nullptr /*|| (cM.getChunkState(cPos) != ChunkState::LLEST && cM.getChunkState(cPos) != ChunkState::TERRENY && cM.getChunkState(cPos) != ChunkState::PENDENT2 && cM.getChunkState(cPos) != ChunkState::CARREGAT)*/) {
 		return Bloc::LIMIT;
 	}
@@ -609,8 +610,8 @@ void World::draw(Vector3<float> pos, float dist) {
 	for (chunki = vChunks.begin(); (chunki != vChunks.end()); chunki++) {
 		Vector3<int> cPos = *chunki;
 		Vector3<int> rPos = getRegion(cPos);
-		Chunk* ch = chunks[cPos];
-		if (ch == NULL || cM.getChunkState(cPos) != ChunkState::LLEST || (cM.getRegionState(rPos) != RegionState::LLEST && cM.getRegionState(rPos) != RegionState::DIRTY)) {
+		Chunk* ch = getChunk(cPos);
+		if (ch == NULL){// || cM.getChunkState(cPos) != ChunkState::LLEST || (cM.getRegionState(rPos) != RegionState::LLEST && cM.getRegionState(rPos) != RegionState::DIRTY)) {
 			continue;
 		}
 		glPushMatrix();
@@ -626,9 +627,9 @@ void World::draw(Vector3<float> pos, float dist) {
 	std::list<Vector3<int>>::reverse_iterator rchunki;
 	for (rchunki = vChunks.rbegin(); (rchunki != vChunks.rend()); ++rchunki) {
 		Vector3<int> cPos = *rchunki;
-		Chunk *ch = chunks[cPos];
+		Chunk *ch = getChunk(cPos);
 		Vector3<int> rPos = getRegion(cPos);
-		if (ch == NULL || cM.getChunkState(cPos) != ChunkState::LLEST || (cM.getRegionState(rPos) != RegionState::LLEST && cM.getRegionState(rPos) != RegionState::DIRTY)) {
+		if (ch == NULL){// || cM.getChunkState(cPos) != ChunkState::LLEST || (cM.getRegionState(rPos) != RegionState::LLEST && cM.getRegionState(rPos) != RegionState::DIRTY)) {
 			continue;
 		}
 		glPushMatrix();
@@ -754,7 +755,7 @@ void World::interact(Vector3<int> pos) {
 	//cpos.floor();
 	Vector3<int> bpos = pos % CHUNKSIZE;
 
-	return chunks[cPos]->interact(bpos);
+	return getChunk(cPos)->interact(bpos);
 }
 
 //Afegeix una entitat al món
@@ -802,7 +803,7 @@ void World::updateNeighborChunks(Vector3<int> cPos) {
 				if (oPos == cPos) {
 					continue;
 				}
-				if (chunks[oPos] == nullptr || (cM.getRegionState(rPos) != RegionState::LLEST && cM.getRegionState(rPos) != RegionState::DIRTY) /* || (cM.getChunkState(oPos) != ChunkState::LLEST && cM.getChunkState(oPos) != ChunkState::CARREGAT && cM.getChunkState(oPos) != ChunkState::PENDENT2 && cM.getChunkState(oPos) != ChunkState::TERRENY)*/) {
+				if (getChunk(oPos) == nullptr || (cM.getRegionState(rPos) != RegionState::LLEST && cM.getRegionState(rPos) != RegionState::DIRTY) /* || (cM.getChunkState(oPos) != ChunkState::LLEST && cM.getChunkState(oPos) != ChunkState::CARREGAT && cM.getChunkState(oPos) != ChunkState::PENDENT2 && cM.getChunkState(oPos) != ChunkState::TERRENY)*/) {
 					continue;
 				}
 				chunks[oPos]->updateMesh();
@@ -835,13 +836,14 @@ void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
 	//printf("Update des de %d %d %d\n", cpos.x, cpos.y, cpos.z);
 	std::list<Vector3<int>>::iterator chunki;
 	for (chunki = toUpdate.begin(); (chunki != toUpdate.end()); chunki++) {
-		if (!safeMod(*chunki)) {
+		/*if (!safeMod(*chunki)) {
 			continue;
-		}
-		Chunk* ch = chunks[*chunki];
+		}*/
+		Chunk* ch = getChunk(*chunki);
 		if (ch == nullptr) {
-			ch = new Chunk(this, *chunki);
-			chunks[*chunki] = ch;
+			continue;
+			/*ch = new Chunk(this, *chunki);
+			chunks[*chunki] = ch;*/
 		}
 		//printf("Actualitzam %d %d %d\n", (*chunki).x, (*chunki).y, (*chunki).z);
 		ch->updateMesh();
@@ -896,7 +898,7 @@ void World::drawMap(float scrAspect, Entity *ent, int y) {
 			Vector3 cPos = Vector3<int>(x, y, z);
 			glPushMatrix();
 			glTranslatef(mX * dX, mZ * dZ, 0);
-			Chunk* ch = chunks[cPos];
+			Chunk* ch = getChunk(cPos);
 			if (ch == nullptr || cM.getChunkState(cPos) != ChunkState::LLEST) {
 				glColor3f(0,0,0);
 			}
@@ -985,7 +987,7 @@ bool World::doRegion(Vector3<int> rPos, bool save, bool unload) {
 			for (int z = rPos.z * REGIONSIZE; z < (rPos.z + 1) * REGIONSIZE; z++) {
 				Vector3<int> rPos = getRegion(Vector3<int>(x, y, z));
 				Vector3 cPos = Vector3<int>(x, y, z);
-				Chunk* ch = chunks[cPos];
+				Chunk* ch = getChunk(cPos);
 				if (ch != nullptr){
 					if (save) {
 						if (ch->nblocs > 0 && cM.getChunkState(cPos) == ChunkState::LLEST) {
@@ -1015,8 +1017,7 @@ bool World::doRegion(Vector3<int> rPos, bool save, bool unload) {
 						cM.removeChunk(cPos);
 						{
 							//std::unique_lock lock(sMutex); //SI PETA TORNAR ACTIVAR AQUÍ I A S'ALTRA
-							delete chunks[cPos];
-							chunks.erase(cPos);
+							delete getChunk(cPos);
 						}
 					}
 				}
@@ -1026,6 +1027,9 @@ bool World::doRegion(Vector3<int> rPos, bool save, bool unload) {
 						file.write(buffer, 1);
 					}
 					//file.write(zeros, chunkSize + 1);
+				}
+				if (unload) {
+					chunks.unsafe_erase(cPos);
 				}
 			}
 		}
@@ -1135,10 +1139,10 @@ bool World::loadRegion(Vector3<int> rPos) {
 }
 
 void World::redrawChunks() {
-	std::map<Vector3<int>, Chunk*>::iterator cit;
+	concurrency::concurrent_unordered_map<Vector3<int>, Chunk*>::iterator cit;
 	for (cit = chunks.begin(); cit != chunks.end(); cit++) {
 		Vector3<int> cPos = cit->first;
-		Chunk* ch = chunks[cPos];
+		Chunk* ch = getChunk(cPos);
 		if (ch != nullptr && cM.getChunkState(cPos) == ChunkState::LLEST) {
 			ch->updateMesh();
 		}
@@ -1177,4 +1181,14 @@ Vector3<int> World::getRegion(Vector3<int> cpos) {
 		toAdd = toAdd + Vector3<int>(0, 0, -1);
 	}
 	return (cpos / REGIONSIZE + toAdd);
+}
+
+Chunk* World::getChunk(Vector3<int> cPos) {
+	concurrency::concurrent_unordered_map<Vector3<int>, Chunk*>::const_iterator iter = chunks.find(cPos);
+
+	if (iter == chunks.end())
+	{
+		return nullptr;
+	}
+	return iter->second;
 }

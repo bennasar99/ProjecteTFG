@@ -23,7 +23,7 @@ GLFWwindow* window;
 //Clipping planes
 const float zNear = 0.001f;
 float zFar = 280.0f;
-float viewDist = 16; //Distància de visió (en chunks)
+float viewDist = 16.0f; //Distància de visió (en chunks)
 
 const float axisSize = zFar;
 
@@ -57,7 +57,6 @@ bool axisVisible = false; //Eixos ON/OFF
 
 //Nom del món
 std::string wname;
-int updTimer = 500; //500 ms = 20tps
 
 void onWindowResize(GLFWwindow* window, int width, int height);
 void onKeyboardUp(unsigned char key, int x, int y);
@@ -98,7 +97,7 @@ void Display(GLFWwindow* window)
 
 	fpsc++;
 	if (fpsc > 20) { //Contador fps
-		//printf("%f\n", fps);
+		printf("%f\n", fps);
 		fpsc = 0;
 	}
 	//if (fps < 26) {
@@ -334,18 +333,6 @@ void Update(void)
 	float delta = time - lastTime;
 	lastTime = time;
 
-	updatePlayerBlock();
-
-
-	//Actualitzam el món
-	//std::async(&World::update, world, delta, camera.getPos());
-	time = (float)glfwGetTime();
-	float deltaW = time - lastTimeW;
-	if (deltaW > 1.0f / (float)TPS) {
-		lastTimeW = time;
-		world->update(deltaW, camera.getPos());
-	}
-
 	if (ent != nullptr) { //L'entitat que controlam s'ha d'actualitzar quan l'ordinador ho permeti
 		ent->update(delta);
 		ent->setRot(camera.yaw);
@@ -356,6 +343,17 @@ void Update(void)
 		ent->control(delta, &camera); //Actualitzam el seu estat intern
 		Vector3 pos = ent->getPos();
 		alListener3f(AL_POSITION, pos.x, pos.y, pos.z); //Actualitzam la posició de l'escoltador a l'entitat
+	}
+	updatePlayerBlock();
+
+
+	//Actualitzam el món
+	//std::async(&World::update, world, delta, camera.getPos());
+	time = (float)glfwGetTime();
+	float deltaW = time - lastTimeW;
+	if (deltaW > 1.0f / (float)TPS) {
+		lastTimeW = time;
+		world->update(deltaW, camera.getPos());
 	}
 }
 void Idle() {

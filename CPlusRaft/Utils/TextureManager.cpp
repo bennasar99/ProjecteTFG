@@ -43,7 +43,7 @@ unsigned int TextureManager::getTexture(Textura nom) {
 }
 
 void TextureManager::initialize() {
-	TextureManager::blockAtlas = TextureAtlas(1, 22);
+	TextureManager::blockAtlas = TextureAtlas(5, 5);
 }
 
 bool TextureManager::getTexCoords(int texNum, std::array<float, 4> &texCoords) {

@@ -29,6 +29,7 @@ class ChunkManager {
 private:
 	//Block* blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE] = {};
 	//int height[CHUNKSIZE][CHUNKSIZE]; //Heightmap
+
 	std::map<Vector3<int>, ChunkState> cestat;
 	std::map<Vector3<int>, RegionState> restat;
 	std::map < Vector3<int>, std::array<std::array<int, CHUNKSIZE>, CHUNKSIZE > > height;
