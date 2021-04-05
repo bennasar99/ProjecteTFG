@@ -410,15 +410,12 @@ void Block::drawBlock(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[
 
 	float text[6][4][2] =
 	{
-		//{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra BAD
-		{{xt, yb}, {xt,yt}, {xb,yt}, {xb,yb}}, //Esquerra NOU
-		//{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt BAD
-		{{xt,yt}, {xb,yt}, {xb,yb}, {xt,yb}}, //Damunt NOU
-		{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Dreta OK
-		{{xt,yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Abaix OK
-		{{xt, yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Davant OK
-		{{xt, yt}, {xb,yt}, {xb,yb}, {xt,yb}}, //Darrera NOU
-		//{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}} //Darrera BAD
+		{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Esquerra OK
+		{{xt, yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Damunt OK
+		{{xb, yb}, {xb,yt}, {xt,yt}, {xt, yb}}, //Dreta OK
+		{{xb, yt}, {xt,yt}, {xt,yb}, {xb,yb}}, //Abaix OK
+		{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Davant OK
+		{{xb,yt}, {xt, yt}, {xt,yb}, {xb,yb}}, //Darrera Ok
 	};
 
 	for (int i = 0; i < 6; i++) {

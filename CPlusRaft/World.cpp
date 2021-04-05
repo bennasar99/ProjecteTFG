@@ -184,7 +184,7 @@ void World::delLight(Light* light) {
  * Actualitza l'cestat intern de les estructures del món, a més de la distància de les llums
  */
 void World::update(float delta, Vector3<float> pos) {
-	printf("mapsize %d \n", chunks.size());
+	//printf("mapsize %d \n", chunks.size());
 	daytime += ((float)delta);
 	if (daytime >= DAYTIME) {
 		daytime = 0; //Reiniciam el temps del dia

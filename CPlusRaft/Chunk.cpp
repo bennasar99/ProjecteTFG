@@ -21,7 +21,6 @@ void Chunk::drawO() {
 		return;
 	}
 	if (firstdraw == true) {
-		printf("FIRSTDRAW\n");
 		firstdraw = false;
 		oMutex.lock();
 			cMesh.updateO();
