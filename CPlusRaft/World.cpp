@@ -1029,7 +1029,9 @@ bool World::doRegion(Vector3<int> rPos, bool save, bool unload) {
 					//file.write(zeros, chunkSize + 1);
 				}
 				if (unload) {
-					chunks.unsafe_erase(cPos);
+					uMutex.lock();
+					chunks.unsafe_erase(cPos); //Pot petar aquí
+					uMutex.unlock();
 				}
 			}
 		}

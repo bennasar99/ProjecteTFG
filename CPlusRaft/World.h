@@ -87,7 +87,8 @@ private:
 	int updTimer = 200;
 
 	std::string name;
-	std::mutex mutex;
+	std::mutex mutex; //mutex per la llista de chunks visibles
+	std::mutex uMutex; //mutex per eliminar chunks del mapa "chunks"
 
 	void updateGeneration();
 
@@ -154,5 +155,4 @@ public:
 
 	World(std::string name, int seed, Camera* camera);
 	World(std::string file, Camera* camera);
-	World();
 };
