@@ -20,17 +20,20 @@ Player::Player(World* world, Vector3<float> pos): Entity(world, pos)
   * Funció d'actualització de l'estat intern del jugador (passiva)
   */
 void Player::update(float delta) {
-	if (this->gamemode == 1) { //Gravetat
+	if (this->gamemode == 1) { //Gravetat MILLORAR
 		Vector3<float> grav = Vector3<float>(0, -1, 0) * delta * this->grav;
 		if (world->getBlock(this->pos) == Bloc::AIGUA) { //A l'aigua queim més lent
 			grav = grav / 4.0f;
 		}
+		if (this->grav > 0 && Block::isSolid(world->getBlock(this->pos - Vector3<float>(0, 2, 0)))) {
+			this->grav = 0;
+		}
+		else if (this->grav < gravmax) { //"Gravetat"
+				this->grav += delta * 9.8f;
+		}
 		Vector3<float> newPos = this->pos + grav;
 		if (!Block::isSolid(world->getBlock(newPos - Vector3<float>(0, 1, 0))) && this->grav >= 0.0f) { //Caiem
 			this->pos = newPos;
-		}
-		if (this->grav < gravmax) { //"Gravetat"
-			this->grav += delta * 9.8f;
 		}
 		if (this->grav < 0) { //Si tocam adalt, tornam caure
 			if (Block::isSolid(world->getBlock(this->pos + Vector3<float>(0,eyesOffset + 0.2f,0)))) {
@@ -46,7 +49,7 @@ void Player::update(float delta) {
 
 //Control per teclat
 void Player::control(int key) {
-	if (key == GLFW_KEY_SPACE && Block::isSolid(world->getBlock(this->pos - Vector3<float>(0, 2, 0))) && grav >= 0.01f && this->gamemode == 1) {
+	if (key == GLFW_KEY_SPACE && Block::isSolid(world->getBlock(this->pos - Vector3<float>(0, 2, 0))) && grav >= 0.00f && this->gamemode == 1) {
 		grav = -1.0f;
 	}
 	if (key == GLFW_KEY_G) {

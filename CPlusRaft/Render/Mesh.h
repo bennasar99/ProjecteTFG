@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-
+#include "../Utils.h"
 
 enum class Primitiva {
 	LINIA,
@@ -10,6 +10,7 @@ enum class Primitiva {
 
 class Mesh {
 private:
+
 	std::vector<unsigned short> vert;
 	std::vector<GLubyte> col;
 
@@ -31,6 +32,7 @@ public:
 	void erase();
 
 	Mesh(Primitiva prim);
+	Mesh(std::string path);
 	Mesh();
 	~Mesh();
 };

@@ -13,6 +13,7 @@ enum class Textura {
 	ESTALAGMITA,
 	FUSTAARBRE,
 	FULLAARBRE,
+	OVELLA,
 	BLOC
 };
 

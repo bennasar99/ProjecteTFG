@@ -761,9 +761,12 @@ void World::interact(Vector3<int> pos) {
 //Afegeix una entitat al món
 Entity* World::addEntity(Entitat ent, Vector3<float> pos) {
 	Entity* entitat = 0;
-	//switch (ent) {
+	switch (ent) {
 		//Ficar entitat amb new a *entitat
-	//}
+		case Entitat::OVELLA:
+			entitat = new Sheep(this, pos);
+			break;
+	}
 	entities.push_front(entitat);
 	return entitat;
 }
@@ -895,7 +898,7 @@ void World::drawMap(float scrAspect, Entity *ent, int y) {
 	for (int x = cPos.x - SPAWNSIZE/2; x <= cPos.x + SPAWNSIZE/2; x++) {
 		mZ = 0;
 		for (int z = cPos.z - SPAWNSIZE/2; z <= cPos.z + SPAWNSIZE/2; z++) {
-			Vector3 cPos = Vector3<int>(x, y, z);
+			Vector3 cPos = Vector3<int>(x, getChunkPos(ent->getPos().toInt()).y, z);
 			glPushMatrix();
 			glTranslatef(mX * dX, mZ * dZ, 0);
 			Chunk* ch = getChunk(cPos);

@@ -1,11 +1,38 @@
 #include <GL/glew.h>
 #include "Mesh.h"
 #include "../Utils/RenderManager.h"
+#include "OBJ_Loader.h"
+
 Mesh::Mesh() {
 	this->prim = Primitiva::TRIANGLE;
 	this->vbo = 0;
 	this->vao = 0;
 	this->vert.shrink_to_fit();
+}
+
+Mesh::Mesh(std::string path) { //Càrrega de fitxer
+	this->prim = Primitiva::TRIANGLE;
+	this->vbo = 0;
+	this->vao = 0;
+	this->vert.shrink_to_fit();
+
+	objl::Loader loader;
+	loader.LoadFile(path);
+	for (int k = 0; k < loader.LoadedMeshes.size(); k++) {
+		objl::Mesh mesh = loader.LoadedMeshes[k];
+		for (int i = 0; i < mesh.Indices.size(); i++) {
+			objl::Vector3 vert = mesh.Vertices[i].Position;
+			unsigned short vF[3] = { toHFloat(vert.X), toHFloat(vert.Y), toHFloat(vert.Z) };
+			objl::Vector3 norm = mesh.Vertices[i].Normal;
+			unsigned short nF[3] = { toHFloat(norm.X), toHFloat(norm.Y), toHFloat(norm.Z) };
+			objl::Vector2 text = mesh.Vertices[i].TextureCoordinate;
+			unsigned short tF[2] = { toHFloat(text.X), toHFloat(text.Y) };
+			//printf("%f %f\n", toFloat(tF[0]), toFloat(tF[1]));
+			objl::Vector3 col = mesh.MeshMaterial.Kd;
+			unsigned char cF[4] = { col.X * 255, col.Y * 255, col.Z * 255, 255 };
+			this->addVertex(vF, nF, cF, tF);
+		}
+	}
 }
 
 Mesh::Mesh(Primitiva prim) {

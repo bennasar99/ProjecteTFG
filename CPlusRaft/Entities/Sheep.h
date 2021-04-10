@@ -5,6 +5,7 @@
 #include "../Utils/KeyboardManager.h"
 #include "../Utils/SoundManager.h"
 #include "../Light.h"
+#include "../Render/Mesh.h"
 
 class Block;
 class World;
@@ -18,28 +19,29 @@ private:
 	float gravmax = 100;
 	float speed = 16.0f;
 
+	bool firstdraw = false;
+
+	Mesh cos;
+	Mesh davDR;
+	Mesh davES;
+	Mesh darDR;
+	Mesh darES;
+
 	int health;
 	float rot = 0;
+	float rotDavDr = 0;
+	float rotDR = 1;
 
 	float eyesOffset = 0.5f; //Alçada ulls
-
-	//Inventari *inv;
-
-	int gamemode = 0; //0 = creative, 1 = survival
 
 public:
 	Sheep(World* world, Vector3<float> pos);
 
 	void update(float delta);
-	void control(int key);
-	void control(float delta, Camera *cam);
 
 	void draw();
 	void destroy();
 
 	void setCam(Camera* cam);
-
-	void onAttach();
-	void onDeattach();
 };
 

@@ -82,7 +82,7 @@ Bioma WorldGenerator::getBiomeAt(int bX, int bZ) {
 Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks dels voltants ja estan generats
 	Vector3<int> cPos = chunk->getPos();
 	float density = 0;
-	int randmax; //Com més alt, - densitat de coses
+	int randmax = INT32_MAX; //Com més alt, - densitat de coses
 	Bioma bio = chunk->getBiome();
    	switch (bio) {
 	case Bioma::BOSC:
@@ -132,6 +132,9 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 								}
 							}
 						}
+					}
+					else if (random == 10) { //Ovella
+						world->addEntity(Entitat::OVELLA, Vector3<float>(tpos.x, tpos.y + 1, tpos.z));
 					}
 				}
 			}

@@ -33,6 +33,7 @@
 #include "Utils/RenderManager.h"
 #include "Utils/ThreadManager.h"
 #include "lib/zlib/zlib.h"
+#include "Entities/Sheep.h"
 
 #include "ChunkManager.h"
 

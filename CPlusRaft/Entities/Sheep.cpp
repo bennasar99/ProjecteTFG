@@ -13,125 +13,106 @@ class World;
 
 Sheep::Sheep(World* world, Vector3<float> pos): Entity(world, pos)
 {
+	cos = Mesh("Models/Sheep/sheep.obj");
+	davDR = Mesh("Models/Sheep/SheepDavDR.obj");
+	davES = Mesh("Models/Sheep/SheepDavES.obj");
+	darDR = Mesh("Models/Sheep/SheepDarDR.obj");
+	darES = Mesh("Models/Sheep/SheepDarES.obj");
 	this->health = 5;
+	this->firstdraw = true;
 }
 
 /**
   * Funció d'actualització de l'estat intern del jugador (passiva)
   */
 void Sheep::update(float delta) {
-	if (this->gamemode == 1) { //Gravetat
-		Vector3<float> grav = Vector3<float>(0, -1, 0) * delta * this->grav;
-		if (world->getBlock(this->pos) == Bloc::AIGUA) { //A l'aigua queim més lent
-			grav = grav / 4.0f;
-		}
-		Vector3<float> newPos = this->pos + grav;
-		if (!Block::isSolid(world->getBlock(newPos - Vector3<float>(0, 1, 0))) && this->grav >= 0.0f) { //Caiem
-			this->pos = newPos;
-		}
-		if (this->grav < gravmax) { //"Gravetat"
-			this->grav += delta * 9.8f;
-		}
-		if (this->grav < 0) { //Si tocam adalt, tornam caure
-			if (Block::isSolid(world->getBlock(this->pos + Vector3<float>(0,eyesOffset + 0.2f,0)))) {
-				this->grav = 0;
-			}
-		}
+	if (rotDavDr > 25) {
+		rotDR = -1;
+	}
+	else if (rotDavDr < -25) {
+		rotDR = 1;
+	}
+	rotDavDr += delta * 25 * rotDR;
 
-		if (KeyboardManager::isPressed(GLFW_KEY_SPACE) && world->getBlock(this->pos) == Bloc::AIGUA && this->gamemode == 1) {
-			this->grav = -0.02f;
-		}
+	Vector3<float> front = this->pos + Vector3<float>(sinf(this->rot), 0, cosf(this->rot)) * 2;
+	if (Block::isSolid(world->getBlock(front))) {
+		//this->rot += delta;
 	}
-}
-
-//Control per teclat
-void Sheep::control(int key) {
-	if (key == GLFW_KEY_SPACE && Block::isSolid(world->getBlock(this->pos - Vector3<float>(0, 2, 0))) && grav >= 0.01f && this->gamemode == 1) {
-		grav = -1.0f;
+	this->rot += delta*10;
+	this->pos = this->pos + Vector3<float>(sinf(toRad(this->rot)), 0, sinf(toRad(this->rot)))/100.0f;
+	//this->pos.x += 0.001f;;
+	//Gravetat
+	Bloc bd = world->getBlock(this->pos - Vector3<float>(0, 1, 0));
+	Bloc ba = world->getBlock(this->pos);
+	if (this->grav > 0 && Block::isSolid(bd) && ba != Bloc::AIGUA ) {
+		this->grav = 0;
 	}
-	if (key == GLFW_KEY_G) {
-		if (gamemode == 0) {
-			gamemode = 1;
-		}
-		else {
-			gamemode = 0;
-		}
+	else if (this->grav < gravmax && (bd == Bloc::RES || bd == Bloc::LIMIT)) { //"Gravetat"
+		this->grav += delta * 9.8f;
 	}
-}
-
-/*
-  Funció d'actualització de l'estat intern del jugador (activa, quan està controlat)
-*/
-void Sheep::control(float delta, Camera *cam) {
-	//Actualitzam la posició del jugador
-	Vector3<float> add = Vector3<float>(0, 0, 0);
-	Vector3<float> forward = Vector3<float>::normalize(Vector3<float>(cam->getFront().x, 0, cam->getFront().z));
-	Vector3<float> right = Vector3<float>::normalize(Vector3<float>(cam->getRight().x, 0, cam->getRight().z));
-	Vector3<float> up = Vector3<float>(0, 1, 0);
-	if (KeyboardManager::isPressed(GLFW_KEY_W)) {
-		add = add + forward;
-	}
-	else if (KeyboardManager::isPressed(GLFW_KEY_S)) {
-		add = add - forward;
-	}
-	if (KeyboardManager::isPressed(GLFW_KEY_D)) {
-		add = add - right;
-	}
-	else if (KeyboardManager::isPressed(GLFW_KEY_A)) {
-		add = add + right;
-	}
-	if ((KeyboardManager::isPressed(GLFW_KEY_SPACE) && this->gamemode==0) || (grav < 0)) { //Creatiu o acabam de botar
-		add = add + up;
-	}
-	else if (KeyboardManager::isPressed(GLFW_KEY_LEFT_CONTROL) && this->gamemode == 0) {
-		add = add - up;
-	}
-	if (KeyboardManager::isPressed(GLFW_KEY_LEFT_CONTROL)) { //Crouch
-		this->eyesOffset = 0.0f;
-	}
-	else {
-		this->eyesOffset = 0.5f;
-	}
-	float speed = this->speed;
-	if (KeyboardManager::isPressed(GLFW_KEY_LEFT_SHIFT)) { //Si sprinta
-		speed*=2.0f;
-	}
-	Vector3<float> newPos = this->pos + add * delta * speed;
-	if (gamemode == 0) {
+	Vector3<float> newPos = this->pos + Vector3<float>(0, -1, 0) * delta * this->grav;
+	if (!Block::isSolid(world->getBlock(newPos - Vector3<float>(0, 1, 0))) && this->grav >= 0.0f) { //Caiem
 		this->pos = newPos;
-		return; //No comprovam colisions
 	}
-	if (newPos != this->pos) {
-		if (Block::isSolid(world->getBlock(newPos + add * ((float)delta) - Vector3<float>(0, 1, 0))) ||
-			Block::isSolid(world->getBlock(newPos + add * ((float)delta)))) {
-			Vector3<float> poss[6] = { Vector3<float>(add.x, add.y, 0), Vector3<float>(add.x, 0, add.z), Vector3<float>(0, add.y, add.z),
-				Vector3<float>(add.x, 0, 0), Vector3<float>(0, add.y, 0), Vector3<float>(0, 0, add.z) };
-			for (int i = 0; i < 6; i++) {
-				Vector3<float> newAdd = poss[i];
-				newPos = this->pos + newAdd * ((float)delta / 200.0f);
-				if (!Block::isSolid(world->getBlock(newPos + newAdd * ((float)delta) - Vector3<float>(0, 1, 0))) &&
-					!Block::isSolid(world->getBlock(newPos + newAdd * ((float)delta) + Vector3<float>(0, eyesOffset, 0)))) {
-					this->pos = newPos;
-					if (Block::isSolid(world->getBlock(this->pos - Vector3<float>(0,1,0)))) {
-						SoundManager::playSound(So::CAMINA, this->pos, false);
-					}
-					break;
-				}
-			}
-		}
-		else {
-			this->pos = newPos;
-			if (world->getBlock(this->pos - Vector3<float>(0, 1, 0)) != Bloc::AIGUA) {
-				SoundManager::playSound(So::CAMINA, this->pos, false);
-			}
+	if (this->grav < 0) { //Si tocam adalt, tornam caure
+		if (Block::isSolid(world->getBlock(this->pos + Vector3<float>(0, eyesOffset + 0.2f, 0)))) {
+			this->grav = 0;
 		}
 	}
 
+	if (ba == Bloc::AIGUA) {
+		if (this->grav > -0.1f) {
+			this->grav += -0.1f;
+		}
+	}
+
+	//Bot
 }
+
 
 //Funció de dibuix
 void Sheep::draw() {
-	
+	if (firstdraw) {
+		firstdraw = false;
+		cos.update();
+		davDR.update();
+		davES.update();
+		darDR.update();
+		darES.update();
+	}
+	glScalef(0.1f, 0.1f, 0.1f);
+	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::OVELLA));
+	glRotatef(rot, 0, 1, 0);
+	cos.draw();
+
+	glPushMatrix();
+	glTranslatef(-3.0f, +5.5, 5.5f);
+	glRotatef(rotDavDr, 1, 0, 0);
+	davDR.draw();
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(+3.0f, +5.5, 5.5f);
+	glRotatef(rotDavDr, 1, 0, 0);
+	davES.draw();
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(+3.0f, +5.5, -5.5f);
+	glRotatef(rotDavDr, 1, 0, 0);
+	darES.draw();
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(-3.0f, +5.5, -5.5f);
+	glRotatef(rotDavDr, 1, 0, 0);
+	darDR.draw();
+	glPopMatrix();
+
+	/*davES.draw();
+	darDR.draw();
+	darES.draw();*/
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Sheep::destroy() {
@@ -139,12 +120,4 @@ void Sheep::destroy() {
 
 void Sheep::setCam(Camera* cam) {
 	cam->setPos(this->pos + Vector3<float>(0, eyesOffset, 0));
-}
-
-void Sheep::onAttach() {
-
-}
-
-void Sheep::onDeattach(){
-
 }

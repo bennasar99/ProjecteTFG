@@ -6,6 +6,7 @@ class World;
 
 enum class Entitat : uint8_t {
 	JUGADOR,
+	OVELLA
 };
 
 class Entity {
