@@ -3,7 +3,7 @@
 #include "../Utils.h"
 
 bool Block::marching = false;
-TextureAtlas blockAtlas = TextureAtlas(5,5);
+TextureAtlas blockAtlas = TextureAtlas(8,3);
 
 //Les texCoords és retornen en ordre xb, yb, xt, yt i el color en RGBA
 bool Block::getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<unsigned char, 4> &color) {

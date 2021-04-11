@@ -142,7 +142,7 @@ void Display(GLFWwindow* window)
 
 	if (ent != 0) { //Si hi ha una entitat controlada, centram la càmera a ella
 		ent->setCam(&camera);
-		printf("G %f\n", ((Player*)ent)->grav);
+		//printf("G %f\n", ((Player*)ent)->grav);
 	}
 
 	//Transformam la matriu de visualització per mirar on toqui
@@ -397,12 +397,12 @@ int main(int argc, char** argv)
 		world = new World(wname, &camera);
 		//ent = new Player(world, Vector3<float>(400, 120, 400) + Vector3<float>(0, 2.0f, 0));
 		ent = new Player(world, Vector3<float>(0, 0, 0) + Vector3<float>(0, 2.0f, 0));
-		world->addEntity(Entitat::OVELLA, Vector3<float>(0, 250, 0));
+		world->addEntity(Entitat::OVELLA, Vector3<float>(20, 250, -20));
 		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
 	}
 	else {
 		//Si no, el cream
-		float f = 0.0f;
+		float f = 0.125f;
 		printf("float %f\n", f);
 		unsigned short s = toHFloat(f);
 		float f2 = toFloat(s);

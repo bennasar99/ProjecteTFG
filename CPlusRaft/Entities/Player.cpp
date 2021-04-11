@@ -21,28 +21,41 @@ Player::Player(World* world, Vector3<float> pos): Entity(world, pos)
   */
 void Player::update(float delta) {
 	if (this->gamemode == 1) { //Gravetat MILLORAR
-		Vector3<float> grav = Vector3<float>(0, -1, 0) * delta * this->grav;
-		if (world->getBlock(this->pos) == Bloc::AIGUA) { //A l'aigua queim més lent
-			grav = grav / 4.0f;
-		}
-		if (this->grav > 0 && Block::isSolid(world->getBlock(this->pos - Vector3<float>(0, 2, 0)))) {
+		Bloc bd = world->getBlock(this->pos - Vector3<float>(0, 1.5f, 0));
+		Bloc ba = world->getBlock(this->pos - Vector3<float>(0, 0.5f, 0));
+		Bloc bu = world->getBlock(this->pos + Vector3<float>(0, eyesOffset + 0.2f, 0));
+
+		if (this->grav >= 0 && Block::isSolid(bd)) {
 			this->grav = 0;
+			return;
 		}
 		else if (this->grav < gravmax) { //"Gravetat"
-				this->grav += delta * 9.8f;
+			float mult = 1;
+			if (ba == Bloc::AIGUA) { //A l'aigua queim més lent
+				if (this->grav > 2.0f) { //Reduim la gravetat, (push de l'aigua cap a dalt en tirar-s'hi)
+					mult = -1.0f;
+				}
+				else {
+					mult = 0.5f; //Gravetat a la meitat
+				}
+				if (KeyboardManager::isPressed(GLFW_KEY_SPACE)) {
+					mult += -2.0f;
+				}
+			}
+			this->grav += delta * 9.8f * mult;
+
+			if (ba == Bloc::AIGUA) {
+				this->grav = std::max(this->grav, -0.2f);
+			}
 		}
-		Vector3<float> newPos = this->pos + grav;
-		if (!Block::isSolid(world->getBlock(newPos - Vector3<float>(0, 1, 0))) && this->grav >= 0.0f) { //Caiem
+		Vector3<float> newPos = this->pos + Vector3<float>(0, -1, 0) * delta * this->grav;
+		if (!Block::isSolid(world->getBlock(newPos)) && this->grav >= 0.0f) { //Caiem
 			this->pos = newPos;
 		}
 		if (this->grav < 0) { //Si tocam adalt, tornam caure
-			if (Block::isSolid(world->getBlock(this->pos + Vector3<float>(0,eyesOffset + 0.2f,0)))) {
+			if (Block::isSolid(bu)) {
 				this->grav = 0;
 			}
-		}
-
-		if (KeyboardManager::isPressed(GLFW_KEY_SPACE) && world->getBlock(this->pos) == Bloc::AIGUA && this->gamemode == 1) {
-			this->grav = -0.02f;
 		}
 	}
 }
