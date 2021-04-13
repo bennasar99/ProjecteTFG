@@ -13,7 +13,7 @@ class World;
 
 Sheep::Sheep(World* world, Vector3<float> pos): Entity(world, pos)
 {
-	cos = Mesh("Models/Sheep/sheep.obj");
+	cos = Mesh("Models/Sheep/sheepCentrat.obj");
 	davDR = Mesh("Models/Sheep/SheepDavDR.obj");
 	davES = Mesh("Models/Sheep/SheepDavES.obj");
 	darDR = Mesh("Models/Sheep/SheepDarDR.obj");
@@ -26,7 +26,7 @@ Sheep::Sheep(World* world, Vector3<float> pos): Entity(world, pos)
   * Funció d'actualització de l'estat intern del jugador (passiva)
   */
 void Sheep::update(float delta) {
-	printf("grav %f \n", this->grav);
+	//printf("grav %f \n", this->grav);
 	if (rotDavDr > 25) {
 		rotDR = -1;
 	}
@@ -39,14 +39,19 @@ void Sheep::update(float delta) {
 	if (Block::isSolid(world->getBlock(front))) {
 		//this->rot += delta;
 	}
-	this->rot += delta*10;
-	this->pos = this->pos + Vector3<float>(sinf(toRad(this->rot)), 0, sinf(toRad(this->rot)))/100.0f;
+	
+	Vector3<float> dir = Vector3<float>::normalize(world->camera->getPos() - this->pos);
+	this->rot = toDegree(Vector3<float>::angle(Vector3<float>(dir.x, 0, dir.z), Vector3<float>(0,0,1)));
+	if (dir.x < 0) {
+		this->rot = 360 - rot; //Conversió de 180 a 360 graus
+	}
+	//this->pos = this->pos; /*Vector3<float>(sinf(toRad(this->rot)), 0, sinf(toRad(this->rot)))/100.0f*/;
 	//this->pos.x += 0.001f;;
 	
 	//Gravetat
-	Bloc bd = world->getBlock(this->pos - Vector3<float>(0, 0.5f, 0));
-	Bloc ba = world->getBlock(this->pos + Vector3<float>(0, 0.5f, 0));
-	Bloc bu = world->getBlock(this->pos + Vector3<float>(0, eyesOffset + 0.2f, 0));
+	Bloc bd = world->getBlock(this->pos - Vector3<float>(0, 1, 0));
+	Bloc ba = world->getBlock(this->pos + Vector3<float>(0, 0, 0));
+	Bloc bu = world->getBlock(this->pos + Vector3<float>(0, 1, 0));
 
 	if (this->grav >= 0 && Block::isSolid(bd)) {
 		this->grav = 0;
@@ -62,7 +67,16 @@ void Sheep::update(float delta) {
 			this->grav = std::max(this->grav, -1.0f);
 		}
 	}
-	Vector3<float> newPos = this->pos + Vector3<float>(0, -1, 0) * delta * this->grav;
+	Vector3<float> newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.1f + Vector3<float>(0, -1, 0) * delta * this->grav;
+	Bloc nbd = world->getBlock(newPos - Vector3<float>(0, 1.0f, 0));
+	Bloc nba = world->getBlock(newPos + Vector3<float>(0, 0, 0));
+	Bloc nbu = world->getBlock(newPos + Vector3<float>(0, 1, 0));
+	printf("abaix %d normal %d amunt %d\n", nbd, nba, nbu);
+	if (nbu == Bloc::RES && Block::isSolid(nba)) {
+		this->grav = -5.0f;
+		newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.1f + Vector3<float>(0,1,0);
+	}
+
 	if (!Block::isSolid(world->getBlock(newPos))) { //Caiem
 		this->pos = newPos;
 	}
@@ -89,28 +103,32 @@ void Sheep::draw() {
 	glScalef(0.1f, 0.1f, 0.1f);
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::OVELLA));
 	glRotatef(rot, 0, 1, 0);
-	cos.draw();
 
 	glPushMatrix();
-	glTranslatef(-3.0f, +5.5, 5.5f);
+	glTranslatef(-0, 1, 0);
+	cos.draw();
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(-3.0f, -2.5f, 5.5f);
 	glRotatef(-rotDavDr, 1, 0, 0);
 	davDR.draw();
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(+3.0f, +5.5, 5.5f);
+	glTranslatef(+3.0f, -2.5f, 5.5f);
 	glRotatef(rotDavDr, 1, 0, 0);
 	davES.draw();
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(+3.0f, +5.5, -5.5f);
+	glTranslatef(+3.0f, -2.5f, -5.5f);
 	glRotatef(rotDavDr, 1, 0, 0);
 	darES.draw();
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(-3.0f, +5.5, -5.5f);
+	glTranslatef(-3.0f, -2.5f, -5.5f);
 	glRotatef(-rotDavDr, 1, 0, 0);
 	darDR.draw();
 	glPopMatrix();

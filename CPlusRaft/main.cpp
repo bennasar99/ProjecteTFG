@@ -397,7 +397,7 @@ int main(int argc, char** argv)
 		world = new World(wname, &camera);
 		//ent = new Player(world, Vector3<float>(400, 120, 400) + Vector3<float>(0, 2.0f, 0));
 		ent = new Player(world, Vector3<float>(0, 0, 0) + Vector3<float>(0, 2.0f, 0));
-		world->addEntity(Entitat::OVELLA, Vector3<float>(20, 250, -20));
+		world->addEntity(Entitat::OVELLA, Vector3<float>(30, 200, 60));
 		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
 	}
 	else {
