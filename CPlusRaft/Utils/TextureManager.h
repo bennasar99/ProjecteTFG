@@ -6,15 +6,9 @@
 #define NTEXT 7 //Nombre de textures
 
 enum class Textura {
-	TERRA,
-	FUSTA,
-	PEDRA,
-	ALTAVEU,
-	ESTALAGMITA,
-	FUSTAARBRE,
-	FULLAARBRE,
 	OVELLA,
-	BLOC
+	BLOC,
+	ESTRUC
 };
 
 enum class Cara {

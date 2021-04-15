@@ -13,16 +13,18 @@ void RenderManager::removeVAO(unsigned int vao) {
 
 void RenderManager::removeVBO(unsigned int vbo) {
 	const std::lock_guard<std::mutex> lock(mutex);
-	RenderManager::vaos.push_back(vbo);
+	RenderManager::vbos.push_back(vbo);
 }
 
 void RenderManager::removeBuffers() {
 	const std::lock_guard<std::mutex> lock(mutex);
 	std::vector<unsigned int>::iterator it;
-	for (it = RenderManager::vbos.begin(); it != RenderManager::vbos.begin(); it++) {
+	for (it = RenderManager::vbos.begin(); it != RenderManager::vbos.end(); it++) {
 		glDeleteBuffers(1, &(*it));
 	}
-	for (it = RenderManager::vaos.begin(); it != RenderManager::vaos.begin(); it++) {
-		//glDeleteBuffers(1, &(*it));
+	vbos.clear();
+	for (it = RenderManager::vaos.begin(); it != RenderManager::vaos.end(); it++) {
+		glDeleteVertexArrays(1, &(*it));
 	}
+	vaos.clear();
 }

@@ -766,6 +766,9 @@ Entity* World::addEntity(Entitat ent, Vector3<float> pos) {
 		case Entitat::OVELLA:
 			entitat = new Sheep(this, pos);
 			break;
+		case Entitat::ESTRUC:
+			entitat = new Ostrich(this, pos);
+			break;
 	}
 	entities.push_front(entitat);
 	return entitat;

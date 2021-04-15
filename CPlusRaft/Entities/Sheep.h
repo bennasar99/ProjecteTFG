@@ -28,9 +28,11 @@ private:
 	Mesh darES;
 
 	int health;
+	float rotCounter = 0;
 	float rot = 0;
 	float rotDavDr = 0;
 	float rotDR = 1;
+	short rotAct = 0;
 
 	float eyesOffset = 0.5f; //Alçada ulls
 

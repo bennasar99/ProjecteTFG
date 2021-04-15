@@ -26,6 +26,12 @@ Sheep::Sheep(World* world, Vector3<float> pos): Entity(world, pos)
   * Funció d'actualització de l'estat intern del jugador (passiva)
   */
 void Sheep::update(float delta) {
+	rotCounter += delta;
+	printf("rc %f\n", rotCounter);
+	if (rotCounter > 5) {
+		rotAct = rand() % 5;
+		rotCounter = 0;
+	}
 	//printf("grav %f \n", this->grav);
 	if (rotDavDr > 25) {
 		rotDR = -1;
@@ -35,19 +41,29 @@ void Sheep::update(float delta) {
 	}
 	rotDavDr += delta * 25 * rotDR;
 
-	Vector3<float> front = this->pos + Vector3<float>(sinf(this->rot), 0, cosf(this->rot)) * 2;
-	if (Block::isSolid(world->getBlock(front))) {
+	//if (Block::isSolid(world->getBlock(front))) {
 		//this->rot += delta;
+	//}
+	switch (rotAct) {
+	case 1:
+		this->rot += delta*25;
+		break;
+	case 2: 
+		this->rot -= delta*25;
+		break;
+	default:
+		break;
 	}
-	
-	Vector3<float> dir = Vector3<float>::normalize(world->camera->getPos() - this->pos);
-	this->rot = toDegree(Vector3<float>::angle(Vector3<float>(dir.x, 0, dir.z), Vector3<float>(0,0,1)));
-	if (dir.x < 0) {
-		this->rot = 360 - rot; //Conversió de 180 a 360 graus
-	}
+	Vector3<float> front = this->pos + Vector3<float>(sinf(toRad(this->rot)), 0, cosf(toRad(this->rot))) * 2;
+	Vector3<float> dir = Vector3<float>::normalize(front); //Vector3<float>::normalize(world->camera->getPos() - this->pos);
+
+	//this->rot = toDegree(Vector3<float>::angle(Vector3<float>(dir.x, 0, dir.z), Vector3<float>(0, 0, 1)));
+	//if (dir.x < 0) {
+	//	this->rot = 360 - rot; //Conversió de 180 a 360 graus
+	//}
 	//this->pos = this->pos; /*Vector3<float>(sinf(toRad(this->rot)), 0, sinf(toRad(this->rot)))/100.0f*/;
 	//this->pos.x += 0.001f;;
-	
+
 	//Gravetat
 	Bloc bd = world->getBlock(this->pos - Vector3<float>(0, 1, 0));
 	Bloc ba = world->getBlock(this->pos + Vector3<float>(0, 0, 0));
@@ -56,7 +72,7 @@ void Sheep::update(float delta) {
 	if (this->grav >= 0 && Block::isSolid(bd)) {
 		this->grav = 0;
 	}
-	if (this->grav < gravmax) { //"Gravetat"
+	else if (this->grav < gravmax) { //"Gravetat"
 		float mult = 1;
 		if (ba == Bloc::AIGUA) { //A l'aigua queim més lent
 			mult = -1.0f;
@@ -68,13 +84,14 @@ void Sheep::update(float delta) {
 		}
 	}
 	Vector3<float> newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.1f + Vector3<float>(0, -1, 0) * delta * this->grav;
+	Vector3<float> checkPos = newPos;
 	Bloc nbd = world->getBlock(newPos - Vector3<float>(0, 1.0f, 0));
 	Bloc nba = world->getBlock(newPos + Vector3<float>(0, 0, 0));
 	Bloc nbu = world->getBlock(newPos + Vector3<float>(0, 1, 0));
-	printf("abaix %d normal %d amunt %d\n", nbd, nba, nbu);
+	printf("abaix %d normal %d amunt %d grav %f\n", nbd, nba, nbu, this->grav);
 	if (nbu == Bloc::RES && Block::isSolid(nba)) {
 		this->grav = -5.0f;
-		newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.1f + Vector3<float>(0,1,0);
+		newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.1f + Vector3<float>(0, 1, 0);
 	}
 
 	if (!Block::isSolid(world->getBlock(newPos))) { //Caiem
@@ -85,8 +102,6 @@ void Sheep::update(float delta) {
 			this->grav = 0;
 		}
 	}
-
-	//Bot
 }
 
 

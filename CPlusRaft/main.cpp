@@ -398,6 +398,7 @@ int main(int argc, char** argv)
 		//ent = new Player(world, Vector3<float>(400, 120, 400) + Vector3<float>(0, 2.0f, 0));
 		ent = new Player(world, Vector3<float>(0, 0, 0) + Vector3<float>(0, 2.0f, 0));
 		world->addEntity(Entitat::OVELLA, Vector3<float>(30, 200, 60));
+		world->addEntity(Entitat::ESTRUC, Vector3<float>(30, 200, 30));
 		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
 	}
 	else {
@@ -487,6 +488,7 @@ int main(int argc, char** argv)
 	glEnable(GL_TEXTURE_2D); //Activació
 	TextureManager::LoadTexture("Textures/texture.png", Textura::BLOC);
 	TextureManager::LoadTexture("Models/Sheep/sheep_pallete.png", Textura::OVELLA);
+	TextureManager::LoadTexture("Models/Ostrich/Ostrich.png", Textura::ESTRUC);
 
 	//Sons
 	SoundManager::initialize();

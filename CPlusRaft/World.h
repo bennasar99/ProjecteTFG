@@ -34,6 +34,7 @@
 #include "Utils/ThreadManager.h"
 #include "lib/zlib/zlib.h"
 #include "Entities/Sheep.h"
+#include "Entities/Ostrich.h"
 
 #include "ChunkManager.h"
 
