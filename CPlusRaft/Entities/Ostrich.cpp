@@ -13,10 +13,8 @@ class World;
 
 Ostrich::Ostrich(World* world, Vector3<float> pos): Entity(world, pos)
 {
-	printf("OSTRICH\n");
-	cos = Mesh("Models/Ostrich/Ostrich.obj");
 	this->health = 5;
-	this->firstdraw = true;
+	this->estat = Estat::CAMINANT;
 }
 
 /**
@@ -24,19 +22,12 @@ Ostrich::Ostrich(World* world, Vector3<float> pos): Entity(world, pos)
   */
 void Ostrich::update(float delta) {
 	rotCounter += delta;
-	printf("rc %f\n", rotCounter);
+	//printf("rc %f\n", rotCounter);
 	if (rotCounter > 5) {
 		rotAct = rand() % 5;
+		printf("ra %d", rotAct);
 		rotCounter = 0;
 	}
-	//printf("grav %f \n", this->grav);
-	if (rotDavDr > 25) {
-		rotDR = -1;
-	}
-	else if (rotDavDr < -25) {
-		rotDR = 1;
-	}
-	rotDavDr += delta * 25 * rotDR;
 
 	//if (Block::isSolid(world->getBlock(front))) {
 		//this->rot += delta;
@@ -51,13 +42,10 @@ void Ostrich::update(float delta) {
 	default:
 		break;
 	}
-	Vector3<float> front = this->pos + Vector3<float>(sinf(toRad(this->rot)), 0, cosf(toRad(this->rot))) * 2;
+	this->rot = fmod(this->rot, 360.0f);
+	Vector3<float> front = Vector3<float>(-sinf(toRad(this->rot)), 0, -cosf(toRad(this->rot)));
 	Vector3<float> dir = Vector3<float>::normalize(front); //Vector3<float>::normalize(world->camera->getPos() - this->pos);
 
-	//this->rot = toDegree(Vector3<float>::angle(Vector3<float>(dir.x, 0, dir.z), Vector3<float>(0, 0, 1)));
-	//if (dir.x < 0) {
-	//	this->rot = 360 - rot; //Conversió de 180 a 360 graus
-	//}
 	//this->pos = this->pos; /*Vector3<float>(sinf(toRad(this->rot)), 0, sinf(toRad(this->rot)))/100.0f*/;
 	//this->pos.x += 0.001f;;
 
@@ -80,12 +68,12 @@ void Ostrich::update(float delta) {
 			this->grav = std::max(this->grav, -1.0f);
 		}
 	}
-	Vector3<float> newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.1f + Vector3<float>(0, -1, 0) * delta * this->grav;
+	Vector3<float> newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.03f + Vector3<float>(0, -1, 0) * delta * this->grav;
 	Vector3<float> checkPos = newPos;
 	Bloc nbd = world->getBlock(newPos - Vector3<float>(0, 1.0f, 0));
 	Bloc nba = world->getBlock(newPos + Vector3<float>(0, 0, 0));
 	Bloc nbu = world->getBlock(newPos + Vector3<float>(0, 1, 0));
-	printf("abaix %d normal %d amunt %d grav %f\n", nbd, nba, nbu, this->grav);
+	//printf("abaix %d normal %d amunt %d grav %f\n", nbd, nba, nbu, this->grav);
 	if (nbu == Bloc::RES && Block::isSolid(nba)) {
 		this->grav = -5.0f;
 		newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.1f + Vector3<float>(0, 1, 0);
@@ -106,16 +94,25 @@ void Ostrich::update(float delta) {
 void Ostrich::draw() {
 	if (firstdraw) {
 		firstdraw = false;
-		cos.update();
+		
 	}
 	//glScalef(0.1f, 0.1f, 0.1f);
+
+	int est = static_cast<int>(this->estat);
+	int frameMax = frameInici[est] + frameCount[est];
+	int frameAct = anim++ + frameInici[est];
+
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::ESTRUC));
 	glRotatef(rot, 0, 1, 0);
 
-	glTranslatef(-0, 1, 0);
-	cos.draw();
+	ModelManager::drawModel(Model::ESTRUC, frameAct);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	if (frameAct >= frameMax) {
+		anim = 0;
+	}
+
 }
 
 void Ostrich::destroy() {

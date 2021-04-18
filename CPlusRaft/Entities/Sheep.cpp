@@ -27,7 +27,7 @@ Sheep::Sheep(World* world, Vector3<float> pos): Entity(world, pos)
   */
 void Sheep::update(float delta) {
 	rotCounter += delta;
-	printf("rc %f\n", rotCounter);
+	//printf("rc %f\n", rotCounter);
 	if (rotCounter > 5) {
 		rotAct = rand() % 5;
 		rotCounter = 0;
@@ -88,7 +88,7 @@ void Sheep::update(float delta) {
 	Bloc nbd = world->getBlock(newPos - Vector3<float>(0, 1.0f, 0));
 	Bloc nba = world->getBlock(newPos + Vector3<float>(0, 0, 0));
 	Bloc nbu = world->getBlock(newPos + Vector3<float>(0, 1, 0));
-	printf("abaix %d normal %d amunt %d grav %f\n", nbd, nba, nbu, this->grav);
+	//printf("abaix %d normal %d amunt %d grav %f\n", nbd, nba, nbu, this->grav);
 	if (nbu == Bloc::RES && Block::isSolid(nba)) {
 		this->grav = -5.0f;
 		newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.1f + Vector3<float>(0, 1, 0);

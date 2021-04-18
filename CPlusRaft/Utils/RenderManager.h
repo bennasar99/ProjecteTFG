@@ -6,11 +6,9 @@
 #include <algorithm>
 #include <mutex>
 
-
 //Gestió dels fils
 class RenderManager {
 private:
-	static int cores; //True si la tecla està pitjada
 
 	static std::vector<unsigned int> vaos;
 	static std::vector<unsigned int> vbos;

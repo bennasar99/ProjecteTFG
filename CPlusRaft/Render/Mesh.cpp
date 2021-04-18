@@ -21,7 +21,7 @@ Mesh::Mesh(std::string path) { //Càrrega de fitxer
 	for (int k = 0; k < loader.LoadedMeshes.size(); k++) {
 		objl::Mesh mesh = loader.LoadedMeshes[k];
 		for (int j = 0; j < mesh.Indices.size(); j++) {
-			printf("ind %u\n", mesh.Indices[j]);
+			//printf("ind %u\n", mesh.Indices[j]);
 			int i = mesh.Indices.at(j);
 			objl::Vector3 vert = mesh.Vertices[i].Position;
 			unsigned short vF[3] = { toHFloat(vert.X), toHFloat(vert.Y), toHFloat(vert.Z) };
@@ -31,7 +31,7 @@ Mesh::Mesh(std::string path) { //Càrrega de fitxer
 			//printf("Norig %f %f %f conv %f %f %f\n", norm.X, norm.Y, norm.Z, toFloat(nF[0]), toFloat(nF[1]), toFloat(nF[2]));
 			objl::Vector2 text = mesh.Vertices[i].TextureCoordinate;
 			unsigned short tF[2] = { toHFloat(text.X), toHFloat(1-text.Y) };
-			printf("Torig %f %f conv %f %f\n", text.X, text.Y, toFloat(tF[0]), toFloat(tF[1]));
+			//printf("Torig %f %f conv %f %f\n", text.X, text.Y, toFloat(tF[0]), toFloat(tF[1]));
 			//objl::Vector3 col = mesh.MeshMaterial.Kd;
 			//unsigned char cF[4] = { col.X * 255, col.Y * 255, col.Z * 255, 255 };
 			unsigned char cF[4] = {255, 255, 255, 255 };
