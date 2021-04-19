@@ -11,8 +11,8 @@ void ModelManager::initialize() {
 void ModelManager::addModel(Model mod, int frames, std::string path) {
 	model[static_cast<int>(mod)] = new Mesh[frames];
 	if (frames <= 1) { //Si només té un frame carregam directament amb el path
-		Mesh mesh = (model[static_cast<int>(mod)][0] = Mesh(path));
-		mesh.update();
+		model[static_cast<int>(mod)][0] = Mesh(path);
+		model[static_cast<int>(mod)][0].update();
 		return;
 	}
 

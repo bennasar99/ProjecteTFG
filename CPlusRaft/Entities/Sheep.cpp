@@ -13,13 +13,7 @@ class World;
 
 Sheep::Sheep(World* world, Vector3<float> pos): Entity(world, pos)
 {
-	cos = Mesh("Models/Sheep/sheepCentrat.obj");
-	davDR = Mesh("Models/Sheep/SheepDavDR.obj");
-	davES = Mesh("Models/Sheep/SheepDavES.obj");
-	darDR = Mesh("Models/Sheep/SheepDarDR.obj");
-	darES = Mesh("Models/Sheep/SheepDarES.obj");
 	this->health = 5;
-	this->firstdraw = true;
 }
 
 /**
@@ -107,45 +101,38 @@ void Sheep::update(float delta) {
 
 //Funció de dibuix
 void Sheep::draw() {
-	if (firstdraw) {
-		firstdraw = false;
-		cos.update();
-		davDR.update();
-		davES.update();
-		darDR.update();
-		darES.update();
-	}
+
 	glScalef(0.1f, 0.1f, 0.1f);
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::OVELLA));
 	glRotatef(rot, 0, 1, 0);
 
 	glPushMatrix();
 	glTranslatef(-0, 1, 0);
-	cos.draw();
+	ModelManager::drawModel(Model::OV_COS, 0);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(-3.0f, -2.5f, 5.5f);
 	glRotatef(-rotDavDr, 1, 0, 0);
-	davDR.draw();
+	ModelManager::drawModel(Model::OV_DVDR, 0);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(+3.0f, -2.5f, 5.5f);
 	glRotatef(rotDavDr, 1, 0, 0);
-	davES.draw();
+	ModelManager::drawModel(Model::OV_DVES, 0);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(+3.0f, -2.5f, -5.5f);
 	glRotatef(rotDavDr, 1, 0, 0);
-	darES.draw();
+	ModelManager::drawModel(Model::OV_DRES, 0);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(-3.0f, -2.5f, -5.5f);
 	glRotatef(-rotDavDr, 1, 0, 0);
-	darDR.draw();
+	ModelManager::drawModel(Model::OV_DRDR, 0);
 	glPopMatrix();
 
 	/*davES.draw();

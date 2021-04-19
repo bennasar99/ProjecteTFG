@@ -493,6 +493,11 @@ int main(int argc, char** argv)
 
 	//Models
 	ModelManager::addModel(Model::ESTRUC, 231, "Models/Ostrich/Ostrich");
+	ModelManager::addModel(Model::OV_COS, 1, "Models/Sheep/sheepCentrat.obj");
+	ModelManager::addModel(Model::OV_DVDR, 1, "Models/Sheep/SheepDavDR.obj");
+	ModelManager::addModel(Model::OV_DVES, 1, "Models/Sheep/SheepDavES.obj");
+	ModelManager::addModel(Model::OV_DRDR, 1, "Models/Sheep/SheepDarDR.obj");
+	ModelManager::addModel(Model::OV_DRES, 1, "Models/Sheep/SheepDarES.obj");
 
 	//Sons
 	SoundManager::initialize();

@@ -92,11 +92,7 @@ void Ostrich::update(float delta) {
 
 //Funció de dibuix
 void Ostrich::draw() {
-	if (firstdraw) {
-		firstdraw = false;
-		
-	}
-	//glScalef(0.1f, 0.1f, 0.1f);
+	glScalef(1.75f, 1.75f, 1.75f);
 
 	int est = static_cast<int>(this->estat);
 	int frameMax = frameInici[est] + frameCount[est];

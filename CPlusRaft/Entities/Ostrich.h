@@ -33,13 +33,6 @@ private:
 	float gravmax = 100;
 	float speed = 16.0f;
 
-	bool firstdraw = false;
-
-	Mesh cos;
-	Mesh davDR;
-	Mesh davES;
-	Mesh darDR;
-	Mesh darES;
 
 	int health;
 	float rotCounter = 0;

@@ -133,8 +133,14 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 							}
 						}
 					}
-					else if (random == 10) { //Ovella
-						//world->addEntity(Entitat::OVELLA, Vector3<float>(tpos.x, tpos.y + 1, tpos.z));
+					else if (random == 10) { //Possible mob
+						int rand2 = rand() % 10;
+						if (rand2 == 5) {
+							world->addEntity(Entitat::OVELLA, Vector3<float>(tpos.x, tpos.y + 1, tpos.z));
+						}
+						else if (rand2 == 7) {
+							world->addEntity(Entitat::ESTRUC, Vector3<float>(tpos.x, tpos.y + 1, tpos.z));
+						}
 					}
 				}
 			}
