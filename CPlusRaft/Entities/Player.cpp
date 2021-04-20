@@ -19,7 +19,7 @@ Player::Player(World* world, Vector3<float> pos): Entity(world, pos)
 /**
   * Funció d'actualització de l'estat intern del jugador (passiva)
   */
-void Player::update(float delta) {
+void Player::update(double delta) {
 	if (this->gamemode == 1) { //Gravetat MILLORAR
 		Bloc bd = world->getBlock(this->pos - Vector3<float>(0, 1.5f, 0));
 		Bloc ba = world->getBlock(this->pos - Vector3<float>(0, 0.5f, 0));
@@ -42,13 +42,13 @@ void Player::update(float delta) {
 					mult += -2.0f;
 				}
 			}
-			this->grav += delta * 9.8f * mult;
+			this->grav += (float)delta * 9.8f * mult;
 
 			if (ba == Bloc::AIGUA) {
 				this->grav = std::max(this->grav, -0.2f);
 			}
 		}
-		Vector3<float> newPos = this->pos + Vector3<float>(0, -1, 0) * delta * this->grav;
+		Vector3<float> newPos = this->pos + Vector3<float>(0, -1, 0) * (float)(delta) * this->grav;
 		if (!Block::isSolid(world->getBlock(newPos)) && this->grav >= 0.0f) { //Caiem
 			this->pos = newPos;
 		}
@@ -78,7 +78,7 @@ void Player::control(int key) {
 /*
   Funció d'actualització de l'estat intern del jugador (activa, quan està controlat)
 */
-void Player::control(float delta, Camera *cam) {
+void Player::control(double delta, Camera *cam) {
 	//Actualitzam la posició del jugador
 	Vector3<float> add = Vector3<float>(0, 0, 0);
 	Vector3<float> forward = Vector3<float>::normalize(Vector3<float>(cam->getFront().x, 0, cam->getFront().z));
@@ -112,7 +112,7 @@ void Player::control(float delta, Camera *cam) {
 	if (KeyboardManager::isPressed(GLFW_KEY_LEFT_SHIFT)) { //Si sprinta
 		speed*=2.0f;
 	}
-	Vector3<float> newPos = this->pos + add * delta * speed;
+	Vector3<float> newPos = this->pos + add * (float)delta * speed;
 	if (gamemode == 0) {
 		this->pos = newPos;
 		return; //No comprovam colisions
@@ -146,7 +146,7 @@ void Player::control(float delta, Camera *cam) {
 }
 
 //Funció de dibuix
-void Player::draw() {
+void Player::draw(double delta) {
 	//Model jugador
 }
 

@@ -31,11 +31,11 @@ public:
 
 	Player(World* world, Vector3<float> pos);
 
-	void update(float delta);
+	void update(double delta);
 	void control(int key);
-	void control(float delta, Camera *cam);
+	void control(double delta, Camera *cam);
 
-	void draw();
+	void draw(double delta);
 	void destroy();
 
 	void setCam(Camera* cam);

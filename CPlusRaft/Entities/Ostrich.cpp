@@ -20,7 +20,7 @@ Ostrich::Ostrich(World* world, Vector3<float> pos): Entity(world, pos)
 /**
   * Funció d'actualització de l'estat intern del jugador (passiva)
   */
-void Ostrich::update(float delta) {
+void Ostrich::update(double delta) { 
 	rotCounter += delta;
 	//printf("rc %f\n", rotCounter);
 	if (rotCounter > 5) {
@@ -32,19 +32,30 @@ void Ostrich::update(float delta) {
 	//if (Block::isSolid(world->getBlock(front))) {
 		//this->rot += delta;
 	//}
+	bool canviEstat = false;
 	switch (rotAct) {
 	case 1:
-		this->rot += delta*25;
+		if (this->estat == Estat::CAMINANT || this->estat == Estat::ATURAT) {
+			this->rot += (float)delta * 25;
+		}
 		break;
-	case 2: 
-		this->rot -= delta*25;
+	case 2:
+		if (this->estat == Estat::CAMINANT || this->estat == Estat::ATURAT) {
+			this->rot -= (float)delta * 25;
+		}
+		break;
+	case 3:
+		if (rotCounter == 0) {
+			canviEstat = true;
+		}
 		break;
 	default:
 		break;
 	}
 	this->rot = fmod(this->rot, 360.0f);
+
 	Vector3<float> front = Vector3<float>(-sinf(toRad(this->rot)), 0, -cosf(toRad(this->rot)));
-	Vector3<float> dir = Vector3<float>::normalize(front); //Vector3<float>::normalize(world->camera->getPos() - this->pos);
+	Vector3<float> dir = Vector3<float>::normalize(front);
 
 	//this->pos = this->pos; /*Vector3<float>(sinf(toRad(this->rot)), 0, sinf(toRad(this->rot)))/100.0f*/;
 	//this->pos.x += 0.001f;;
@@ -62,13 +73,13 @@ void Ostrich::update(float delta) {
 		if (ba == Bloc::AIGUA) { //A l'aigua queim més lent
 			mult = -1.0f;
 		}
-		this->grav += delta * 9.8f * mult;
+		this->grav += (float)delta * 9.8f * mult;
 
 		if (ba == Bloc::AIGUA) {
 			this->grav = std::max(this->grav, -1.0f);
 		}
 	}
-	Vector3<float> newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.03f + Vector3<float>(0, -1, 0) * delta * this->grav;
+	Vector3<float> newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.03f + Vector3<float>(0, -1, 0) * (float)delta * this->grav;
 	Vector3<float> checkPos = newPos;
 	Bloc nbd = world->getBlock(newPos - Vector3<float>(0, 1.0f, 0));
 	Bloc nba = world->getBlock(newPos + Vector3<float>(0, 0, 0));
@@ -79,7 +90,28 @@ void Ostrich::update(float delta) {
 		newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.1f + Vector3<float>(0, 1, 0);
 	}
 
-	if (!Block::isSolid(world->getBlock(newPos))) { //Caiem
+	if (canviEstat) {
+		if (nba == Bloc::HERBA && this->estat != Estat::MENJANT) {
+			this->estat = Estat::MENJANT;
+			printf("EAT BEGIN\n");
+		}
+		else {
+			int r = rand() % 3;
+			Estat antest = this->estat;
+			if (r == 2) {
+				this->estat = Estat::ATURAT;
+			}
+			else {
+				this->estat = Estat::CAMINANT;
+			}
+			if (antest == Estat::MENJANT) {
+				printf("EAT END\n");
+				world->setBlock(Bloc::RES, newPos.toInt(), true, true); //No lleva el que toca, sinó el de darrera
+			}
+		}
+	}
+
+	if (!Block::isSolid(world->getBlock(newPos)) && this->estat == Estat::CAMINANT) { //Caiem
 		this->pos = newPos;
 	}
 	if (this->grav < 0) { //Si tocam adalt, tornam caure
@@ -91,12 +123,12 @@ void Ostrich::update(float delta) {
 
 
 //Funció de dibuix
-void Ostrich::draw() {
+void Ostrich::draw(double delta) {
 	glScalef(1.75f, 1.75f, 1.75f);
 
 	int est = static_cast<int>(this->estat);
 	int frameMax = frameInici[est] + frameCount[est];
-	int frameAct = anim++ + frameInici[est];
+	int frameAct = (int)(anim+=((float)delta/30.0f)) + frameInici[est];
 
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::ESTRUC));
 	glRotatef(rot, 0, 1, 0);

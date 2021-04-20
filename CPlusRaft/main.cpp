@@ -74,7 +74,7 @@ void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
 void gamePad();
 
 double lastTime;
-float lastTimeW;
+double lastTimeW;
 int fpsc = 0;
 bool run = false;
 
@@ -151,7 +151,7 @@ void Display(GLFWwindow* window)
 
 	glEnable(GL_LIGHTING); //Ens asseguram que l'il·luminació està activada
 
-	world->draw(camera.getPos(), viewDist); //Dibuixam el món
+	world->draw(camera.getPos(), viewDist, delta); //Dibuixam el món
 
 	//Dibuixam el bloc seleccionat
 	if (Block::isSolid(world->getBlock(ba))) {
@@ -331,8 +331,8 @@ void Update(void)
 {
 
 	//Gestió del temps
-	float time = (float)glfwGetTime();
-	float delta = time - lastTime;
+	double time = glfwGetTime();
+	double delta = time - lastTime;
 	lastTime = time;
 
 	if (ent != nullptr) { //L'entitat que controlam s'ha d'actualitzar quan l'ordinador ho permeti
@@ -351,8 +351,8 @@ void Update(void)
 
 	//Actualitzam el món
 	//std::async(&World::update, world, delta, camera.getPos());
-	time = (float)glfwGetTime();
-	float deltaW = time - lastTimeW;
+	time = glfwGetTime();
+	double deltaW = time - lastTimeW;
 	if (deltaW > 1.0f / (float)TPS) {
 		lastTimeW = time;
 		world->update(deltaW, camera.getPos());
@@ -524,7 +524,6 @@ int main(int argc, char** argv)
 	glfwMakeContextCurrent(NULL);
 	run = true;
 	// Comienza la ejecucion del core de GLUT
-	double time;
 	lastTime = (float)glfwGetTime();
 	lastTimeW = lastTime;
 	while (run) {
@@ -691,7 +690,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 	}
 	else {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) { //Botó dret, eliminar blocs
-			if (world->deleteBlock(Vector3<int>(floor(ba.x), floor(ba.y), floor(ba.z)), true)) {
+			if (world->deleteBlock(Vector3<int>((int)floor(ba.x), (int)floor(ba.y), (int)floor(ba.z)), true)) {
 				SoundManager::playSound(So::DESTRUEIX, ba, true);
 			}
 		}
@@ -708,7 +707,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 					//epos.floor();
 				}
 				if (ent == nullptr || epos != bp) {
-					world->setBlock(tipusbloc, Vector3<int>(floor(bp.x), floor(bp.y), floor(bp.z)));
+					world->setBlock(tipusbloc, Vector3<int>((int)floor(bp.x), (int)floor(bp.y), (int)floor(bp.z)));
 					SoundManager::playSound(So::COLOCA, bp, true);
 				}
 			}

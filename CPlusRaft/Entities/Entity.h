@@ -21,13 +21,13 @@ protected:
 
 public:
 
-	virtual void draw();
-	virtual void update(float delta); //Actualitzacions passives
+	virtual void draw(double delta);
+	virtual void update(double delta); //Actualitzacions passives
 	virtual void destroy();
 
 	virtual void control(int key); //Control actiu (entitat controlada i tecla pitjada)
-	virtual void control(float delta); //Actualitzacions actives (entitat controlada)
-	virtual void control(float delta, Camera *cam); //Actualitzacions actives (entitat controlada)
+	virtual void control(double delta); //Actualitzacions actives (entitat controlada)
+	virtual void control(double delta, Camera *cam); //Actualitzacions actives (entitat controlada)
 
 	virtual void onAttach(); //Es crida quan l'usuari agafa el control de l'entitat
 	virtual void onDeattach(); //Es crida quan l'usuari deixa de controlar l'entitat

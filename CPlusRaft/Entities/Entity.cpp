@@ -12,9 +12,9 @@ Entity::Entity() {
 	this->pos = Vector3<float>(0, 0, 0);
 }
 
-void Entity::draw() {}
+void Entity::draw(double delta) {}
 
-void Entity::update(float delta) {}
+void Entity::update(double delta) {}
 
 void Entity::destroy() {}
 
@@ -42,11 +42,9 @@ float Entity::getRot() {
 
 void Entity::control(int key) {}
 
-void Entity::control(float delta) {}
+void Entity::control(double delta) {}
 
-void Entity::control(float delta, Camera* cam)
-{
-}
+void Entity::control(double delta, Camera* cam) {}
 
 void Entity::setCam(Camera* cam) {}
 

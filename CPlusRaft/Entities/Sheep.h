@@ -31,9 +31,9 @@ private:
 public:
 	Sheep(World* world, Vector3<float> pos);
 
-	void update(float delta);
+	void update(double delta);
 
-	void draw();
+	void draw(double delta);
 	void destroy();
 
 	void setCam(Camera* cam);

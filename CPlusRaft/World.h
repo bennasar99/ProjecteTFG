@@ -65,7 +65,7 @@ private:
 			res = res * 31 + hash<int>()(vec.x);
 			res = res * 31 + hash<int>()(vec.y);
 			res = res * 31 + hash<int>()(vec.z);*/
-			return vec.x + 128 * (vec.y + 128 * vec.z);
+			return (size_t)vec.x + 128 * ((size_t)vec.y + 128 * (size_t)vec.z);
 		}
 	};
 
@@ -114,7 +114,7 @@ public:
 	Vector3<int> getSpawn();
 
 	void drawAxis(Vector3<float> pos, float axisSize);
-	void draw(Vector3<float> pos, float dist);
+	void draw(Vector3<float> pos, float dist, double delta);
 
 	//Llums
 	void drawLights();
@@ -135,7 +135,7 @@ public:
 	void updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos);
 	void updateNeighborChunks(Vector3<int> cpos);
 
-	void update(float delta, Vector3<float> camPos);
+	void update(double delta, Vector3<float> camPos);
 	bool setRandomSpawn();
 
 	/*void setRegionDirty(Vector3<int> rPos);*/

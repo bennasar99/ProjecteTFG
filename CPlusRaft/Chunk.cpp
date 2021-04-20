@@ -241,7 +241,7 @@ void Chunk::updateMesh() {
 					bool visible[6] = { false, false, false, false, false, false };
 					bool solid = Block::isSolid(bt);
 					if (Block::isTransparent(bt)) {
-						dT info = dT(Vector3<float>(pos.x, pos.y, pos.z));
+						dT info = dT(Vector3<float>((float)pos.x, (float)pos.y, (float)pos.z));
 						for (int i = 0; i < 6; i++) {
 							Bloc bo = getBlockWorld(toCheck[i]);
 							if (bo != bt && Block::canSeeThrough(bo) && !Block::isSolid(bo)) {
@@ -318,7 +318,7 @@ void Chunk::updateTransparency(Vector3<float> pPos){
 			}
 		}
 		//printf("info %d %d %d count %d \n", info.pos.x, info.pos.y, info.pos.z, count);
-		Vector3<int> bpos = Vector3<int>(info.pos.x, info.pos.y, info.pos.z) % CHUNKSIZE;
+		Vector3<int> bpos = info.pos.toInt() % CHUNKSIZE;
 		if (blocs[bpos.x][bpos.y][bpos.z] != Bloc::RES) {
 			//printf("%d %d %d, ", bpos.y, bpos.y, bpos.z);
 			//blocs[bpos.x][bpos.y][bpos.z]->draw(&cMesh, info.visible, bpos);

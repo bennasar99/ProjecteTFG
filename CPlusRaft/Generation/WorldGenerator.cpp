@@ -36,7 +36,8 @@ WorldGenerator::WorldGenerator(int seed, World* world) {
 }
 
 WorldGenerator::WorldGenerator() {
-	
+	this->seed = 0;
+	this->world = nullptr;
 }
 
 Bioma WorldGenerator::getBiomeAt(int bX, int bZ) {
@@ -136,10 +137,10 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 					else if (random == 10) { //Possible mob
 						int rand2 = rand() % 10;
 						if (rand2 == 5) {
-							world->addEntity(Entitat::OVELLA, Vector3<float>(tpos.x, tpos.y + 1, tpos.z));
+							world->addEntity(Entitat::OVELLA, Vector3<float>((float)tpos.x, (float)tpos.y + 1.0f, (float)tpos.z));
 						}
 						else if (rand2 == 7) {
-							world->addEntity(Entitat::ESTRUC, Vector3<float>(tpos.x, tpos.y + 1, tpos.z));
+							//world->addEntity(Entitat::ESTRUC, Vector3<float>(tpos.x, tpos.y + 1, tpos.z));
 						}
 					}
 				}

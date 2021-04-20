@@ -81,7 +81,7 @@ inline Vector3<T> Vector3<T>::operator+(const Vector3<U>& b) {
 template <class T>
 template <class U>
 inline Vector3<T> Vector3<T>::operator-(const Vector3<U>& b) {
-	return Vector3(this->x - b.x, this->y - b.y, this->z - b.z);
+	return Vector3(this->x - (T)b.x, this->y - (T)b.y, this->z - (T)b.z);
 }
 
 template <class T>
@@ -151,7 +151,7 @@ inline float Vector3<T>::operator*(const Vector3<T>& b) {
 //Mòdul d'un vector
 template <class T>
 inline float Vector3<T>::module(Vector3<T> a) {
-	return sqrtf(powf(a.x, 2.f) + powf(a.y, 2.f) + powf(a.z, 2.f));
+	return sqrtf(powf((float)a.x, 2.f) + powf((float)a.y, 2.f) + powf((float)a.z, 2.f));
 }
 
 //Angle entre 2 vectors

@@ -23,7 +23,7 @@ enum class Estat {
 */
 class Ostrich : public Entity {
 private:
-	int anim = 0;
+	float anim = 0;
 
 	Estat estat = Estat::CAMINANT;
 	int frameInici[4] = { 0, 65, 130, 180 };
@@ -46,9 +46,9 @@ private:
 public:
 	Ostrich(World* world, Vector3<float> pos);
 
-	void update(float delta);
+	void update(double delta);
 
-	void draw();
+	void draw(double delta);
 	void destroy();
 
 	void setCam(Camera* cam);

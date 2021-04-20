@@ -183,7 +183,7 @@ void World::delLight(Light* light) {
  * @param Vector3<float> posicio
  * Actualitza l'cestat intern de les estructures del món, a més de la distància de les llums
  */
-void World::update(float delta, Vector3<float> pos) {
+void World::update(double delta, Vector3<float> pos) {
 	//printf("mapsize %d \n", chunks.size());
 	daytime += ((float)delta);
 	if (daytime >= DAYTIME) {
@@ -214,7 +214,7 @@ void World::update(float delta, Vector3<float> pos) {
 
 	//Descàrrega de chunks
 	Vector3<int> prPos = getRegion(pcPos); //Obtenim la regió actual del jugador
-	int range = ceil(ceilf(camera->getViewDist() / CHUNKSIZE) / REGIONSIZE) + 1;  //"Distància de visió en regions"
+	int range = (int)ceil(ceilf(camera->getViewDist() / CHUNKSIZE) / REGIONSIZE) + 1;  //"Distància de visió en regions"
 
 	std::list<Vector3<int>> toDelete;
 	{
@@ -276,7 +276,7 @@ void World::update(float delta, Vector3<float> pos) {
 	}
 
 
-	int dist = floor((camera->getViewDist() / CHUNKSIZE) / 3);
+	int dist = (int)floor((camera->getViewDist() / CHUNKSIZE) / 3);
 	for (int x = pcPos.x - dist; x < pcPos.x + dist; x++) {
 		for (int y = pcPos.y - dist; y < pcPos.y + dist; y++) {
 			for (int z = pcPos.z - dist; z < pcPos.z + dist; z++) {
@@ -312,7 +312,7 @@ void World::updateGeneration() {
 				if (cnk[i].wait_for(std::chrono::nanoseconds(0)) == std::future_status::ready) {
 					Chunk* ch = cnk[i].get();
 					Vector3 cPos = ch->getPos();
-					int range = ceil(ceil(camera->getViewDist() / CHUNKSIZE) / REGIONSIZE) + 1;
+					int range = (int)ceil(ceil(camera->getViewDist() / CHUNKSIZE) / REGIONSIZE) + 1;
 					Vector3<int> rPos = getRegion(cPos);
 					Vector3<int> prPos = getRegion(getChunkPos(camera->getPos().toInt()));
 					float dist = Vector3<int>::dist(rPos, prPos);
@@ -587,14 +587,14 @@ Block* World::getBlockPointer(Vector3<int> pos, bool remove) {
 
 
 //Dibuixa el món visible
-void World::draw(Vector3<float> pos, float dist) {
+void World::draw(Vector3<float> pos, float dist, double delta) {
 	RenderManager::removeBuffers();
 	std::list<Entity*>::iterator ent;
 	for (ent = entities.begin(); (ent != entities.end()); ent++) {
 		Vector3<float> pos = (*ent)->getPos();
 		glPushMatrix();
 		glTranslatef(pos.x, pos.y, pos.z);
-		(*ent)->draw();
+		(*ent)->draw(delta);
 		glPopMatrix();
 	}
 
@@ -615,7 +615,7 @@ void World::draw(Vector3<float> pos, float dist) {
 			continue;
 		}
 		glPushMatrix();
-		glTranslatef(cPos.x * CHUNKSIZE, cPos.y * CHUNKSIZE, cPos.z * CHUNKSIZE);
+		glTranslatef((float)cPos.x * CHUNKSIZE, (float)cPos.y * CHUNKSIZE, (float)cPos.z * CHUNKSIZE);
 		ch->drawO();
 		glPopMatrix();
 		if (nchunk < 5) {
@@ -633,7 +633,7 @@ void World::draw(Vector3<float> pos, float dist) {
 			continue;
 		}
 		glPushMatrix();
-		glTranslatef(cPos.x * CHUNKSIZE, cPos.y * CHUNKSIZE, cPos.z * CHUNKSIZE);
+		glTranslatef((float)cPos.x * CHUNKSIZE, (float)cPos.y * CHUNKSIZE, (float)cPos.z * CHUNKSIZE);
 		ch->drawT();
 		glPopMatrix();
 	}
@@ -656,9 +656,9 @@ void World::updateVisibility() {
 	for (cPos.x = cMin.x; cPos.x <= cMax.x; cPos.x++) {
 		for (cPos.z = cMin.z; cPos.z <= cMax.z; cPos.z++) {
 			for (cPos.y = cMin.y; cPos.y <= cMax.y; cPos.y++) {
-				Vector3<float> pos = Vector3<float>(cPos.x, cPos.y, cPos.z);
+				Vector3<float> pos = Vector3<float>((float)cPos.x, (float)cPos.y, (float)cPos.z);
 				Vector3<int> camPos = this->getChunkPos(camera->getPos().toInt());
-				int dist = Vector3<int>::dist(camPos, pos.toInt());
+				int dist = (int)Vector3<int>::dist(camPos, pos.toInt());
 				pos = pos * CHUNKSIZE;
 				if ((dist <= 5) || (camera->isVisible(pos, 100) ||
 						camera->isVisible(pos + Vector3<float>(CHUNKSIZE/2, CHUNKSIZE/2, CHUNKSIZE/2), 100) ||
@@ -739,10 +739,10 @@ void World::drawSol(Vector3<float> pos, float dist) {
 	float aY = abs(sinf((daytime / (DAYTIME / 2)) * M_PI));
 	float aX = abs(cosf((daytime / (DAYTIME / 2)) * M_PI));
 	if (daytime > DAYTIME / 2) { //Vespre: 	0, 0, 54.5, alba/posta: 	100, 64.7, 0
-		glClearColor(1*aX, 0.647*aX, 0.545f * aY, 1);
+		glClearColor(1*aX, 0.647f*aX, 0.545f * aY, 1);
 	}
 	else { //dia: 	52.9, 80.8, 92.2, alba/posta: 	100, 64.7, 0
-		glClearColor(0.529f + 0.471f * aX, 0.647f + 0.1538f * aY, 0.92 * aY, 1);
+		glClearColor(0.529f + 0.471f * aX, 0.647f + 0.1538f * aY, 0.92f * aY, 1);
 	}
 
 	glPopMatrix();

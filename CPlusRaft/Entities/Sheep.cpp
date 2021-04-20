@@ -19,8 +19,8 @@ Sheep::Sheep(World* world, Vector3<float> pos): Entity(world, pos)
 /**
   * Funció d'actualització de l'estat intern del jugador (passiva)
   */
-void Sheep::update(float delta) {
-	rotCounter += delta;
+void Sheep::update(double delta) {
+	rotCounter += (float)delta;
 	//printf("rc %f\n", rotCounter);
 	if (rotCounter > 5) {
 		rotAct = rand() % 5;
@@ -33,17 +33,17 @@ void Sheep::update(float delta) {
 	else if (rotDavDr < -25) {
 		rotDR = 1;
 	}
-	rotDavDr += delta * 25 * rotDR;
+	rotDavDr += (float)delta * 25 * rotDR;
 
 	//if (Block::isSolid(world->getBlock(front))) {
 		//this->rot += delta;
 	//}
 	switch (rotAct) {
 	case 1:
-		this->rot += delta*25;
+		this->rot += (float)delta*25;
 		break;
 	case 2: 
-		this->rot -= delta*25;
+		this->rot -= (float)delta*25;
 		break;
 	default:
 		break;
@@ -71,13 +71,13 @@ void Sheep::update(float delta) {
 		if (ba == Bloc::AIGUA) { //A l'aigua queim més lent
 			mult = -1.0f;
 		}
-		this->grav += delta * 9.8f * mult;
+		this->grav += (float)delta * 9.8f * mult;
 
 		if (ba == Bloc::AIGUA) {
 			this->grav = std::max(this->grav, -1.0f);
 		}
 	}
-	Vector3<float> newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.1f + Vector3<float>(0, -1, 0) * delta * this->grav;
+	Vector3<float> newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.1f + Vector3<float>(0, -1, 0) * (float)delta * this->grav;
 	Vector3<float> checkPos = newPos;
 	Bloc nbd = world->getBlock(newPos - Vector3<float>(0, 1.0f, 0));
 	Bloc nba = world->getBlock(newPos + Vector3<float>(0, 0, 0));
@@ -100,8 +100,7 @@ void Sheep::update(float delta) {
 
 
 //Funció de dibuix
-void Sheep::draw() {
-
+void Sheep::draw(double delta) {
 	glScalef(0.1f, 0.1f, 0.1f);
 	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::OVELLA));
 	glRotatef(rot, 0, 1, 0);
@@ -135,9 +134,6 @@ void Sheep::draw() {
 	ModelManager::drawModel(Model::OV_DRDR, 0);
 	glPopMatrix();
 
-	/*davES.draw();
-	darDR.draw();
-	darES.draw();*/
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
