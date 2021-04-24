@@ -22,7 +22,8 @@ bool Block::getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<un
 		break;
 	case Bloc::VIDRE: //cub transparent/opac (vidre?)
 		//color = { 0, 0, 0, 1 };
-		color = { 0, 0, 0, 255 };
+		texNum = 11;
+		color = { 0, 0, 0, 51 };
 		break;
 	case Bloc::FUSTA:
 		texNum = 3;
@@ -191,8 +192,6 @@ void Block::draw(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[6]) {
 		}
 		break;
 	}
-	case Bloc::HERBAFULL:
-		break;
 	default:
 		Block::drawBlock(id, cM, relPos, visible);
 		break;
@@ -207,12 +206,11 @@ bool Block::isTransparent(Bloc tipus) {
 }
 
 bool Block::canSeeThrough(Bloc tipus) {
-	return (Block::isTransparent(tipus) || tipus == Bloc::TORXA || tipus == Bloc::HERBA || tipus == Bloc::HERBAFULL || tipus == Bloc::RES);
+	return (Block::isTransparent(tipus) || tipus == Bloc::TORXA || tipus == Bloc::HERBA || tipus == Bloc::RES);
 }
 
 bool Block::isSolid(Bloc tipus) {
-	if (tipus != Bloc::RES && tipus != Bloc::HERBA && tipus != Bloc::TORXA && tipus != Bloc::HERBAFULL 
-		&& tipus != Bloc::AIGUA) { //Exclude list
+	if (tipus != Bloc::RES && tipus != Bloc::HERBA && tipus != Bloc::TORXA && tipus != Bloc::AIGUA) { //Exclude list
 		return true;
 	}
 	return false;
@@ -227,8 +225,7 @@ bool Block::isMarcheable(Bloc tipus) {
 }
 
 bool Block::isCube(Bloc tipus) {
-	if (tipus != Bloc::HERBA && tipus != Bloc::TORXA && tipus != Bloc::HERBAFULL
-		&& tipus != Bloc::LLUMSOTIL && tipus != Bloc::LLUMTERRA) { //Exclude list
+	if (tipus != Bloc::HERBA && tipus != Bloc::TORXA && tipus != Bloc::LLUMSOTIL && tipus != Bloc::LLUMTERRA) { //Exclude list
 		return true;
 	}
 	return false;
@@ -309,31 +306,6 @@ bool Block::drawIcon(Bloc id) {
 			glVertex3d(0, 0.5, 0.25); glVertex3d(0, -0.5, 0.25);
 			glVertex3d(-0.25, 0.1, 0); glVertex3d(-0.25, -0.5, 0);
 			glVertex3d(0, 0.4, -0.25); glVertex3d(0, -0.5, -0.25);
-			glEnd();
-			glLineWidth(1.0f);
-			break;
-		case Bloc::HERBAFULL: //Herba
-			glColor3f(0, 1, 0);
-			glLineWidth(3.0f);
-			glBegin(GL_LINES);
-			glNormal3f(0, 1, 0);
-			glVertex3d(0.5, 0.5, 0.5); glVertex3d(0.5, -0.5, 0.5);
-			glVertex3d(-0.5, 0.5, 0.5); glVertex3d(-0.5, -0.5, 0.5);
-			glVertex3d(0.5, 0.5, -0.5); glVertex3d(0.5, -0.5, -0.5);
-			glVertex3d(-0.5, 0.5, -0.5); glVertex3d(-0.5, -0.5, -0.5);
-			glVertex3d(0.0, 0.5, 0.0); glVertex3d(0.0, -0.5, 0.0);
-			glVertex3d(0.5, 0.5, 0.0); glVertex3d(0.5, -0.5, 0.0);
-			glVertex3d(0.0, 0.5, 0.5); glVertex3d(0.0, -0.5, 0.5);
-			glVertex3d(-0.5, 0.5, 0.0); glVertex3d(-0.5, -0.5, 0.0);
-			glVertex3d(0.0, 0.5, -0.5); glVertex3d(0.0, -0.5, -0.5);
-			glVertex3d(0.25, 0.5, 0.25); glVertex3d(0.25, -0.5, 0.25);
-			glVertex3d(-0.25, 0.5, 0.25); glVertex3d(-0.25, -0.5, 0.25);
-			glVertex3d(0.25, 0.5, -0.25); glVertex3d(0.25, -0.5, -0.25);
-			glVertex3d(-0.25, 0.5, -0.25); glVertex3d(-0.25, -0.5, -0.25);
-			glVertex3d(0.25, 0.5, 0); glVertex3d(0.25, -0.5, 0);
-			glVertex3d(0, 0.5, 0.25); glVertex3d(0, -0.5, 0.25);
-			glVertex3d(-0.25, 0.5, 0); glVertex3d(-0.25, -0.5, 0);
-			glVertex3d(0, 0.5, -0.25); glVertex3d(0, -0.5, -0.25);
 			glEnd();
 			glLineWidth(1.0f);
 			break;

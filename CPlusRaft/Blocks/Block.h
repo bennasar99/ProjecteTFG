@@ -2,8 +2,10 @@
 
 #include "../Render/ChunkMesh.h"
 #include "../Utils/Vector3.h"
+#include "../Utils/ShaderManager.h"
 #include "../Render/MarchingCubes.h"
 #include <array>
+#include "../Render/Shader.h"
 
 class Chunk;
 
@@ -14,7 +16,6 @@ enum class Bloc :uint8_t {
 	AIGUA,
 	CUB,
 	HERBA,
-	HERBAFULL,
 	TERRA,
 	VIDRE,
 	TORXA,

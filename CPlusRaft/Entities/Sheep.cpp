@@ -14,6 +14,7 @@ class World;
 Sheep::Sheep(World* world, Vector3<float> pos): Entity(world, pos)
 {
 	this->health = 5;
+	this->rot = float(rand() % 300);
 }
 
 /**
@@ -48,8 +49,8 @@ void Sheep::update(double delta) {
 	default:
 		break;
 	}
-	Vector3<float> front = this->pos + Vector3<float>(sinf(toRad(this->rot)), 0, cosf(toRad(this->rot))) * 2;
-	Vector3<float> dir = Vector3<float>::normalize(front); //Vector3<float>::normalize(world->camera->getPos() - this->pos);
+	Vector3<float> front = Vector3<float>(-sinf(toRad(this->rot)), 0, -cosf(toRad(this->rot)));
+	Vector3<float> dir = Vector3<float>::normalize(front);
 
 	//this->rot = toDegree(Vector3<float>::angle(Vector3<float>(dir.x, 0, dir.z), Vector3<float>(0, 0, 1)));
 	//if (dir.x < 0) {

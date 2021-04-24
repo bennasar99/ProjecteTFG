@@ -2,27 +2,44 @@
 #include "../world.h"
 #include "../Chunk.h"
 
-WorldGenerator::WorldGenerator(int seed, World* world) {
+WorldGenerator::WorldGenerator(int seed, World* world, Generator gen) {
 	this->setSeed(seed);
+	this->biomeSize = 2;
 
 	srand(seed);
 
+	this->readFromFile();
+
 	//Oceans
 	this->oceanNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-	this->oceanNoise.SetFrequency(0.004f); //0.04
+	this->oceanNoise.SetFrequency(0.002f / biomeSize); //0.04
+	
+	//Mars interiors
+	this->seaNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	this->seaNoise.SetFrequency(0.001f);
+	this->seaNoise.SetFractalType(FastNoiseLite::FractalType_Ridged);
+	//this->riverNoise.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_Hybrid);
+	//this->riverNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_Distance2Div);
+
+	//Rius
+	this->riverNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	this->riverNoise.SetFrequency(0.002f);
+	this->riverNoise.SetFractalOctaves(1);
+	this->riverNoise.SetFractalType(FastNoiseLite::FractalType_Ridged);
 
 	//Clima (calor, templat, fred)
 	this->climateNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
-	this->climateNoise.SetFrequency(0.005f); //0.01
+	this->climateNoise.SetFrequency(0.005f / biomeSize); //0.01
 	this->climateNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
 	//Bioma (depen del clima)
 	this->biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
-	this->biomeNoise.SetFrequency(0.005f); //0.1
+	this->biomeNoise.SetFrequency(0.005f / biomeSize); //0.1
 	this->biomeNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
+	//Coves
 	this->caveNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
-	this->caveNoise.SetFrequency(0.05f); //0.01
+	this->caveNoise.SetFrequency(0.1f / caveSize); //0.01
 	//this->caveNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_Distance2);
 
 	this->normalNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
@@ -44,18 +61,31 @@ Bioma WorldGenerator::getBiomeAt(int bX, int bZ) {
 	float ocean = oceanNoise.GetNoise((float)bX, (float)bZ);
 	float climate = climateNoise.GetNoise((float)bX, (float)bZ);
 	float biome = biomeNoise.GetNoise((float)bX, (float)bZ);
+	float sea = seaNoise.GetNoise((float)bX, (float)bZ);
+	float river = riverNoise.GetNoise((float)bX, (float)bZ);
 
-	if (ocean < -0.25f) {
+	float seaThreshold = -0.75f + this->oceanProb * 1.5f; //1.5 perquè és el rang del renou -0,75|0,75 (aprox)
+	float oceanThreshold = seaThreshold - this->seaToOcean*(seaThreshold + 0.75f);
+	if (ocean < oceanThreshold) {
 		return Bioma::OCEA;
 	}
-	else if (ocean < 0) {
+	else if (ocean < seaThreshold) {
 		return Bioma::MAR;
 	}
 
-	if (climate < -0.3f) { //Clima fred
+	if (sea > 0.5f) {
+		return Bioma::MAR;
+	}
+	if (river > 0.9f) {
+		return Bioma::MAR;
+	}
+
+	float warmThreshold = -0.75f + this->climColdProb * 1.5f;
+	float hotThreshold = warmThreshold + this->climWarmProb * 1.5f;
+	if (climate < warmThreshold) { //Clima fred
 		return Bioma::ARTIC;
 	}
-	else if (climate >= -0.3f && climate < 0.25f) { //Clima templat
+	else if (climate >= warmThreshold && climate < hotThreshold) { //Clima templat
 		if (biome < -0.25f) {
 			return Bioma::PLANA;
 		}
@@ -66,7 +96,7 @@ Bioma WorldGenerator::getBiomeAt(int bX, int bZ) {
 			return Bioma::MUNTANYA;
 		}
 	}
-	else if (climate >= 0.25f) { //Clima calent
+	else if (climate >= hotThreshold) { //Clima calent
 		if (biome < -0.25f) {
 			return Bioma::DESERT;
 		}
@@ -267,7 +297,12 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 				float fdensity = density / threshold;
 				//printf("density %f threshold %f\n", density, threshold);
 				if (fdensity < 1) {
-					if (caveNoise.GetNoise((float)bpos.x, (float)bpos.y, (float)bpos.z) > -0.4f) { //-0.4
+					float prob0 = ((float)sealvl / (float)bpos.y);
+					float prob = -caveProb * prob0;
+					prob = std::min(prob, -0.5f);
+					prob = std::max(prob, -0.3f);
+
+					if (caveNoise.GetNoise((float)bpos.x, (float)bpos.y, (float)bpos.z) > prob) { //-0.4
 						continue;
 					}
 
@@ -358,8 +393,31 @@ void WorldGenerator::setSeed(int seed) {
 	this->normalNoise.SetSeed(seed);
 	this->mountainNoise.SetSeed(seed);
 	this->oceanGenNoise.SetSeed(seed);
+	this->riverNoise.SetSeed(seed);
+	this->seaNoise.SetSeed(seed);
 }
 
 int WorldGenerator::getSeed() {
 	return this->seed;
+}
+
+void WorldGenerator::readFromFile() {
+	std::string path = "settings/worldGen.yml";
+	std::ifstream info(path.c_str());
+	std::string str((std::istreambuf_iterator<char>(info)), std::istreambuf_iterator<char>());
+	char* par = (char*)str.c_str();
+	c4::substr parse = c4::to_substr(par);
+	ryml::Tree tree = ryml::parse(parse);
+	auto gen = tree["generators"]["normal"];
+	ryml::read(gen["biome_size"], &this->biomeSize);
+	ryml::read(gen["ocean_prob"], &this->oceanProb);
+	ryml::read(gen["sea_to_ocean_ratio"], &this->seaToOcean);
+	ryml::read(gen["biome_size"], &this->biomeSize);
+	ryml::read(gen["climate_prob"]["hot"], &this->climHotProb);
+	ryml::read(gen["climate_prob"]["warm"], &this->climWarmProb);
+	ryml::read(gen["climate_prob"]["cold"], &this->climColdProb);
+	ryml::read(gen["cave_size"], &this->caveSize);
+	ryml::read(gen["cave_prob"], &this->caveProb);
+	ryml::read(gen["ore_prob"], &this->oreProb);
+	info.close();
 }

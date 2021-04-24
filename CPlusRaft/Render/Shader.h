@@ -11,11 +11,14 @@ class Shader {
 private:
 	unsigned int shader;
 
+	bool loadFromFile(string path, unsigned int shader);
 	bool readFile(string path, const char** source, int* len);
 
 public:
 	void use();
 
-	Shader(unsigned int tipus, const char* path);
+	unsigned int getProgram();
 
+	Shader(std::string name);
+	Shader();
 };

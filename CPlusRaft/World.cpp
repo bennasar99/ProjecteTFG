@@ -9,7 +9,7 @@ World::World(std::string name, int seed, Camera* camera) //Nou
 	this->cnk = std::vector< std::future<Chunk*> >(genCores);
 	this->regLoad = std::vector< std::future<bool> >(genCores);
 	this->name = name;
-	this->wGen = WorldGenerator(seed, this);
+	this->wGen = WorldGenerator(seed, this, Generator::DEFAULT);
 
 	this->seed = seed;
 	this->camera = camera;
@@ -860,7 +860,7 @@ Vector3<int> World::getSpawn() {
 	return this->spawn;
 }
 
-void World::drawMap(float scrAspect, Entity *ent, int y) {
+void World::drawMap(float scrAspect, Entity *ent, int y, int range) {
 
 	glPushMatrix();
 	float aspect = scrAspect;
@@ -891,25 +891,25 @@ void World::drawMap(float scrAspect, Entity *ent, int y) {
 	glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
 	glEnd();
 
-	float dX = 0.8f * ((float)1 / (float)SPAWNSIZE);
-	float dZ = 0.8f * ((float)1 / (float)SPAWNSIZE);
+	float dX = 0.8f * ((float)1 / (range*2));
+	float dZ = 0.8f * ((float)1 / (range*2));
 
 	Vector3<int> cPos = getChunkPos(ent->getPos().toInt());
 	glTranslatef(0.5f * aspect - 0.4f, 0.1f, -1);
 	float mX = 0;
 	float mZ = 0;
-	for (int x = cPos.x - SPAWNSIZE/2; x <= cPos.x + SPAWNSIZE/2; x++) {
+	for (int x = cPos.x - range; x <= cPos.x + range; x++) {
 		mZ = 0;
-		for (int z = cPos.z - SPAWNSIZE/2; z <= cPos.z + SPAWNSIZE/2; z++) {
+		for (int z = cPos.z - range; z <= cPos.z + range; z++) {
 			Vector3 cPos = Vector3<int>(x, getChunkPos(ent->getPos().toInt()).y, z);
 			glPushMatrix();
 			glTranslatef(mX * dX, mZ * dZ, 0);
-			Chunk* ch = getChunk(cPos);
+			/*Chunk* ch = getChunk(cPos);
 			if (ch == nullptr || cM.getChunkState(cPos) != ChunkState::LLEST) {
 				glColor3f(0,0,0);
 			}
-			else {
-				switch (ch->getBiome()) {
+			else {*/
+				switch (wGen.getBiomeAt(cPos.x*CHUNKSIZE, cPos.z*CHUNKSIZE)) {
 					case Bioma::MUNTANYA:
 						glColor3f(0.8f,0.8f,0.8f);
 						break;
@@ -941,7 +941,7 @@ void World::drawMap(float scrAspect, Entity *ent, int y) {
 						glColor3f(1, 0, 0);
 						break;
 				}
-			}
+			/*}*/
 			glBegin(GL_QUADS);
 			glVertex2f(0, dZ);
 			glVertex2f(dX, dZ);

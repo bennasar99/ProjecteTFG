@@ -178,6 +178,7 @@
     <ClInclude Include="Utils\KeyboardManager.h" />
     <ClInclude Include="Utils\ModelManager.h" />
     <ClInclude Include="Utils\RenderManager.h" />
+    <ClInclude Include="Utils\ShaderManager.h" />
     <ClInclude Include="Utils\SoundManager.h" />
     <ClInclude Include="Utils\TextureAtlas.h" />
     <ClInclude Include="Utils\TextureManager.h" />
@@ -212,6 +213,7 @@
     <ClCompile Include="Utils\KeyboardManager.cpp" />
     <ClCompile Include="Utils\ModelManager.cpp" />
     <ClCompile Include="Utils\RenderManager.cpp" />
+    <ClCompile Include="Utils\ShaderManager.cpp" />
     <ClCompile Include="Utils\SoundManager.cpp" />
     <ClCompile Include="Utils\TextureAtlas.cpp" />
     <ClCompile Include="Utils\TextureManager.cpp" />

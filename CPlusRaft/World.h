@@ -143,7 +143,7 @@ public:
 	//void generate(int seed);
 	void save();
 
-	void drawMap(float scrAspect, Entity* ent, int mapY);
+	void drawMap(float scrAspect, Entity* ent, int mapY, int range);
 	void updateVisibility();
 
 	Vector3<int> getRegion(Vector3<int> cPos);

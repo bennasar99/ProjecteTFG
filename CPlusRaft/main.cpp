@@ -10,6 +10,7 @@
 #include "Utils/KeyboardManager.h"
 #include "Utils/ThreadManager.h"
 #include "Utils/ModelManager.h"
+#include "Utils/ShaderManager.h"
 #include "Entities/Player.h"
 #include "Render/Shader.h"
 #include <sys/stat.h>
@@ -55,6 +56,8 @@ bool press[GLFW_GAMEPAD_BUTTON_LAST+1];
 Entity* ent; //Entitat controlada
 
 bool axisVisible = false; //Eixos ON/OFF
+
+int mapMult = 1; //Multiplicador mapa
 
 //Nom del món
 std::string wname;
@@ -297,7 +300,7 @@ void Display(GLFWwindow* window)
 		glPopMatrix();
 	}
 	else if (act == Active::MAPA){
-		world->drawMap(camera.getAspect(), ent, mapY);
+		world->drawMap(camera.getAspect(), ent, mapY, (camera.getViewDist() / CHUNKSIZE) * mapMult);
 	}
 	else {
 		glColor3i(0, 0, 0); 
@@ -421,7 +424,9 @@ int main(int argc, char** argv)
 		printf("Seed: %d\n", seed);
 		world = new World(wname, seed, &camera);
 		world->setRandomSpawn();
-		ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 2.0f, 0));
+		world->save();
+		ent = new Player(world, Vector3<float>(0, 0, 0) + Vector3<float>(0, 2.0f, 0));
+		//ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 2.0f, 0));
 	}
 	// Inicialitzam el GLFW
 	glfwInit();
@@ -513,9 +518,11 @@ int main(int argc, char** argv)
 
 	setLighting();
 
-	//Prova shader
-	Shader fShader = Shader(GL_FRAGMENT_SHADER, "fragment.glsl");
-	//fShader.use();
+
+	//ShaderManager::addShader(TipusShader::DEFAULT, "block");
+	//ShaderManager::useShader(TipusShader::DEFAULT);
+	//unsigned int sh = ShaderManager::getShader(TipusShader::DEFAULT);
+	//glUniform3f(glGetUniformLocation(sh, "pos"), 0.01f, 0.01f, 0.01f);
 	//Shader vShader = Shader(GL_VERTEX_SHADER, "vertex.glsl");
 	//vShader.use();
 	
@@ -773,6 +780,12 @@ void movement(int key) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		act = Active::MAPA;
 
+	}
+	else if (key == GLFW_KEY_KP_ADD) {
+		mapMult++;
+	}
+	else if (key == GLFW_KEY_KP_SUBTRACT) {
+		mapMult--;
 	}
 	else if (key == GLFW_KEY_ESCAPE) {
 		act = Active::JOC;

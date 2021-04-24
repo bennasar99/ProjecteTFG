@@ -1,0 +1,13 @@
+generators:
+    normal:
+        biome_size: 2
+        ocean_prob: 0.5
+        sea_to_ocean_ratio: 0.3
+        climate_prob:
+            hot: 0.25
+            warm: 0.5
+            cold: 0.25
+        cave_prob: 0.4
+        ore_prob: 0.01
+        cave_size: 2
+        
