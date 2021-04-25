@@ -12,7 +12,8 @@ WorldGenerator::WorldGenerator(int seed, World* world, Generator gen) {
 
 	//Oceans
 	this->oceanNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-	this->oceanNoise.SetFrequency(0.002f / biomeSize); //0.04
+	this->oceanNoise.SetFrequency(0.001f / biomeSize); 
+	//this->seaNoise.SetFractalType(FastNoiseLite::FractalType_Ridged);
 	
 	//Mars interiors
 	this->seaNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
@@ -23,25 +24,34 @@ WorldGenerator::WorldGenerator(int seed, World* world, Generator gen) {
 
 	//Rius
 	this->riverNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-	this->riverNoise.SetFrequency(0.002f);
+	this->riverNoise.SetFrequency(0.02f * riverProb);
 	this->riverNoise.SetFractalOctaves(1);
 	this->riverNoise.SetFractalType(FastNoiseLite::FractalType_Ridged);
 
 	//Clima (calor, templat, fred)
 	this->climateNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
-	this->climateNoise.SetFrequency(0.005f / biomeSize); //0.01
+	this->climateNoise.SetFrequency(0.002f / biomeSize); //0.01
 	this->climateNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
 	//Bioma (depen del clima)
 	this->biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
-	this->biomeNoise.SetFrequency(0.005f / biomeSize); //0.1
+	this->biomeNoise.SetFrequency(0.004f / biomeSize); //0.1
 	this->biomeNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
 	//Coves
-	this->caveNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
-	this->caveNoise.SetFrequency(0.1f / caveSize); //0.01
+	this->caveNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
+	this->caveNoise.SetFrequency(0.1f * caveProb); //0.01
+	this->caveNoise.SetFractalOctaves(3);
+	this->caveNoise.SetFractalType(FastNoiseLite::FractalType_Ridged);
 	//this->caveNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_Distance2);
 
+	//Ores
+	this->oreNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	this->oreNoise.SetFrequency(1.0f * oreProb); //0.01
+	//this->oreNoise.SetFractalOctaves(3);
+	//this->oreNoise.SetFractalType(FastNoiseLite::FractalType_Ridged);
+
+	//Densitat biomes
 	this->normalNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	this->oceanGenNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	this->mountainNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
@@ -59,10 +69,6 @@ WorldGenerator::WorldGenerator() {
 
 Bioma WorldGenerator::getBiomeAt(int bX, int bZ) {
 	float ocean = oceanNoise.GetNoise((float)bX, (float)bZ);
-	float climate = climateNoise.GetNoise((float)bX, (float)bZ);
-	float biome = biomeNoise.GetNoise((float)bX, (float)bZ);
-	float sea = seaNoise.GetNoise((float)bX, (float)bZ);
-	float river = riverNoise.GetNoise((float)bX, (float)bZ);
 
 	float seaThreshold = -0.75f + this->oceanProb * 1.5f; //1.5 perquè és el rang del renou -0,75|0,75 (aprox)
 	float oceanThreshold = seaThreshold - this->seaToOcean*(seaThreshold + 0.75f);
@@ -73,12 +79,20 @@ Bioma WorldGenerator::getBiomeAt(int bX, int bZ) {
 		return Bioma::MAR;
 	}
 
+	float sea = seaNoise.GetNoise((float)bX, (float)bZ);
+
 	if (sea > 0.5f) {
 		return Bioma::MAR;
 	}
-	if (river > 0.9f) {
+
+	float river = riverNoise.GetNoise((float)bX, (float)bZ);
+	float riverSize = this->riverSize * this->riverProb; //Ja que hem multiplicat la freqüència per aquest valor, si volem mantenir la mida de riu constant també ho hem de fer aquí
+	if (river > (1 - riverSize)) {
 		return Bioma::MAR;
 	}
+
+	float climate = climateNoise.GetNoise((float)bX, (float)bZ);
+	float biome = biomeNoise.GetNoise((float)bX, (float)bZ);
 
 	float warmThreshold = -0.75f + this->climColdProb * 1.5f;
 	float hotThreshold = warmThreshold + this->climWarmProb * 1.5f;
@@ -196,7 +210,7 @@ float WorldGenerator::getDensity(Bioma bio, Vector3<int> pos) {
 	case Bioma::MAR: case Bioma::GEL:
 		terlvl = 80;
 		noise = &this->oceanGenNoise;
-		return (pos.y / terlvl + noise->GetNoise((float)pos.x, (float)pos.y, (float)pos.z)/3.0f);
+		return (pos.y / terlvl + noise->GetNoise((float)pos.x, (float)pos.y, (float)pos.z)/8.0f);
 	default:
 		noise = &this->normalNoise;
 		return (pos.y / terlvl + noise->GetNoise((float)pos.x, (float)pos.y, (float)pos.z)/4.0f);
@@ -297,10 +311,10 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 				float fdensity = density / threshold;
 				//printf("density %f threshold %f\n", density, threshold);
 				if (fdensity < 1) {
-					float prob0 = ((float)sealvl / (float)bpos.y);
-					float prob = -caveProb * prob0;
-					prob = std::min(prob, -0.5f);
-					prob = std::max(prob, -0.3f);
+					float prob0 = ((float)(sealvl) / (float)(abs(bpos.y+1)));
+					prob0 = std::max(0.5f, prob0);
+					prob0 = std::min(1.5f, prob0);
+					float prob = 1 - caveSize*caveProb*prob0; //Així és menys probable trobar coves a dalt
 
 					if (caveNoise.GetNoise((float)bpos.x, (float)bpos.y, (float)bpos.z) > prob) { //-0.4
 						continue;
@@ -341,9 +355,11 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 					}
 
 					//Minerals
-					int threshold = 94 + (cPos.y);
 					if (toSet == Bloc::PEDRA) {
-						if (rand() % 100 > threshold) {
+						float heightMod = (float)sealvl / (float)(abs(bpos.y));
+						heightMod = std::min(heightMod, 1.2f);
+						float oreProb = this->oreSize * this->oreProb * heightMod; // + probable com + abaix
+						if (oreNoise.GetNoise((float)bpos.x, (float)bpos.y, (float)bpos.z) > (0.72f - oreProb)) {
 							Bloc ores[3] = { Bloc::OR, Bloc::FERRO, Bloc::CARBO };
 							toSet = ores[rand() % 3];
 						}
@@ -419,5 +435,8 @@ void WorldGenerator::readFromFile() {
 	ryml::read(gen["cave_size"], &this->caveSize);
 	ryml::read(gen["cave_prob"], &this->caveProb);
 	ryml::read(gen["ore_prob"], &this->oreProb);
+	ryml::read(gen["ore_size"], &this->oreSize);
+	ryml::read(gen["river_prob"], &this->riverProb);
+	ryml::read(gen["river_size"], &this->riverSize);
 	info.close();
 }

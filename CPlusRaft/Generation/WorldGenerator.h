@@ -39,6 +39,7 @@ private:
 	FastNoiseLite oceanGenNoise;
 	FastNoiseLite mountainNoise;
 	FastNoiseLite caveNoise;
+	FastNoiseLite oreNoise;
 
 	World *world;
 	Generator gen;
@@ -52,7 +53,9 @@ private:
 	float caveSize;
 	float caveProb;
 	float oreProb;
-
+	float oreSize;
+	float riverProb;
+	float riverSize;
 	int seed;
 
 public:
