@@ -8,7 +8,8 @@
 enum class Textura {
 	OVELLA,
 	BLOC,
-	ESTRUC
+	ESTRUC,
+	FONT
 };
 
 enum class Cara {
@@ -27,6 +28,7 @@ class TextureManager {
 private:
 	static unsigned int text[NTEXT]; //Textures
 	static TextureAtlas blockAtlas;
+	static TextureAtlas fontAtlas;
 
 	TextureManager() {}
 public:
@@ -34,4 +36,5 @@ public:
 	static unsigned int getTexture(Textura nom);
 	static void initialize();
 	static bool getTexCoords(int texNum, std::array<float, 4> &texCoords);
+	static bool getFontTexCoords(char c, std::array<float, 4>& fontTexCoords);
 };

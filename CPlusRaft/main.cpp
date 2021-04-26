@@ -91,6 +91,8 @@ int mapY = 5;
 
 Active act = Active::JOC; //Indica a quin menú / part està l'usuari
 
+std::string input = "";
+
 // Funcion que visualiza la escena OpenGL
 void Display(GLFWwindow* window)
 {
@@ -242,6 +244,12 @@ void Display(GLFWwindow* window)
 		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
 		glEnd();
 
+		glPushMatrix();
+		drawString(input, 0.05f);
+		glTranslatef(0, 0.1f, 0);
+		drawString("HOLA SOC EN TONI COM ESTAS", 0.05f);
+		glPopMatrix();
+
 		glColor4f(0, 0, 0, 1);
 		glLineWidth(3.0f);
 		glBegin(GL_LINES); //Línies que indiquen els límits del dibuixat de l'inventari
@@ -259,6 +267,7 @@ void Display(GLFWwindow* window)
 		glEnd();
 
 		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
 		glTranslatef(0.5f * aspect - 0.3f, 0.8f, -1);
 		for (int i = 1; i < NBLOCS-1; i++) { //Objectes de l'inventari, botam primer (RES) i darrer (LIMIT)
 			glPushMatrix();
@@ -493,6 +502,7 @@ int main(int argc, char** argv)
 	//Textures
 	glEnable(GL_TEXTURE_2D); //Activació
 	TextureManager::LoadTexture("Textures/texture.png", Textura::BLOC);
+	TextureManager::LoadTexture("Textures/font.png", Textura::FONT);
 	TextureManager::LoadTexture("Models/Sheep/sheep_pallete.png", Textura::OVELLA);
 	TextureManager::LoadTexture("Models/Ostrich/Ostrich.png", Textura::ESTRUC);
 
@@ -740,6 +750,18 @@ void movement(int key) {
 			mapY--;
 			printf("mapY: %d\n", mapY);
 		}
+	}
+	else if (act == Active::INVENTARI) {
+		if (key >= GLFW_KEY_A && key <= GLFW_KEY_Z) {
+			input += glfwGetKeyName(key, 0);
+		}
+		else if (key == GLFW_KEY_SPACE) {
+			input += " ";
+		}
+		else if (key == GLFW_KEY_BACKSPACE) {
+			input = input.substr(0, input.size() - 1);
+		}
+
 	}
 	
 	if (key == GLFW_KEY_F) {

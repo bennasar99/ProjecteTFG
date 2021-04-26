@@ -14,6 +14,9 @@ public:
 	float getCoordY(int index);
 	bool getCoords(int index, std::array<float, 4> &texCoords);
 
+	int getSizeX();
+	int getSizeY();
+
 	TextureAtlas();
 	TextureAtlas(int sizeX, int sizeY);
 };

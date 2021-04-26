@@ -147,6 +147,9 @@
     <ClInclude Include="Utils\ShaderManager.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Menu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -244,6 +247,9 @@
     </ClCompile>
     <ClCompile Include="Utils\ShaderManager.cpp">
       <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
