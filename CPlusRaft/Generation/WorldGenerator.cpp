@@ -128,6 +128,7 @@ Bioma WorldGenerator::getBiomeAt(int bX, int bZ) {
 
 //TODO: pot petar l'execució si és descarrega el chunk quan ja s'ha entrat aquí
 Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks dels voltants ja estan generats
+
 	Vector3<int> cPos = chunk->getPos();
 	float density = 0;
 	int randmax = INT32_MAX; //Com més alt, - densitat de coses
@@ -147,6 +148,14 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 		break;
 	}
 
+	if (randmax <= 0) {
+		chunk->updateMesh();
+		return chunk;
+	}
+
+	std::default_random_engine rng{ (unsigned int)(chunk->getPos().x + chunk->getPos().y + chunk->getPos().z + static_cast<int>(chunk->getBiome())) };
+	std::uniform_int_distribution<> dist{ 1, randmax };
+
 	Vector3<int> pos = Vector3<int>(0, 0, 0);
 	for (pos.x = 0; pos.x < CHUNKSIZE; pos.x++) {
 		for (pos.z = 0; pos.z < CHUNKSIZE; pos.z++) {
@@ -158,7 +167,7 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 				Bloc b2 = chunk->getBlockWorld(tpos);
 				if (b1 == Bloc::TERRA && (b2 == Bloc::RES || b2 == Bloc::NEUSUP)){
 					trobat = true;
-					int random = rand() % randmax;
+					int random = dist(rng);
 					if (random == 4 || random == 5 || random == 6 || random == 7 || random == 8) {
 						//chunk->setBlock(new SpreadBlock(Bloc::HERBA, tpos), tpos);
 						world->setBlock(Bloc::HERBA, tpos, false, false);
@@ -167,7 +176,8 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 						//Tronc
 						//chunk->setBlock(new SolidBlock(Bloc::FUSTAARBRE), tpos);
 						world->setBlock(Bloc::FUSTAARBRE, tpos, false, false);
-						int rand2 = rand() % 5 + 1;
+						std::uniform_int_distribution<> dist2{ 1, 5 };
+						int rand2 = dist2(rng) + 1;
 						for (int i = 1; i <= rand2; i++) {
 							Vector3<int> fpos = tpos + Vector3<int>(0, i, 0);
 							world->setBlock(Bloc::FUSTAARBRE, fpos, false, false);
@@ -178,9 +188,11 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 							altura = 3;
 						}
 						if (bio != Bioma::SABANA) {
-							altura += rand() % 3;
+							std::uniform_int_distribution<> dist3{ 1, 3 };
+							altura += dist3(rng);
 						}
-						int amplada = (rand() % (rand2)) + 1;
+						std::uniform_int_distribution<> dist4{ 1, rand2 };
+						int amplada = dist4(rng) + 1;
 						for (int y = 1; y <= altura; y++) {
 							for (int x = -amplada; x <= amplada; x++) {
 								for (int z = -amplada; z <= amplada; z++) {
@@ -198,7 +210,8 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 						}
 					}
 					else if (random == 10) { //Possible mob
-						int rand2 = rand() % 10;
+						std::uniform_int_distribution<> dist5{ 1, 20 };
+						int rand2 = dist5(rng);
 						if (rand2 == 5) {
 							world->addEntity(Entitat::OVELLA, Vector3<float>((float)tpos.x, (float)tpos.y + 1.0f, (float)tpos.z));
 						}
@@ -398,7 +411,9 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 						float oreProb = this->oreSize * this->oreProb * heightMod; // + probable com + abaix
 						if (oreNoise.GetNoise((float)bpos.x, (float)bpos.y, (float)bpos.z) > (0.72f - oreProb)) {
 							Bloc ores[3] = { Bloc::OR, Bloc::FERRO, Bloc::CARBO };
-							toSet = ores[rand() % 3];
+							std::default_random_engine rng{ (unsigned int)(cPos.x + cPos.y + cPos.z + static_cast<int>(bio)) };
+							std::uniform_int_distribution<> dist{ 1, 3 };
+							toSet = ores[dist(rng) % 3];
 						}
 					}
 					chunk->setBlock(toSet, pos);
