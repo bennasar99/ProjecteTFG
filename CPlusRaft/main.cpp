@@ -80,6 +80,7 @@ double lastTime;
 double lastTimeW;
 int fpsc = 0;
 bool run = false;
+bool drawfps = false;
 
 enum class Active {
 	JOC,
@@ -219,9 +220,16 @@ void Display(GLFWwindow* window)
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 
-	glPushMatrix();
+	if (drawfps) {
+		glPushMatrix();
+		glTranslatef(0.01f * camera.getAspect(), 0.95f, 0);
+		drawString(std::to_string(fps), 0.05f);
+		glTranslatef(0, 0.1f, 0);
+		glPopMatrix();
+	}
 
 	//Dibuixam el bloc seleccionat al cantó esquerra inferior
+	glPushMatrix();
 	Block bsel = Block(static_cast<Bloc>(btipus));
 	glTranslatef(0.9f * camera.getAspect(), 0.1f, -2);
 	glScalef(0.1f, 0.1f, 0.1f);
@@ -243,11 +251,6 @@ void Display(GLFWwindow* window)
 		glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
 		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
 		glEnd();
-
-		glPushMatrix();
-		drawString(input, 0.05f);
-		glTranslatef(0, 0.1f, 0);
-		glPopMatrix();
 
 		glColor4f(0, 0, 0, 1);
 		glLineWidth(3.0f);
@@ -765,6 +768,9 @@ void movement(int key) {
 	
 	if (key == GLFW_KEY_F) {
 		llanterna = !llanterna;
+	}
+	else if (key == GLFW_KEY_F3) {
+		drawfps = !drawfps;
 	}
 	else if (key == GLFW_KEY_C) { //Switch Marching Cubes ON/OFF
 		Block::setMCEnabled(!Block::getMCEnabled());
