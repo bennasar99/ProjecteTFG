@@ -247,7 +247,6 @@ void Display(GLFWwindow* window)
 		glPushMatrix();
 		drawString(input, 0.05f);
 		glTranslatef(0, 0.1f, 0);
-		drawString("HOLA SOC EN TONI COM ESTAS", 0.05f);
 		glPopMatrix();
 
 		glColor4f(0, 0, 0, 1);
@@ -925,7 +924,7 @@ void updatePlayerBlock() {
 	Vector3<float> bpN = camera.getPos();
 	Vector3<float> baN = camera.getPos() + front;
 	int i = 0;
-	while (!Block::isSolid(world->getBlock(baN)) && i < 100) { //Traçam una línia cap a la direcció del front de la càmera
+	while (!Block::isInteractable(world->getBlock(baN)) && i < 100) { //Traçam una línia cap a la direcció del front de la càmera
 		bpN = baN;
 		baN = baN + front * 0.1f;
 		i++;

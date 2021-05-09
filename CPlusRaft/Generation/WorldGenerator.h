@@ -4,7 +4,7 @@
 #include "../lib/FastNoiseLite.h"
 #include <string>
 
-#define NBIOMES 9
+#define NBIOMES 10
 
 enum class Bioma {
 	MUNTANYA,
@@ -12,10 +12,11 @@ enum class Bioma {
 	OCEA,
 	MAR,
 	PLANA,
-	SABANA,
 	DESERT,
 	GEL,
-	ARTIC
+	ARTIC,
+	BOSCNEVAT,
+	SABANA
 };
 
 enum class Generator {

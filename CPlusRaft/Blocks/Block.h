@@ -29,6 +29,7 @@ enum class Bloc :uint8_t {
 	PEDRA, //Stone
 	ALTAVEU,
 	NEU,
+	NEUSUP,
 	GEL,
 	ARENA,
 	OR,
@@ -37,6 +38,15 @@ enum class Bloc :uint8_t {
 	GRAVILLA,
 	CARBO,
 	LIMIT //SEMPRE DARRER
+};
+
+enum class Cara {
+	ESQUERRA,
+	ADALT,
+	DRETA,
+	ABAIX,
+	DAVANT,
+	DARRERA
 };
 
 class World;
@@ -62,6 +72,7 @@ public:
 	static bool getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<unsigned char, 4>& color);
 	static bool isTransparent(Bloc tipus);
 	static bool isSolid(Bloc tipus);
+	static bool isInteractable(Bloc tipus);
 	static bool isCube(Bloc tipus);
 	static bool canSeeThrough(Bloc tipus);
 	static bool isMarcheable(Bloc tipus);

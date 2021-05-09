@@ -13,7 +13,6 @@ WorldGenerator::WorldGenerator(int seed, World* world, Generator gen) {
 	//Oceans
 	this->oceanNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	this->oceanNoise.SetFrequency(0.001f / biomeSize); 
-	//this->seaNoise.SetFractalType(FastNoiseLite::FractalType_Ridged);
 	
 	//Mars interiors
 	this->seaNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
@@ -29,9 +28,9 @@ WorldGenerator::WorldGenerator(int seed, World* world, Generator gen) {
 	this->riverNoise.SetFractalType(FastNoiseLite::FractalType_Ridged);
 
 	//Clima (calor, templat, fred)
-	this->climateNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
-	this->climateNoise.SetFrequency(0.002f / biomeSize); //0.01
-	this->climateNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
+	this->climateNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	this->climateNoise.SetFrequency(0.001f / biomeSize); //0.01
+	//this->climateNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
 	//Bioma (depen del clima)
 	this->biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
@@ -81,25 +80,34 @@ Bioma WorldGenerator::getBiomeAt(int bX, int bZ) {
 
 	float sea = seaNoise.GetNoise((float)bX, (float)bZ);
 
+	float climate = climateNoise.GetNoise((float)bX, (float)bZ);
+	float warmThreshold = -0.75f + this->climColdProb * 1.5f;
+	float transition = 0.1f;
 	if (sea > 0.5f) {
+		if (climate < (warmThreshold - transition)) {
+			return Bioma::GEL;
+		}
 		return Bioma::MAR;
 	}
 
 	float river = riverNoise.GetNoise((float)bX, (float)bZ);
 	float riverSize = this->riverSize * this->riverProb; //Ja que hem multiplicat la freqüència per aquest valor, si volem mantenir la mida de riu constant també ho hem de fer aquí
 	if (river > (1 - riverSize)) {
+		if (climate < (warmThreshold - transition)) { //Riu congelat
+			return Bioma::GEL;
+		}
 		return Bioma::MAR;
 	}
 
-	float climate = climateNoise.GetNoise((float)bX, (float)bZ);
-	float biome = biomeNoise.GetNoise((float)bX, (float)bZ);
-
-	float warmThreshold = -0.75f + this->climColdProb * 1.5f;
 	float hotThreshold = warmThreshold + this->climWarmProb * 1.5f;
-	if (climate < warmThreshold) { //Clima fred
+	if (climate < (warmThreshold - transition)) { //Clima fred
 		return Bioma::ARTIC;
 	}
-	else if (climate >= warmThreshold && climate < hotThreshold) { //Clima templat
+	else if (climate >= (warmThreshold - transition) && climate < (warmThreshold + transition)) {
+		return Bioma::BOSCNEVAT;
+	}
+	else if (climate >= (warmThreshold + transition) && climate < (hotThreshold - transition)) { //Clima templat
+		float biome = biomeNoise.GetNoise((float)bX, (float)bZ);
 		if (biome < -0.25f) {
 			return Bioma::PLANA;
 		}
@@ -110,16 +118,11 @@ Bioma WorldGenerator::getBiomeAt(int bX, int bZ) {
 			return Bioma::MUNTANYA;
 		}
 	}
-	else if (climate >= hotThreshold) { //Clima calent
-		if (biome < -0.25f) {
-			return Bioma::DESERT;
-		}
-		else if (biome >= -0.25f && biome < 0.3f) {
-			return Bioma::SABANA;
-		}
-		else /*if (biome >= 0.5f)*/ {
-			return Bioma::MUNTANYA;
-		}
+	else if (climate >= (hotThreshold - transition) && (climate < (hotThreshold + transition))) {
+		return Bioma::SABANA;
+	}
+	else if (climate >= (hotThreshold + transition)) { //Clima calent
+		return Bioma::DESERT;
 	}
 }
 
@@ -132,6 +135,12 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
    	switch (bio) {
 	case Bioma::BOSC:
 		randmax = 20;
+		break;
+	case Bioma::BOSCNEVAT:
+		randmax = 60;
+		break;
+	case Bioma::SABANA:
+		randmax = 80;
 		break;
 	case Bioma::PLANA:
 		randmax = 100;
@@ -147,7 +156,7 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 				Vector3<int> tpos = cPos * CHUNKSIZE + pos + Vector3<int>(0, 1, 0);
 				Bloc b1 = chunk->getBlock(pos);
 				Bloc b2 = chunk->getBlockWorld(tpos);
-				if (b1 == Bloc::TERRA && b2 == Bloc::RES){
+				if (b1 == Bloc::TERRA && (b2 == Bloc::RES || b2 == Bloc::NEUSUP)){
 					trobat = true;
 					int random = rand() % randmax;
 					if (random == 4 || random == 5 || random == 6 || random == 7 || random == 8) {
@@ -164,17 +173,27 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 							world->setBlock(Bloc::FUSTAARBRE, fpos, false, false);
 						}
 						//Fulles
-						int altura = rand() % 3 + 1;
+						int altura = 1;
+						if (bio == Bioma::BOSCNEVAT) {
+							altura = 3;
+						}
+						if (bio != Bioma::SABANA) {
+							altura += rand() % 3;
+						}
 						int amplada = (rand() % (rand2)) + 1;
 						for (int y = 1; y <= altura; y++) {
 							for (int x = -amplada; x <= amplada; x++) {
 								for (int z = -amplada; z <= amplada; z++) {
 									Vector3<int> lpos = tpos + Vector3<int>(0, rand2 + y, 0)
 										+ Vector3<int>(x, 0, 0) + Vector3<int>(0, 0, z);
-									if (chunk->getBlockWorld(lpos) == Bloc::RES) {
-										world->setBlock(Bloc::FULLAARBRE, lpos, false, false);
+									world->setBlock(Bloc::FULLAARBRE, lpos, false, false);
+									if (bio == Bioma::BOSCNEVAT && (abs(x) == amplada || abs(z) == amplada || y == altura) && world->getBlock(lpos + Vector3<int>(0, 1, 0)) == Bloc::RES) {
+										world->setBlock(Bloc::NEUSUP, lpos+Vector3<int>(0,1,0), false, false);
 									}
 								}
+							}
+							if (bio == Bioma::BOSCNEVAT) {
+								amplada--;
 							}
 						}
 					}
@@ -299,11 +318,7 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 						}
 					}
 				}
-				//else/* if (!WorldGenerator::isBiome3D(bio))*/ {
-				//	density += (float)bpos.y / height;
-				//	threshold += 1.0f;
-				//}
-				else { //Bioma 3D
+				else {
 					density += getDensity(bio, bpos);// / dist;
 					threshold += 1.0f;// / dist;
 				}
@@ -345,6 +360,28 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 							toSet = Bloc::ARENA;
 						}
 					}
+					else if (bio == Bioma::BOSCNEVAT) {
+						if (fdensity <= 0.95f) {
+							toSet = Bloc::PEDRA;
+						}
+						else if (fdensity <= 0.995f) {
+							toSet = Bloc::TERRA;
+						}
+						else if (fdensity < 1.0f){
+							toSet = Bloc::NEUSUP;
+						}
+					}
+					else if (bio == Bioma::SABANA) {
+						if (fdensity <= 0.95f) {
+							toSet = Bloc::PEDRA;
+						}
+						else if (fdensity <= 0.995f) {
+							toSet = Bloc::TERRA;
+						}
+						else if (fdensity < 1.0f) {
+							toSet = Bloc::ARENA;
+						}
+					}
 					else {
 						if (fdensity <= 0.95f) {
 							toSet = Bloc::PEDRA;
@@ -368,9 +405,9 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 				}
 				else {
 					if ((CHUNKSIZE*cPos.y + y) <= sealvl) {
-						if ((CHUNKSIZE * cPos.y + y) == sealvl && bio == Bioma::ARTIC) {
+						if ((CHUNKSIZE * cPos.y + y) == sealvl && (bio == Bioma::ARTIC || bio == Bioma::GEL)) {
 							chunk->setBlock(Bloc::GEL, pos);
-							if (rand() % CHUNKSIZE == 0) {
+							if (rand() % (CHUNKSIZE*CHUNKSIZE) == 0) {
 								chunk->setBlock(Bloc::AIGUA, pos);
 							}
 						}
@@ -402,15 +439,15 @@ bool WorldGenerator::isBiome3D(Bioma bio) {
 void WorldGenerator::setSeed(int seed) {
 	this->seed = seed;
 
-	this->oceanNoise.SetSeed(seed * 4);
-	this->climateNoise.SetSeed(seed * 3);
-	this->biomeNoise.SetSeed(seed * 2);
-	this->caveNoise.SetSeed(seed * 5);
-	this->normalNoise.SetSeed(seed);
-	this->mountainNoise.SetSeed(seed);
-	this->oceanGenNoise.SetSeed(seed);
-	this->riverNoise.SetSeed(seed);
-	this->seaNoise.SetSeed(seed);
+	this->oceanNoise.SetSeed(seed * 1);
+	this->climateNoise.SetSeed(seed * 2);
+	this->biomeNoise.SetSeed(seed * 3);
+	this->caveNoise.SetSeed(seed * 4);
+	this->normalNoise.SetSeed(seed*5);
+	this->mountainNoise.SetSeed(seed*6);
+	this->oceanGenNoise.SetSeed(seed*7);
+	this->riverNoise.SetSeed(seed*8);
+	this->seaNoise.SetSeed(seed*9);
 }
 
 int WorldGenerator::getSeed() {
