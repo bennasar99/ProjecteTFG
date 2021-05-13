@@ -153,7 +153,7 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 		return chunk;
 	}
 
-	std::default_random_engine rng{ (unsigned int)(chunk->getPos().x + chunk->getPos().y + chunk->getPos().z + static_cast<int>(chunk->getBiome())) };
+	std::default_random_engine rng{ (unsigned int)((long)((chunk->getPos().x + chunk->getPos().y + chunk->getPos().z + static_cast<int>(chunk->getBiome()))* this->seed) % UINT_MAX ) };
 	std::uniform_int_distribution<> dist{ 1, randmax };
 
 	Vector3<int> pos = Vector3<int>(0, 0, 0);
