@@ -28,3 +28,5 @@ float toDegree(float rads);
 void drawSphere(double r, int lats, int longs);
 unsigned short toHFloat(float f);
 float toFloat(unsigned short h);
+
+void drawString(std::string str, float size);

@@ -75,11 +75,14 @@ void centerPointer();
 void updatePlayerBlock();
 void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
 void gamePad();
+void draw2DUI();
 
 double lastTime;
 double lastTimeW;
 int fpsc = 0;
+float fps = 0;
 bool run = false;
+bool drawfps = false;
 
 enum class Active {
 	JOC,
@@ -97,7 +100,7 @@ void Display(GLFWwindow* window)
 	int temps = int(glfwGetTime() * 1000);
 	//printf("%d\n", temps);
 	int delta = temps - darrerDisplay;
-	float fps = 1.0f / ((float)delta / 1000.0f);
+	fps = 1.0f / ((float)delta / 1000.0f);
 
 	fpsc++;
 	if (fpsc > 20) { //Contador fps
@@ -217,101 +220,7 @@ void Display(GLFWwindow* window)
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 
-	glPushMatrix();
-
-	//Dibuixam el bloc seleccionat al cantó esquerra inferior
-	Block bsel = Block(static_cast<Bloc>(btipus));
-	glTranslatef(0.9f * camera.getAspect(), 0.1f, -2);
-	glScalef(0.1f, 0.1f, 0.1f);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
-	world->drawBloc(bsel.getId());
-	glPopMatrix();
-
-	if (act == Active::INVENTARI) { //Dibuixam inventari
-		glPushMatrix();
-		float aspect = camera.getAspect();
-		glDisable(GL_LIGHTING);
-		glDisable(GL_TEXTURE_2D);
-
-		glColor3f(1, 1, 1);
-		glBegin(GL_QUADS); //Quadrat blanc exterior
-		glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
-		glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
-		glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
-		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
-		glEnd();
-
-		glColor4f(0, 0, 0, 1);
-		glLineWidth(3.0f);
-		glBegin(GL_LINES); //Línies que indiquen els límits del dibuixat de l'inventari
-		glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
-		glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
-
-		glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
-		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
-
-		glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
-		glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
-
-		glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
-		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
-		glEnd();
-
-		glEnable(GL_TEXTURE_2D);
-		glTranslatef(0.5f * aspect - 0.3f, 0.8f, -1);
-		for (int i = 1; i < NBLOCS-1; i++) { //Objectes de l'inventari, botam primer (RES) i darrer (LIMIT)
-			glPushMatrix();
-			glScalef(0.1f, 0.1f, 0.1f);
-			Block bsel = Block(static_cast<Bloc>(i));
-			glDisable(GL_LIGHTING);
-
-			if (bsel.getId() == static_cast<Bloc>(btipus)) { //L'hem de dibuixar com a seleccionat
-				glPushMatrix();
-
-				glColor4f(0, 0, 0, 1);
-				glLineWidth(5.0f);
-				glBegin(GL_LINES);
-				glVertex3f(-0.5f, 0.5f, -0.5f);
-				glVertex3f(-0.5f, -0.5f, -0.5f);
-
-				glVertex3f(0.5f, 0.5f, -0.5f);
-				glVertex3f(0.5f, -0.5f, -0.5f);
-
-				glVertex3f(-0.5f, 0.5f, 0.5f);
-				glVertex3f(0.5f, 0.5f, -0.5f);
-
-				glVertex3f(-0.5f, -0.5f, -0.5f);
-				glVertex3f(0.5f, -0.5f, -0.5f);
-				glEnd();
-
-				glPopMatrix();
-			}
-
-			world->drawBloc(bsel.getId());
-			glPopMatrix();
-
-			glTranslatef(0.12f, 0, 0); //Passam a la següent columna
-			if (i % 6 == 0) { //I, si cal, a la següent fila
-				glTranslatef(0, -0.12f, 0);
-				glTranslatef(-0.12f * 6, 0, 0);
-			}
-		}
-		glPopMatrix();
-	}
-	else if (act == Active::MAPA){
-		world->drawMap(camera.getAspect(), ent, mapY, (camera.getViewDist() / CHUNKSIZE) * mapMult);
-	}
-	else {
-		glColor3i(0, 0, 0); 
-		glLineWidth(1.0f);
-		glBegin(GL_LINES); //Mira (creu enmig de la pantalla)
-		glVertex3f((camera.getAspect() / 2) - 0.02f, 0.5f, -1);
-		glVertex3f((camera.getAspect() / 2) + 0.02f, 0.5f, -1);
-		glVertex3f((camera.getAspect() / 2), 0.48f, -1);
-		glVertex3f((camera.getAspect() / 2), 0.52f, -1);
-		glEnd();
-	}
+	draw2DUI();
 
 	glEnable(GL_LIGHTING);
 	glEnable(GL_DEPTH_TEST);
@@ -493,6 +402,7 @@ int main(int argc, char** argv)
 	//Textures
 	glEnable(GL_TEXTURE_2D); //Activació
 	TextureManager::LoadTexture("Textures/texture.png", Textura::BLOC);
+	TextureManager::LoadTexture("Textures/font.png", Textura::FONT);
 	TextureManager::LoadTexture("Models/Sheep/sheep_pallete.png", Textura::OVELLA);
 	TextureManager::LoadTexture("Models/Ostrich/Ostrich.png", Textura::ESTRUC);
 
@@ -544,6 +454,112 @@ int main(int argc, char** argv)
 	world->destroy();
 	glfwTerminate();
 	return 0;
+}
+
+void draw2DUI() {
+	if (drawfps) {
+		glPushMatrix();
+		glTranslatef(0.01f * camera.getAspect(), 0.95f, 0);
+		drawString(std::to_string(fps), 0.05f);
+		glTranslatef(0, 0.1f, 0);
+		glPopMatrix();
+	}
+
+	//Dibuixam el bloc seleccionat al cantó esquerra inferior
+	glPushMatrix();
+	Block bsel = Block(static_cast<Bloc>(btipus));
+	glTranslatef(0.9f * camera.getAspect(), 0.1f, -2);
+	glScalef(0.1f, 0.1f, 0.1f);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
+	world->drawBloc(bsel.getId());
+	glPopMatrix();
+
+	if (act == Active::INVENTARI) { //Dibuixam inventari
+		glPushMatrix();
+		float aspect = camera.getAspect();
+		glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
+
+		glColor3f(1, 1, 1);
+		glBegin(GL_QUADS); //Quadrat blanc exterior
+		glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
+		glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
+		glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
+		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
+		glEnd();
+
+		glColor4f(0, 0, 0, 1);
+		glLineWidth(3.0f);
+		glBegin(GL_LINES); //Línies que indiquen els límits del dibuixat de l'inventari
+		glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
+		glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
+
+		glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
+		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
+
+		glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
+		glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
+
+		glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
+		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
+		glEnd();
+
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
+		glTranslatef(0.5f * aspect - 0.3f, 0.8f, -1);
+		for (int i = 1; i < NBLOCS - 1; i++) { //Objectes de l'inventari, botam primer (RES) i darrer (LIMIT)
+			glPushMatrix();
+			glScalef(0.1f, 0.1f, 0.1f);
+			Block bsel = Block(static_cast<Bloc>(i));
+			glDisable(GL_LIGHTING);
+
+			if (bsel.getId() == static_cast<Bloc>(btipus)) { //L'hem de dibuixar com a seleccionat
+				glPushMatrix();
+
+				glColor4f(0, 0, 0, 1);
+				glLineWidth(5.0f);
+				glBegin(GL_LINES);
+				glVertex3f(-0.5f, 0.5f, -0.5f);
+				glVertex3f(-0.5f, -0.5f, -0.5f);
+
+				glVertex3f(0.5f, 0.5f, -0.5f);
+				glVertex3f(0.5f, -0.5f, -0.5f);
+
+				glVertex3f(-0.5f, 0.5f, 0.5f);
+				glVertex3f(0.5f, 0.5f, -0.5f);
+
+				glVertex3f(-0.5f, -0.5f, -0.5f);
+				glVertex3f(0.5f, -0.5f, -0.5f);
+				glEnd();
+
+				glPopMatrix();
+			}
+
+			world->drawBloc(bsel.getId());
+			glPopMatrix();
+
+			glTranslatef(0.12f, 0, 0); //Passam a la següent columna
+			if (i % 6 == 0) { //I, si cal, a la següent fila
+				glTranslatef(0, -0.12f, 0);
+				glTranslatef(-0.12f * 6, 0, 0);
+			}
+		}
+		glPopMatrix();
+	}
+	else if (act == Active::MAPA) {
+		world->drawMap(camera.getAspect(), ent, mapY, (camera.getViewDist() / CHUNKSIZE) * mapMult);
+	}
+	else {
+		glColor3i(0, 0, 0);
+		glLineWidth(1.0f);
+		glBegin(GL_LINES); //Mira (creu enmig de la pantalla)
+		glVertex3f((camera.getAspect() / 2) - 0.02f, 0.5f, -1);
+		glVertex3f((camera.getAspect() / 2) + 0.02f, 0.5f, -1);
+		glVertex3f((camera.getAspect() / 2), 0.48f, -1);
+		glVertex3f((camera.getAspect() / 2), 0.52f, -1);
+		glEnd();
+	}
 }
 
 void gamePad() {
@@ -745,6 +761,9 @@ void movement(int key) {
 	if (key == GLFW_KEY_F) {
 		llanterna = !llanterna;
 	}
+	else if (key == GLFW_KEY_F3) {
+		drawfps = !drawfps;
+	}
 	else if (key == GLFW_KEY_C) { //Switch Marching Cubes ON/OFF
 		Block::setMCEnabled(!Block::getMCEnabled());
 		world->redrawChunks();
@@ -903,7 +922,7 @@ void updatePlayerBlock() {
 	Vector3<float> bpN = camera.getPos();
 	Vector3<float> baN = camera.getPos() + front;
 	int i = 0;
-	while (!Block::isSolid(world->getBlock(baN)) && i < 100) { //Traçam una línia cap a la direcció del front de la càmera
+	while (!Block::isInteractable(world->getBlock(baN)) && i < 100) { //Traçam una línia cap a la direcció del front de la càmera
 		bpN = baN;
 		baN = baN + front * 0.1f;
 		i++;

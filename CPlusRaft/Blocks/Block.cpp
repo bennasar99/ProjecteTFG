@@ -8,7 +8,6 @@ TextureAtlas blockAtlas = TextureAtlas(8,3);
 //Les texCoords és retornen en ordre xb, yb, xt, yt i el color en RGBA
 bool Block::getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<unsigned char, 4> &color) {
 	int texNum = -1; //Per defecte sense textura
-	//float color[4] = { 0, 0, 0, 1 }; //RGBA, Abstracció classe Color?
 
 	switch (id) {
 	case Bloc::CUB: //Cub vermell
@@ -55,7 +54,7 @@ bool Block::getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<un
 		//color = { 0, 0.5f, 0, 1 };
 		color = { 0, 127, 0, 255 };
 		break;
-	case Bloc::NEU:
+	case Bloc::NEU: case Bloc::NEUSUP:
 		texNum = 1;
 		//color = { 1,1,1,1 };
 		color = { 255, 255, 255, 255 };
@@ -199,36 +198,28 @@ void Block::draw(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[6]) {
 }
 
 bool Block::isTransparent(Bloc tipus) {
-	if (tipus == Bloc::VIDRE || tipus == Bloc::AIGUA || tipus == Bloc::GEL) {
-		return true;
-	}
-	return false;
+	return (tipus == Bloc::VIDRE || tipus == Bloc::AIGUA || tipus == Bloc::GEL);
 }
 
 bool Block::canSeeThrough(Bloc tipus) {
-	return (Block::isTransparent(tipus) || tipus == Bloc::TORXA || tipus == Bloc::HERBA || tipus == Bloc::RES);
+	return (Block::isTransparent(tipus) || tipus == Bloc::TORXA || tipus == Bloc::HERBA || tipus == Bloc::RES || tipus == Bloc::NEUSUP);
 }
 
 bool Block::isSolid(Bloc tipus) {
-	if (tipus != Bloc::RES && tipus != Bloc::HERBA && tipus != Bloc::TORXA && tipus != Bloc::AIGUA) { //Exclude list
-		return true;
-	}
-	return false;
+	return (tipus != Bloc::RES && tipus != Bloc::HERBA && tipus != Bloc::TORXA && tipus != Bloc::AIGUA && tipus != Bloc::NEUSUP);
+}
+
+bool Block::isInteractable(Bloc tipus) {
+	return (Block::isSolid(tipus) || tipus == Bloc::HERBA || tipus == Bloc::NEUSUP);
 }
 
 //Indica si a un bloc se li pot aplicar marching cubes. Ex: Als transparents i solids (gel) no s'ha de permetre
 bool Block::isMarcheable(Bloc tipus) {
-	if (isSolid(tipus) && !canSeeThrough(tipus)) {
-		return true;
-	}
-	return false;
+	return (isSolid(tipus) && !canSeeThrough(tipus));
 }
 
 bool Block::isCube(Bloc tipus) {
-	if (tipus != Bloc::HERBA && tipus != Bloc::TORXA && tipus != Bloc::LLUMSOTIL && tipus != Bloc::LLUMTERRA) { //Exclude list
-		return true;
-	}
-	return false;
+	return (tipus != Bloc::HERBA && tipus != Bloc::TORXA && tipus != Bloc::LLUMSOTIL && tipus != Bloc::LLUMTERRA);
 }
 
 
@@ -285,7 +276,7 @@ bool Block::drawIcon(Bloc id) {
 	else {
 		switch (id) { //Dibuixam el que correspongui per cada bloc
 		case Bloc::HERBA: //Herba
-			glColor3f(0, 1, 0);
+			glColor4f(0, 1, 0,1);
 			glLineWidth(3.0f);
 			glBegin(GL_LINES);
 			glNormal3f(0, 1, 0);
@@ -355,13 +346,21 @@ bool Block::drawIcon(Bloc id) {
 }
 
 void Block::drawBlock(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[6]) {
-	static float vert[6][4][3] = {
-	{{-.5f, .5f, .5f},  {-.5f, .5f,-.5f},  {-.5f,-.5f,-.5f}, {-.5f,-.5f, .5f}}, // v1,v6,v7,v2 (left)
-	{{.5f, .5f, .5f},   {.5f, .5f,-.5f},  {-.5f, .5f,-.5f}, {-.5f, .5f, .5f}}, // v0,v5,v6,v1 (top)
-	{{.5f, .5f, .5f},   {.5f,-.5f, .5f},   {.5f,-.5f,-.5f},  {.5f, .5f,-.5f}}, // v0,v3,v4,v5 (right)
+	float height = 1.0f;
+	if (id == Bloc::NEUSUP) {
+		height = 0.2f;
+	}
+	if (height < 1.0f) { //En aquest cas, la cara d'adalt sempre serà visible
+		visible[static_cast<int>(Cara::ADALT)] = true;
+
+	}
+	float vert[6][4][3] = {
+	{{-.5f, -.5f + height, .5f},  {-.5f, -.5f + height,-.5f},  {-.5f,-.5f,-.5f}, {-.5f,-.5f, .5f}}, // v1,v6,v7,v2 (left)
+	{{.5f, -.5f + height, .5f},   {.5f, -.5f + height,-.5f},  {-.5f, -.5f + height,-.5f}, {-.5f, -.5f + height, .5f}}, // v0,v5,v6,v1 (top)
+	{{.5f, -.5f + height, .5f},   {.5f,-.5f, .5f},   {.5f,-.5f,-.5f},  {.5f, -.5f + height,-.5f}}, // v0,v3,v4,v5 (right)
 	{{-.5f,-.5f,-.5f},   {.5f,-.5f,-.5f},   {.5f,-.5f, .5f}, {-.5f,-.5f, .5f}}, // v7,v4,v3,v2 (bottom)
-	{{.5f, .5f, .5f},  {-.5f, .5f, .5f},  {-.5f,-.5f, .5f},  {.5f,-.5f, .5f}}, // v0,v1,v2,v3 (front)
-	{{.5f,-.5f,-.5f},  {-.5f,-.5f,-.5f},  {-.5f, .5f,-.5f},  {.5f, .5f,-.5f}}  // v4,v7,v6,v5 (back)
+	{{.5f, -.5f + height, .5f},  {-.5f, -.5f + height, .5f},  {-.5f,-.5f, .5f},  {.5f,-.5f, .5f}}, // v0,v1,v2,v3 (front)
+	{{.5f,-.5f,-.5f},  {-.5f,-.5f,-.5f},  {-.5f, -.5f + height,-.5f},  {.5f, -.5f + height,-.5f}}  // v4,v7,v6,v5 (back)
 	};
 
 	// normal array
@@ -379,7 +378,6 @@ void Block::drawBlock(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[
 	Block::getBlockInfo(id, tCoords, color);
 	float xb = 0, yb = 0, xt = 0, yt = 0;
 	xb = tCoords[0]; yb = tCoords[1]; xt = tCoords[2]; yt = tCoords[3];
-
 	float text[6][4][2] =
 	{
 		{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Esquerra OK

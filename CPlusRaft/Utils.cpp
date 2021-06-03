@@ -6,6 +6,7 @@
 #include <GL/freeglut.h>
 #include <GL/glu.h>
 #include <cmath>
+#include "Utils/TextureManager.h"
 
 //Codi de: https://stackoverflow.com/questions/36949957/loading-a-wav-file-for-openal
 bool isBigEndian()
@@ -56,270 +57,6 @@ char* loadWAV(const char* fn, int& chan, int& samplerate, int& bps, int& size)
 	char* data = new char[size];
 	in.read(data, size);
 	return data;
-}
-
-//Dibuixa cub parcial
-//void drawCub(bool cares[6], int texNum) {
-//	float xt = 0, xb = 0, yt = 0, yb = 0;
-//
-//	GLfloat n[6][3] =
-//	{
-//	  {-1.0, 0.0, 0.0}, //Esquerra
-//	  {0.0, 1.0, 0.0}, //Amunt
-//	  {1.0, 0.0, 0.0}, //Dreta
-//	  {0.0, -1.0, 0.0}, //Abaix
-//	  {0.0, 0.0, 1.0}, //Davant
-//	  {0.0, 0.0, -1.0} //Darrera
-//	};
-//	GLfloat text[6][4][2] =
-//	{
-//		{{-xt,yt}, {xb,yt}, {xb,yb}, {-xt, yb}}, //Esquerra OK
-//		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}}, //Damunt OK
-//		{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Dreta OK
-//		{{xt,yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Abaix OK
-//		{{xt, yt}, {xt,yb}, {xb,yb}, {xb,yt}}, //Davant OK
-//		{{-xt,yb}, {-xt,yt}, {xb,yt}, {xb,yb}} //Darrera OK
-//	};
-//
-//
-//	GLint faces[6][4] =
-//	{
-//	  {0, 1, 2, 3}, //Esquerra
-//	  {3, 2, 6, 7}, //Damunt
-//	  {7, 6, 5, 4}, //Dreta
-//	  {4, 5, 1, 0}, //Abaix
-//	  {5, 6, 2, 1}, //Davant
-//	  {7, 4, 0, 3} //Darrera
-//	};
-//	GLfloat v[8][3];
-//	GLint i;
-//
-//	v[0][0] = v[1][0] = v[2][0] = v[3][0] = -0.5f;
-//	v[4][0] = v[5][0] = v[6][0] = v[7][0] = 0.5f;
-//	v[0][1] = v[1][1] = v[4][1] = v[5][1] = -0.5f;
-//	v[2][1] = v[3][1] = v[6][1] = v[7][1] = 0.5f;
-//	v[0][2] = v[3][2] = v[4][2] = v[7][2] = -0.5f;
-//	v[1][2] = v[2][2] = v[5][2] = v[6][2] = 0.5f;
-//
-//	glBegin(GL_QUADS);
-//	for (i = 5; i >= 0; i--) { //6 cares
-//		if (cares[i]) {
-//			glNormal3fv(&n[i][0]);
-//			glTexCoord2fv(text[i][0]);
-//			glVertex3fv(&v[faces[i][0]][0]); //Top left
-//			glTexCoord2fv(text[i][1]);
-//			glVertex3fv(&v[faces[i][1]][0]); //Bottom left
-//			glTexCoord2fv(text[i][2]);
-//			glVertex3fv(&v[faces[i][2]][0]); //Bottom right
-//			glTexCoord2fv(text[i][3]);
-//			glVertex3fv(&v[faces[i][3]][0]); //Top right
-//		}
-//	}
-//	glEnd();
-//}
-//
-//void drawCub(bool cares[6]) {
-//	drawCub(cares, -1);
-//}
-
-//Dibuixa un paralepipede d'una mida determinada. generant les coordenades de textures corresponents
-void draw3dRect(float midaX, float midaY, float midaZ) {
-
-    static GLfloat n[6][3] =
-    {
-      {-1.0, 0.0, 0.0}, //Esquerra
-      {0.0, 1.0, 0.0}, //Amunt
-      {1.0, 0.0, 0.0}, //Dreta
-      {0.0, -1.0, 0.0}, //Abaix
-      {0.0, 0.0, 1.0}, //Davant
-      {0.0, 0.0, -1.0} //Darrera
-    };
-	static GLfloat text[6][4][2] =
-	{
-		{{-1,1}, {0,1}, {0,0}, {-1, 0}}, //Esquerra
-		{{-1,-1}, {-1,0}, {0,0}, {0,-1}}, //Damunt
-		{{1,-1}, {0,-1}, {0,0}, {1, 0}}, //Dreta
-		{{1,1}, {1,0}, {0,0}, {0,1}}, //Abaix
-		{{1,1}, {1,0}, {0,0}, {0,1}}, //Davant
-		{{-1,-1}, {-1,0}, {0,0}, {0,-1}} //Darrera
-	};
-    static GLint faces[6][4] =
-    {
-      {0, 1, 2, 3}, //Esquerra
-      {3, 2, 6, 7}, //Damunt
-      {7, 6, 5, 4}, //Dreta
-      {4, 5, 1, 0}, //Abaix
-      {5, 6, 2, 1}, //Davant
-      {7, 4, 0, 3} //Darrera
-    };
-    GLfloat v[8][3];
-    GLint i;
-
-	v[0][0] = v[1][0] = v[2][0] = v[3][0] = -0.5f;
-	v[4][0] = v[5][0] = v[6][0] = v[7][0] = 0.5f;
-	v[0][1] = v[1][1] = v[4][1] = v[5][1] = -0.5f;
-	v[2][1] = v[3][1] = v[6][1] = v[7][1] = 0.5f;
-	v[0][2] = v[3][2] = v[4][2] = v[7][2] = -0.5f;
-	v[1][2] = v[2][2] = v[5][2] = v[6][2] = 0.5f;
-
-	if (midaX == 1 && midaY == 1 && midaZ == 1) {
-		for (i = 5; i >= 0; i--) { //6 cares
-			glBegin(GL_QUADS);
-			glNormal3fv(&n[i][0]);
-			glTexCoord2fv(text[i][0]);
-			glVertex3fv(&v[faces[i][0]][0]); //Top left
-			glTexCoord2fv(text[i][1]);
-			glVertex3fv(&v[faces[i][1]][0]); //Bottom left
-			glTexCoord2fv(text[i][2]);
-			glVertex3fv(&v[faces[i][2]][0]); //Bottom right
-			glTexCoord2fv(text[i][3]);
-			glVertex3fv(&v[faces[i][3]][0]); //Top right
-			glEnd();
-		}
-	}
-	else {
-
-		//Cara de davant
-		glPushMatrix();
-		glTranslatef(0, 0, midaZ - 1);
-		for (i = 0; i < midaX; i++) {
-			glPushMatrix();
-			for (int j = 0; j < midaY; j++) {
-				glBegin(GL_QUADS);
-				glNormal3fv(&n[4][0]);
-				glTexCoord2f(-0.5f, 0.5f);
-				glVertex3fv(&v[faces[4][0]][0]); //Top left
-				glTexCoord2f(-0.5f, -0.5f);
-				glVertex3fv(&v[faces[4][1]][0]); //Bottom left
-				glTexCoord2f(0.5f, -0.5f);
-				glVertex3fv(&v[faces[4][2]][0]); //Bottom right
-				glTexCoord2f(0.5f, 0.5f);
-				glVertex3fv(&v[faces[4][3]][0]); //Top right
-				glEnd();
-				glTranslatef(0, 1.0f, 0);
-			}
-			glPopMatrix();
-			glTranslatef(1.0f, 0, 0);
-		}
-		glPopMatrix();
-
-		//Cara de darrera
-		glPushMatrix();
-		for (i = 0; i < midaX; i++) {
-			glPushMatrix();
-			for (int j = 0; j < midaY; j++) {
-				glBegin(GL_QUADS);
-				glNormal3fv(&n[5][0]);
-				glTexCoord2f(-0.5f, 0.5f);
-				glVertex3fv(&v[faces[5][0]][0]); //Top left
-				glTexCoord2f(-0.5f, -0.5f);
-				glVertex3fv(&v[faces[5][1]][0]); //Bottom left
-				glTexCoord2f(0.5f, -0.5f);
-				glVertex3fv(&v[faces[5][2]][0]); //Bottom right
-				glTexCoord2f(0.5f, 0.5f);
-				glVertex3fv(&v[faces[5][3]][0]); //Top right
-				glEnd();
-				glTranslatef(0, 1.0f, 0);
-			}
-			glPopMatrix();
-			glTranslatef(1.0f, 0, 0);
-		}
-		glPopMatrix();
-
-		//Cara esquerra
-		glPushMatrix();
-		for (i = 0; i < midaZ; i++) {
-			glPushMatrix();
-			for (int j = 0; j < midaY; j++) {
-				glBegin(GL_QUADS);
-				glNormal3fv(&n[0][0]);
-				glTexCoord2f(-0.5f, 0.5f);
-				glVertex3fv(&v[faces[0][0]][0]); //Top left
-				glTexCoord2f(-0.5f, -0.5f);
-				glVertex3fv(&v[faces[0][1]][0]); //Bottom left
-				glTexCoord2f(0.5f, -0.5f);
-				glVertex3fv(&v[faces[0][2]][0]); //Bottom right
-				glTexCoord2f(0.5f, 0.5f);
-				glVertex3fv(&v[faces[0][3]][0]); //Top right
-				glEnd();
-				glTranslatef(0, 1.0f, 0);
-			}
-			glPopMatrix();
-			glTranslatef(0, 0, 1.0f);
-		}
-		glPopMatrix();
-		
-		//Cara dreta
-		glPushMatrix();
-		glTranslatef(midaX-1, 0, 0);
-		for (i = 0; i < midaZ; i++) {
-			glPushMatrix();
-			for (int j = 0; j < midaY; j++) {
-				glBegin(GL_QUADS);
-				glNormal3fv(&n[2][0]);
-				glTexCoord2f(-0.5f, 0.5f);
-				glVertex3fv(&v[faces[2][0]][0]); //Top left
-				glTexCoord2f(-0.5f, -0.5f);
-				glVertex3fv(&v[faces[2][1]][0]); //Bottom left
-				glTexCoord2f(0.5f, -0.5f);
-				glVertex3fv(&v[faces[2][2]][0]); //Bottom right
-				glTexCoord2f(0.5f, 0.5f);
-				glVertex3fv(&v[faces[2][3]][0]); //Top right
-				glEnd();
-				glTranslatef(0, 1.0f, 0);
-			}
-			glPopMatrix();
-			glTranslatef(0, 0, 1.0f);
-		}
-		glPopMatrix();
-
-		//Cara de davall
-		glPushMatrix();
-		for (i = 0; i < midaX; i++) {
-			glPushMatrix();
-			for (int j = 0; j < midaZ; j++) {
-				glBegin(GL_QUADS);
-				glNormal3fv(&n[3][0]);
-				glTexCoord2f(-0.5f, 0.5f);
-				glVertex3fv(&v[faces[3][0]][0]); //Top left
-				glTexCoord2f(-0.5f, -0.5f);
-				glVertex3fv(&v[faces[3][1]][0]); //Bottom left
-				glTexCoord2f(0.5f, -0.5f);
-				glVertex3fv(&v[faces[3][2]][0]); //Bottom right
-				glTexCoord2f(0.5f, 0.5f);
-				glVertex3fv(&v[faces[3][3]][0]); //Top right
-				glEnd();
-				glTranslatef(0, 0, 1.0f);
-			}
-			glPopMatrix();
-			glTranslatef(1.0f, 0, 0);
-		}
-		glPopMatrix();
-
-		//Cara de damunt
-		glPushMatrix();
-		glTranslatef(0, midaY - 1, 0);
-		for (i = 0; i < midaX; i++) {
-			glPushMatrix();
-			for (int j = 0; j < midaZ; j++) {
-				glBegin(GL_QUADS);
-				glNormal3fv(&n[1][0]);
-				glTexCoord2f(-0.5f, 0.5f);
-				glVertex3fv(&v[faces[1][0]][0]); //Top left
-				glTexCoord2f(-0.5f, -0.5f);
-				glVertex3fv(&v[faces[1][1]][0]); //Bottom left
-				glTexCoord2f(0.5f, -0.5f);
-				glVertex3fv(&v[faces[1][2]][0]); //Bottom right
-				glTexCoord2f(0.5f, 0.5f);
-				glVertex3fv(&v[faces[1][3]][0]); //Top right
-				glEnd();
-				glTranslatef(0, 0, 1.0f);
-			}
-			glPopMatrix();
-			glTranslatef(1.0f, 0, 0);
-		}
-		glPopMatrix();
-	}
 }
 
 
@@ -385,4 +122,41 @@ float toFloat(unsigned short fltInt16) {
 	float fRet;
 	memcpy(&fRet, &fltInt32, sizeof(float));
 	return fRet;
+}
+
+void drawString(std::string str, float size) {
+	glPushMatrix();
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::FONT));
+	for (int i = 0; i < str.length(); i++) {
+		char c = str.at(i);
+		std::array<float, 4> tCoords;
+		TextureManager::getFontTexCoords(c, tCoords);
+		float xb = tCoords[0]; float yb = tCoords[1]; float xt = tCoords[2]; float yt = tCoords[3];
+		//{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}
+		glColor4f(1, 1, 1, 1);
+		//glScalef(10, 10, 10);
+		glBegin(GL_QUADS); //Quadrat blanc exterior
+		glTexCoord2f(xb, yb);
+		glVertex3f(0, size, -1);
+		glTexCoord2f(xb, yt);
+		glVertex3f(0, 0, -1);
+		glTexCoord2f(xt, yt);
+		glVertex3f(size, 0, -1);
+		glTexCoord2f(xt, yb);
+		glVertex3f(size, size, -1);
+		glEnd();
+		if (c == 'i' || c == 'j' || c == 'l' || c == 'I' || c == 't' || c == 'f') {
+			glTranslatef(size / 5.0f, 0, 0);
+		}
+		else if (c == 'T' || c == 'E' || c == 'F' || c == 'S' || c == 'L' || islower(c)) {
+			glTranslatef(size / 2.5f, 0, 0);
+		}
+		else {
+			glTranslatef(size / 2.0f, 0, 0);
+		}
+		//glScalef(0.1f, 0.1f, 0.1f);
+	}
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
 }

@@ -25,7 +25,7 @@ void Ostrich::update(double delta) {
 	//printf("rc %f\n", rotCounter);
 	if (rotCounter > 5) {
 		rotAct = rand() % 5;
-		printf("ra %d", rotAct);
+		//printf("ra %d", rotAct);
 		rotCounter = 0;
 	}
 
@@ -93,7 +93,7 @@ void Ostrich::update(double delta) {
 	if (canviEstat) {
 		if (nba == Bloc::HERBA && this->estat != Estat::MENJANT) {
 			this->estat = Estat::MENJANT;
-			printf("EAT BEGIN\n");
+			//printf("EAT BEGIN\n");
 		}
 		else {
 			int r = rand() % 3;
@@ -105,8 +105,8 @@ void Ostrich::update(double delta) {
 				this->estat = Estat::CAMINANT;
 			}
 			if (antest == Estat::MENJANT) {
-				printf("EAT END\n");
-				world->setBlock(Bloc::RES, newPos.toInt(), true, true); //No lleva el que toca, sinó el de darrera
+				//printf("EAT END\n");
+				//world->setBlock(Bloc::RES, newPos.toInt(), true, true); //No lleva el que toca, sinó el de darrera
 			}
 		}
 	}

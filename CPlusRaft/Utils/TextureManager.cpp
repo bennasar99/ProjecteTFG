@@ -3,6 +3,7 @@
 
 unsigned int TextureManager::text[NTEXT];
 TextureAtlas TextureManager::blockAtlas;
+TextureAtlas TextureManager::fontAtlas;
 
 //Carrega una textura, assignant-la a una "Textura" (enum) concreta
 bool TextureManager::LoadTexture(const char* path, Textura nom) {
@@ -44,8 +45,17 @@ unsigned int TextureManager::getTexture(Textura nom) {
 
 void TextureManager::initialize() {
 	TextureManager::blockAtlas = TextureAtlas(8, 3);
+	TextureManager::fontAtlas = TextureAtlas(16, 16);
 }
 
 bool TextureManager::getTexCoords(int texNum, std::array<float, 4> &texCoords) {
 	return TextureManager::blockAtlas.getCoords(texNum, texCoords);
+}
+
+bool TextureManager::getFontTexCoords(char c, std::array<float, 4> &fontTexCoords) {
+	TextureManager::fontAtlas.getCoords((int)c - 32, fontTexCoords);
+	float offset = (0.1f / (float)TextureManager::fontAtlas.getSizeX());
+	fontTexCoords[0] -= offset;
+	fontTexCoords[2] -= offset;
+	return true;
 }

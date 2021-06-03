@@ -909,12 +909,18 @@ void World::drawMap(float scrAspect, Entity *ent, int y, int range) {
 				glColor3f(0,0,0);
 			}
 			else {*/
-				switch (wGen.getBiomeAt(cPos.x*CHUNKSIZE, cPos.z*CHUNKSIZE)) {
+				switch (wGen.getBiomeAt(cPos.x*CHUNKSIZE + CHUNKSIZE/2, cPos.z*CHUNKSIZE + CHUNKSIZE/2)) {
 					case Bioma::MUNTANYA:
 						glColor3f(0.8f,0.8f,0.8f);
 						break;
 					case Bioma::BOSC:
 						glColor3f(1, 0, 0);
+						break;
+					case Bioma::BOSCNEVAT:
+						glColor3f(0.906f, 0.545f, 0.725f);
+						break;
+					case Bioma::SABANA:
+						glColor3f(1, 1, 0);
 						break;
 					case Bioma::OCEA:
 						glColor3f(0, 0, 0.5f);
@@ -927,9 +933,6 @@ void World::drawMap(float scrAspect, Entity *ent, int y, int range) {
 						break;
 					case Bioma::DESERT:
 						glColor3f(0.76f, 0.60f, 0.42f);
-						break;
-					case Bioma::SABANA:
-						glColor3f(1, 1, 0);
 						break;
 					case Bioma::ARTIC:
 						glColor3f(1, 1, 1);

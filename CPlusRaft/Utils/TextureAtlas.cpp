@@ -24,6 +24,14 @@ float TextureAtlas::getCoordY(int index) {
 	return ((index / this->sizeX) * this->uSizeY);
 }
 
+int TextureAtlas::getSizeX() {
+	return sizeX;
+}
+
+int TextureAtlas::getSizeY() {
+	return sizeY;
+}
+
 bool TextureAtlas::getCoords(int index, std::array<float ,4> &texCoords) {
 	if (index < 0) {
 		texCoords = { 0,0,0,0 };

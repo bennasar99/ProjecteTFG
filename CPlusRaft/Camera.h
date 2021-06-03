@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Utils/Vector3.h"
-#include <GL/freeglut.h>
 #include <list>
 #include "Utils.h"
 #include <algorithm>
