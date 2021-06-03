@@ -71,7 +71,6 @@ void Mesh::addVertex(unsigned short* vert, unsigned short* norm, unsigned char* 
 		this->vert.push_back(text[i]);
 	}
 	for (int i = 0; i < 4; i++) {
-		//this->vert.push_back((float)col[i]);
 		this->col.push_back(col[i]);
 	}
 }
@@ -114,7 +113,6 @@ void Mesh::update() {
 	size_t sepV = sizeof(unsigned short) * 8;
 	size_t sepC = sizeof(unsigned char) * 4;
 
-	//TODO: tipus menys pesats HALF FLOAT
 	glVertexPointer(3, GL_HALF_FLOAT, sepV , 0); //Min = short
 	glNormalPointer(GL_HALF_FLOAT, sepV, nO); //Min = byte
 	glTexCoordPointer(2, GL_HALF_FLOAT, sepV, tO); //Min = short

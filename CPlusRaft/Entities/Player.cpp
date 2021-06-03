@@ -112,21 +112,22 @@ void Player::control(double delta, Camera *cam) {
 	if (KeyboardManager::isPressed(GLFW_KEY_LEFT_SHIFT)) { //Si sprinta
 		speed*=2.0f;
 	}
-	Vector3<float> newPos = this->pos + add * (float)delta * speed;
+	add = add * (float)delta * speed;
+	Vector3<float> newPos = this->pos + add;
 	if (gamemode == 0) {
 		this->pos = newPos;
 		return; //No comprovam colisions
 	}
 	if (newPos != this->pos) {
-		if (Block::isSolid(world->getBlock(newPos + add * ((float)delta) - Vector3<float>(0, 1, 0))) ||
-			Block::isSolid(world->getBlock(newPos + add * ((float)delta)))) {
-			Vector3<float> poss[6] = { Vector3<float>(add.x, add.y, 0), Vector3<float>(add.x, 0, add.z), Vector3<float>(0, add.y, add.z),
+		if (Block::isSolid(world->getBlock(newPos - Vector3<float>(0, 1, 0))) ||
+			Block::isSolid(world->getBlock(newPos))) {
+			Vector3<float> poss[6] = { Vector3<float>(add.x, 0, add.z), Vector3<float>(add.x, add.y, 0), Vector3<float>(0, add.y, add.z),
 				Vector3<float>(add.x, 0, 0), Vector3<float>(0, add.y, 0), Vector3<float>(0, 0, add.z) };
 			for (int i = 0; i < 6; i++) {
 				Vector3<float> newAdd = poss[i];
-				newPos = this->pos + newAdd * ((float)delta / 200.0f);
-				if (!Block::isSolid(world->getBlock(newPos + newAdd * ((float)delta) - Vector3<float>(0, 1, 0))) &&
-					!Block::isSolid(world->getBlock(newPos + newAdd * ((float)delta) + Vector3<float>(0, eyesOffset, 0)))) {
+				newPos = this->pos + newAdd;
+				if (!Block::isSolid(world->getBlock(newPos - Vector3<float>(0, 1, 0))) &&
+					!Block::isSolid(world->getBlock(newPos + Vector3<float>(0, eyesOffset, 0)))) {
 					this->pos = newPos;
 					if (Block::isSolid(world->getBlock(this->pos - Vector3<float>(0,1,0)))) {
 						SoundManager::playSound(So::CAMINA, this->pos, false);

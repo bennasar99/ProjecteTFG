@@ -171,6 +171,10 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 					if (random == 4 || random == 5 || random == 6 || random == 7 || random == 8) {
 						//chunk->setBlock(new SpreadBlock(Bloc::HERBA, tpos), tpos);
 						world->setBlock(Bloc::HERBA, tpos, false, false);
+						if (random == 5 || random == 7) {
+							world->setBlock(Bloc::HERBA, tpos + Vector3<int>(0, 1, 0), false, false);
+						}
+						
 					}
 					else if (random == 9) {
 						//Tronc

@@ -75,10 +75,12 @@ void centerPointer();
 void updatePlayerBlock();
 void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
 void gamePad();
+void draw2DUI();
 
 double lastTime;
 double lastTimeW;
 int fpsc = 0;
+float fps = 0;
 bool run = false;
 bool drawfps = false;
 
@@ -92,15 +94,13 @@ int mapY = 5;
 
 Active act = Active::JOC; //Indica a quin menú / part està l'usuari
 
-std::string input = "";
-
 // Funcion que visualiza la escena OpenGL
 void Display(GLFWwindow* window)
 {
 	int temps = int(glfwGetTime() * 1000);
 	//printf("%d\n", temps);
 	int delta = temps - darrerDisplay;
-	float fps = 1.0f / ((float)delta / 1000.0f);
+	fps = 1.0f / ((float)delta / 1000.0f);
 
 	fpsc++;
 	if (fpsc > 20) { //Contador fps
@@ -220,109 +220,7 @@ void Display(GLFWwindow* window)
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 
-	if (drawfps) {
-		glPushMatrix();
-		glTranslatef(0.01f * camera.getAspect(), 0.95f, 0);
-		drawString(std::to_string(fps), 0.05f);
-		glTranslatef(0, 0.1f, 0);
-		glPopMatrix();
-	}
-
-	//Dibuixam el bloc seleccionat al cantó esquerra inferior
-	glPushMatrix();
-	Block bsel = Block(static_cast<Bloc>(btipus));
-	glTranslatef(0.9f * camera.getAspect(), 0.1f, -2);
-	glScalef(0.1f, 0.1f, 0.1f);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
-	world->drawBloc(bsel.getId());
-	glPopMatrix();
-
-	if (act == Active::INVENTARI) { //Dibuixam inventari
-		glPushMatrix();
-		float aspect = camera.getAspect();
-		glDisable(GL_LIGHTING);
-		glDisable(GL_TEXTURE_2D);
-
-		glColor3f(1, 1, 1);
-		glBegin(GL_QUADS); //Quadrat blanc exterior
-		glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
-		glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
-		glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
-		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
-		glEnd();
-
-		glColor4f(0, 0, 0, 1);
-		glLineWidth(3.0f);
-		glBegin(GL_LINES); //Línies que indiquen els límits del dibuixat de l'inventari
-		glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
-		glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
-
-		glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
-		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
-
-		glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
-		glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
-
-		glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
-		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
-		glEnd();
-
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
-		glTranslatef(0.5f * aspect - 0.3f, 0.8f, -1);
-		for (int i = 1; i < NBLOCS-1; i++) { //Objectes de l'inventari, botam primer (RES) i darrer (LIMIT)
-			glPushMatrix();
-			glScalef(0.1f, 0.1f, 0.1f);
-			Block bsel = Block(static_cast<Bloc>(i));
-			glDisable(GL_LIGHTING);
-
-			if (bsel.getId() == static_cast<Bloc>(btipus)) { //L'hem de dibuixar com a seleccionat
-				glPushMatrix();
-
-				glColor4f(0, 0, 0, 1);
-				glLineWidth(5.0f);
-				glBegin(GL_LINES);
-				glVertex3f(-0.5f, 0.5f, -0.5f);
-				glVertex3f(-0.5f, -0.5f, -0.5f);
-
-				glVertex3f(0.5f, 0.5f, -0.5f);
-				glVertex3f(0.5f, -0.5f, -0.5f);
-
-				glVertex3f(-0.5f, 0.5f, 0.5f);
-				glVertex3f(0.5f, 0.5f, -0.5f);
-
-				glVertex3f(-0.5f, -0.5f, -0.5f);
-				glVertex3f(0.5f, -0.5f, -0.5f);
-				glEnd();
-
-				glPopMatrix();
-			}
-
-			world->drawBloc(bsel.getId());
-			glPopMatrix();
-
-			glTranslatef(0.12f, 0, 0); //Passam a la següent columna
-			if (i % 6 == 0) { //I, si cal, a la següent fila
-				glTranslatef(0, -0.12f, 0);
-				glTranslatef(-0.12f * 6, 0, 0);
-			}
-		}
-		glPopMatrix();
-	}
-	else if (act == Active::MAPA){
-		world->drawMap(camera.getAspect(), ent, mapY, (camera.getViewDist() / CHUNKSIZE) * mapMult);
-	}
-	else {
-		glColor3i(0, 0, 0); 
-		glLineWidth(1.0f);
-		glBegin(GL_LINES); //Mira (creu enmig de la pantalla)
-		glVertex3f((camera.getAspect() / 2) - 0.02f, 0.5f, -1);
-		glVertex3f((camera.getAspect() / 2) + 0.02f, 0.5f, -1);
-		glVertex3f((camera.getAspect() / 2), 0.48f, -1);
-		glVertex3f((camera.getAspect() / 2), 0.52f, -1);
-		glEnd();
-	}
+	draw2DUI();
 
 	glEnable(GL_LIGHTING);
 	glEnable(GL_DEPTH_TEST);
@@ -558,6 +456,112 @@ int main(int argc, char** argv)
 	return 0;
 }
 
+void draw2DUI() {
+	if (drawfps) {
+		glPushMatrix();
+		glTranslatef(0.01f * camera.getAspect(), 0.95f, 0);
+		drawString(std::to_string(fps), 0.05f);
+		glTranslatef(0, 0.1f, 0);
+		glPopMatrix();
+	}
+
+	//Dibuixam el bloc seleccionat al cantó esquerra inferior
+	glPushMatrix();
+	Block bsel = Block(static_cast<Bloc>(btipus));
+	glTranslatef(0.9f * camera.getAspect(), 0.1f, -2);
+	glScalef(0.1f, 0.1f, 0.1f);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
+	world->drawBloc(bsel.getId());
+	glPopMatrix();
+
+	if (act == Active::INVENTARI) { //Dibuixam inventari
+		glPushMatrix();
+		float aspect = camera.getAspect();
+		glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
+
+		glColor3f(1, 1, 1);
+		glBegin(GL_QUADS); //Quadrat blanc exterior
+		glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
+		glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
+		glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
+		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
+		glEnd();
+
+		glColor4f(0, 0, 0, 1);
+		glLineWidth(3.0f);
+		glBegin(GL_LINES); //Línies que indiquen els límits del dibuixat de l'inventari
+		glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
+		glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
+
+		glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
+		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
+
+		glVertex3f(0.5f * aspect - 0.4f, 0.1f, -1);
+		glVertex3f(0.5f * aspect + 0.4f, 0.1f, -1);
+
+		glVertex3f(0.5f * aspect - 0.4f, 0.9f, -1);
+		glVertex3f(0.5f * aspect + 0.4f, 0.9f, -1);
+		glEnd();
+
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
+		glTranslatef(0.5f * aspect - 0.3f, 0.8f, -1);
+		for (int i = 1; i < NBLOCS - 1; i++) { //Objectes de l'inventari, botam primer (RES) i darrer (LIMIT)
+			glPushMatrix();
+			glScalef(0.1f, 0.1f, 0.1f);
+			Block bsel = Block(static_cast<Bloc>(i));
+			glDisable(GL_LIGHTING);
+
+			if (bsel.getId() == static_cast<Bloc>(btipus)) { //L'hem de dibuixar com a seleccionat
+				glPushMatrix();
+
+				glColor4f(0, 0, 0, 1);
+				glLineWidth(5.0f);
+				glBegin(GL_LINES);
+				glVertex3f(-0.5f, 0.5f, -0.5f);
+				glVertex3f(-0.5f, -0.5f, -0.5f);
+
+				glVertex3f(0.5f, 0.5f, -0.5f);
+				glVertex3f(0.5f, -0.5f, -0.5f);
+
+				glVertex3f(-0.5f, 0.5f, 0.5f);
+				glVertex3f(0.5f, 0.5f, -0.5f);
+
+				glVertex3f(-0.5f, -0.5f, -0.5f);
+				glVertex3f(0.5f, -0.5f, -0.5f);
+				glEnd();
+
+				glPopMatrix();
+			}
+
+			world->drawBloc(bsel.getId());
+			glPopMatrix();
+
+			glTranslatef(0.12f, 0, 0); //Passam a la següent columna
+			if (i % 6 == 0) { //I, si cal, a la següent fila
+				glTranslatef(0, -0.12f, 0);
+				glTranslatef(-0.12f * 6, 0, 0);
+			}
+		}
+		glPopMatrix();
+	}
+	else if (act == Active::MAPA) {
+		world->drawMap(camera.getAspect(), ent, mapY, (camera.getViewDist() / CHUNKSIZE) * mapMult);
+	}
+	else {
+		glColor3i(0, 0, 0);
+		glLineWidth(1.0f);
+		glBegin(GL_LINES); //Mira (creu enmig de la pantalla)
+		glVertex3f((camera.getAspect() / 2) - 0.02f, 0.5f, -1);
+		glVertex3f((camera.getAspect() / 2) + 0.02f, 0.5f, -1);
+		glVertex3f((camera.getAspect() / 2), 0.48f, -1);
+		glVertex3f((camera.getAspect() / 2), 0.52f, -1);
+		glEnd();
+	}
+}
+
 void gamePad() {
 	if (!glfwJoystickIsGamepad(GLFW_JOYSTICK_1)) {
 		return;
@@ -752,18 +756,6 @@ void movement(int key) {
 			mapY--;
 			printf("mapY: %d\n", mapY);
 		}
-	}
-	else if (act == Active::INVENTARI) {
-		if (key >= GLFW_KEY_A && key <= GLFW_KEY_Z) {
-			input += glfwGetKeyName(key, 0);
-		}
-		else if (key == GLFW_KEY_SPACE) {
-			input += " ";
-		}
-		else if (key == GLFW_KEY_BACKSPACE) {
-			input = input.substr(0, input.size() - 1);
-		}
-
 	}
 	
 	if (key == GLFW_KEY_F) {

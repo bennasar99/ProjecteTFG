@@ -8,7 +8,6 @@ TextureAtlas blockAtlas = TextureAtlas(8,3);
 //Les texCoords és retornen en ordre xb, yb, xt, yt i el color en RGBA
 bool Block::getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<unsigned char, 4> &color) {
 	int texNum = -1; //Per defecte sense textura
-	//float color[4] = { 0, 0, 0, 1 }; //RGBA, Abstracció classe Color?
 
 	switch (id) {
 	case Bloc::CUB: //Cub vermell
@@ -277,7 +276,7 @@ bool Block::drawIcon(Bloc id) {
 	else {
 		switch (id) { //Dibuixam el que correspongui per cada bloc
 		case Bloc::HERBA: //Herba
-			glColor3f(0, 1, 0);
+			glColor4f(0, 1, 0,1);
 			glLineWidth(3.0f);
 			glBegin(GL_LINES);
 			glNormal3f(0, 1, 0);
@@ -379,7 +378,6 @@ void Block::drawBlock(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[
 	Block::getBlockInfo(id, tCoords, color);
 	float xb = 0, yb = 0, xt = 0, yt = 0;
 	xb = tCoords[0]; yb = tCoords[1]; xt = tCoords[2]; yt = tCoords[3];
-
 	float text[6][4][2] =
 	{
 		{{xt, yb}, {xb,yb}, {xb,yt}, {xt,yt}}, //Esquerra OK
