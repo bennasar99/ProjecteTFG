@@ -21,7 +21,7 @@ Ostrich::Ostrich(World* world, Vector3<float> pos): Entity(world, pos)
   * Funció d'actualització de l'estat intern del jugador (passiva)
   */
 void Ostrich::update(double delta) { 
-	rotCounter += delta;
+	rotCounter += (float)delta;
 	//printf("rc %f\n", rotCounter);
 	if (rotCounter > 5) {
 		rotAct = rand() % 5;

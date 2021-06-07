@@ -62,6 +62,18 @@ WorldGenerator::WorldGenerator(int seed, World* world, Generator gen) {
 }
 
 WorldGenerator::WorldGenerator() {
+	this->biomeSize = 1;
+	this->oceanProb = 0.1f;
+	this->seaToOcean = 0.1f;
+	this->climHotProb = 0.1f;
+	this->climWarmProb = 0.1f;
+	this->climColdProb = 0.1f;
+	this->caveSize = 0.1f;
+	this->caveProb = 0.1f;
+	this->oreProb = 0.1f;
+	this->oreSize = 0.1f;
+	this->riverProb = 0.1f;
+	this->riverSize = 0.1f;
 	this->seed = 0;
 	this->world = nullptr;
 }
@@ -124,6 +136,7 @@ Bioma WorldGenerator::getBiomeAt(int bX, int bZ) {
 	else if (climate >= (hotThreshold + transition)) { //Clima calent
 		return Bioma::DESERT;
 	}
+	return Bioma::OCEA;
 }
 
 //TODO: pot petar l'execució si és descarrega el chunk quan ja s'ha entrat aquí
@@ -220,7 +233,7 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 							world->addEntity(Entitat::OVELLA, Vector3<float>((float)tpos.x, (float)tpos.y + 1.0f, (float)tpos.z));
 						}
 						else if (rand2 == 7) {
-							world->addEntity(Entitat::ESTRUC, Vector3<float>(tpos.x, tpos.y + 1, tpos.z));
+							world->addEntity(Entitat::ESTRUC, Vector3<float>((float)tpos.x, (float)(tpos.y + 1), (float)tpos.z));
 						}
 					}
 				}

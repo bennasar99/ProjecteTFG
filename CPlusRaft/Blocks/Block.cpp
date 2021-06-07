@@ -191,8 +191,8 @@ void Block::draw(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[6]) {
 	}
 	case Bloc::TORXA: {
 		GLfloat vert[2][2][3] = {
-		{ {0, 0, 0}, {0, -0.5, 0} },
-		{ {0, 0.1, 0}, {0, 0, 0}},
+		{ {0, 0, 0}, {0, -0.5f, 0} },
+		{ {0, 0.1f, 0}, {0, 0, 0}},
 		};
 
 		int texNum = -1; //Per defecte sense textura
@@ -253,6 +253,8 @@ Block* Block::creaEspecial(Bloc tipus, Vector3<int> pos, World* world) {
 		return (Block*)(new LightBlock(world, tipus, pos));
 	case Bloc::ALTAVEU:
 		return (Block*)(new Jukebox(pos));
+	default:
+		return nullptr;
 	}
 }
 

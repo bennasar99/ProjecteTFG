@@ -61,7 +61,7 @@ public:
 	Bloc getBlock(Vector3<int> bpos);
 
 	void interact(Vector3<int> bpos);
-	void update(float delta);
+	void update(double delta);
 
 	bool isVisible(Vector3<int> bpos);
 	Bloc getBlockWorld(Vector3<int> bpos);

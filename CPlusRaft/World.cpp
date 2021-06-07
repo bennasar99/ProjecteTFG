@@ -144,7 +144,7 @@ void World::drawLights(){
 
 	//Establim llum ambient segons el moment del dia.
 	glLightfv(sol, GL_POSITION, spos);
-	float ambient = 0.3f + sinf((daytime / (DAYTIME / 2))* M_PI) * 2.7f;
+	float ambient = 0.3f + sinf((daytime / (DAYTIME / 2))* (float)M_PI) * 2.7f;
 	ambient = std::max(0.3f, ambient);
 	GLfloat lluma[4] = { ambient, ambient, ambient, 1.0f };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lluma); //Posar a 0.1
@@ -736,8 +736,8 @@ void World::drawSol(Vector3<float> pos, float dist) {
 		
 	//Establim el color del cel (+ blanc com + adalt sigui el sol)
 	//Vespre: 	0, 0, 54.5, dia: 	52.9, 80.8, 92.2, alba/posta: 	100, 64.7, 0
-	float aY = abs(sinf((daytime / (DAYTIME / 2)) * M_PI));
-	float aX = abs(cosf((daytime / (DAYTIME / 2)) * M_PI));
+	float aY = abs(sinf((daytime / (DAYTIME / 2)) * (float)M_PI));
+	float aX = abs(cosf((daytime / (DAYTIME / 2)) * (float)M_PI));
 	if (daytime > DAYTIME / 2) { //Vespre: 	0, 0, 54.5, alba/posta: 	100, 64.7, 0
 		glClearColor(1*aX, 0.647f*aX, 0.545f * aY, 1);
 	}

@@ -47,17 +47,17 @@ private:
 	Generator gen;
 	
 	float biomeSize = 1;
-	float oceanProb;
-	float seaToOcean;
-	float climHotProb;
-	float climWarmProb;
-	float climColdProb;
-	float caveSize;
-	float caveProb;
-	float oreProb;
-	float oreSize;
-	float riverProb;
-	float riverSize;
+	float oceanProb = 0.1f;
+	float seaToOcean = 0.1f;
+	float climHotProb = 0.1f;
+	float climWarmProb = 0.1f;
+	float climColdProb = 0.1f;
+	float caveSize = 0.1f;
+	float caveProb = 0.1f;
+	float oreProb = 0.1f;
+	float oreSize = 0.1f;
+	float riverProb = 0.1f;
+	float riverSize = 0.1f;
 	int seed;
 
 public:

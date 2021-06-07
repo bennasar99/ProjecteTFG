@@ -41,4 +41,5 @@ bool TextureAtlas::getCoords(int index, std::array<float ,4> &texCoords) {
 	float y = this->getCoordY(index);
 	float marge = 0.00; //Per evitar "bleeding edges"
 	texCoords = { x + marge, y+marge, x + uSizeX - marge, y + uSizeY - marge}; //Coordenades bottom i top (xb, yb, xt, yt)
+	return true;
 }

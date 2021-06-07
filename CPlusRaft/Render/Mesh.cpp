@@ -113,10 +113,10 @@ void Mesh::update() {
 	size_t sepV = sizeof(unsigned short) * 8;
 	size_t sepC = sizeof(unsigned char) * 4;
 
-	glVertexPointer(3, GL_HALF_FLOAT, sepV , 0); //Min = short
-	glNormalPointer(GL_HALF_FLOAT, sepV, nO); //Min = byte
-	glTexCoordPointer(2, GL_HALF_FLOAT, sepV, tO); //Min = short
-	glColorPointer(4, GL_UNSIGNED_BYTE, sepC, (void*)vS); //Min = (unsigned) byte
+	glVertexPointer(3, GL_HALF_FLOAT, (GLsizei)sepV , 0); //Min = short
+	glNormalPointer(GL_HALF_FLOAT, (GLsizei)sepV, nO); //Min = byte
+	glTexCoordPointer(2, GL_HALF_FLOAT, (GLsizei)sepV, tO); //Min = short
+	glColorPointer(4, GL_UNSIGNED_BYTE, (GLsizei)sepC, (void*)vS); //Min = (unsigned) byte
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //Deattach VBO
 	glBindVertexArray(0); //Deattach VAO
@@ -136,13 +136,13 @@ void Mesh::draw() {
 	//size dividit entre 12 per què hem de tenir en compte totes les dades (3 pos + 3 normal + 4 color + 2 text)
 	switch (this->prim) {
 	case Primitiva::QUAD:
-		glDrawArrays(GL_QUADS, 0, count );
+		glDrawArrays(GL_QUADS, 0, (GLsizei)count );
 		break;
 	case Primitiva::LINIA:
-		glDrawArrays(GL_LINES, 0, count);
+		glDrawArrays(GL_LINES, 0, (GLsizei)count);
 		break;
 	case Primitiva::TRIANGLE:
-		glDrawArrays(GL_TRIANGLES, 0, count);
+		glDrawArrays(GL_TRIANGLES, 0, (GLsizei)count);
 		break;
 	}
 
@@ -159,7 +159,7 @@ void Mesh::erase() {
 
 //Retorna la mida (nº vèrtexos)
 int Mesh::getSize() {
-	return this->vert.size() / 3;
+	return (int)this->vert.size() / 3;
 }
 
 unsigned short* Mesh::getVertexData() {

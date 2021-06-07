@@ -55,4 +55,5 @@ bool MarchingCubes::apply(float surface, std::array<float, 8>& density, std::vec
         Vector3<float> normal = Vector3<float>::normalize(Vector3<float>::cross(a, b));
         normals.push_back(normal);
     }
+    return true;
 }

@@ -2,7 +2,7 @@
 #include "Shader.h"
 
 Shader::Shader() {
-
+    this->shader = 0;
 }
 
 Shader::Shader(std::string name) {
@@ -56,7 +56,7 @@ bool Shader::loadFromFile(string path, unsigned int shader) {
 bool Shader::readFile(string path, const char** source, int* len) {
     std::ifstream file(path);
     file.seekg(0, std::ios::end);
-    *len = file.tellg();
+    *len = (int)file.tellg();
 
     std::string buffer(*len, ' ');
     file.seekg(0);

@@ -90,7 +90,7 @@ Bloc Chunk::getBlock(Vector3<int> pos) {
 	return blocs[pos.x][pos.y][pos.z];
 }
 
-void Chunk::update(float delta) {
+void Chunk::update(double delta) {
 	/*for (int x = 0; x < CHUNKSIZE; x++) {
 			for (int z = 0; z < CHUNKSIZE; z++) {
 				if (blocs[x][lastYupd][z] != 0) {
@@ -108,6 +108,7 @@ Chunk::~Chunk() {
 	std::unordered_map<Vector3<int>, Block*>::iterator it;
 	for (it = sBlocs.begin(); it != sBlocs.end(); it++) {
 		(*it).second->destroy(this->world);
+		delete (*it).second;
 	}
 	//delete[] blocs;
 }

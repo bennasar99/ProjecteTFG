@@ -543,7 +543,7 @@ void draw2DUI() {
 		glPopMatrix();
 	}
 	else if (act == Active::MAPA) {
-		world->drawMap(camera.getAspect(), ent, mapY, (camera.getViewDist() / CHUNKSIZE) * mapMult);
+		world->drawMap(camera.getAspect(), ent, mapY, (int)ceil(camera.getViewDist() / CHUNKSIZE) * mapMult);
 	}
 	else {
 		glColor3i(0, 0, 0);
