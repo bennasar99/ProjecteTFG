@@ -157,9 +157,6 @@
     <ClInclude Include="Blocks\EntityBlock.h" />
     <ClInclude Include="Blocks\Jukebox.h" />
     <ClInclude Include="Blocks\LightBlock.h" />
-    <ClInclude Include="Blocks\LiquidBlock.h" />
-    <ClInclude Include="Blocks\SolidBlock.h" />
-    <ClInclude Include="Blocks\SpreadBlock.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Chunk.h" />
     <ClInclude Include="ChunkManager.h" />
@@ -192,9 +189,6 @@
     <ClCompile Include="Blocks\EntityBlock.cpp" />
     <ClCompile Include="Blocks\Jukebox.cpp" />
     <ClCompile Include="Blocks\LightBlock.cpp" />
-    <ClCompile Include="Blocks\LiquidBlock.cpp" />
-    <ClCompile Include="Blocks\SolidBlock.cpp" />
-    <ClCompile Include="Blocks\SpreadBlock.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="ChunkManager.cpp" />

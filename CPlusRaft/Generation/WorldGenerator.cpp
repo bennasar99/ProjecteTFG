@@ -220,7 +220,7 @@ Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks 
 							world->addEntity(Entitat::OVELLA, Vector3<float>((float)tpos.x, (float)tpos.y + 1.0f, (float)tpos.z));
 						}
 						else if (rand2 == 7) {
-							//world->addEntity(Entitat::ESTRUC, Vector3<float>(tpos.x, tpos.y + 1, tpos.z));
+							world->addEntity(Entitat::ESTRUC, Vector3<float>(tpos.x, tpos.y + 1, tpos.z));
 						}
 					}
 				}

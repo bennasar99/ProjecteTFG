@@ -1,13 +1,11 @@
 #include "SoundManager.h"
 
-ALuint SoundManager::sons[NSONS];
+unordered_map<string, ALuint> SoundManager::sons;
 ALCcontext* SoundManager::context;
 ALCdevice* SoundManager::device;
 
 //Carrega un so, assignant-lo a un "So" (enum) concret
-bool SoundManager::loadSound(const char* path, So nom) {
-
-    int sonum = static_cast<int>(nom); //Obtenim la posició de l'array
+bool SoundManager::loadSound(const char* path, string nom) {
 
     int channel, sampleRate, bps, size;
     char* data = loadWAV(path, channel, sampleRate, bps, size); //Carregam el WAV del so
@@ -35,26 +33,27 @@ bool SoundManager::loadSound(const char* path, So nom) {
     }
     alBufferData(bufferid, format, data, size, sampleRate); //Omplim el buffer amb les dades del WAV
 
-    alGenSources(1, &sons[sonum]); //Generam la font de so
-    alSourcei(sons[sonum], AL_BUFFER, bufferid); //Hi ficam les dades del buffer creat
+    alGenSources(1, &sons[nom]); //Generam la font de so
+    alSourcei(sons[nom], AL_BUFFER, bufferid); //Hi ficam les dades del buffer creat
 
     alDeleteBuffers(1, &bufferid); //Eliminam el buffer
     delete[] data; //I les dades del WAV
     return true;
 }
 
-void SoundManager::playSound(So nom, Vector3<float> pos, bool forceStart) {
-    int sonum = static_cast<int>(nom);
+void SoundManager::playSound(string nom, Vector3<float> pos, bool forceStart) {
 
-    alSource3f(sons[sonum], AL_POSITION, pos.x, pos.y, pos.z); //Establim la posició del so
-    alSourcef(sons[sonum], AL_REFERENCE_DISTANCE, 5.0f); //Atenuació, a una distància de 5 ja s'haurà reduit el so a la meitat
-    alSourcei(sons[sonum], AL_MAX_GAIN, 1);
-    alSourcef(sons[sonum], AL_ROLLOFF_FACTOR, 1);
+    ALuint so = sons[nom];
+
+    alSource3f(so, AL_POSITION, pos.x, pos.y, pos.z); //Establim la posició del so
+    alSourcef(so, AL_REFERENCE_DISTANCE, 5.0f); //Atenuació, a una distància de 5 ja s'haurà reduit el so a la meitat
+    alSourcei(so, AL_MAX_GAIN, 1);
+    alSourcef(so, AL_ROLLOFF_FACTOR, 1);
 
     ALenum estat;
-    alGetSourcei(sons[sonum], AL_SOURCE_STATE, &estat);
+    alGetSourcei(so, AL_SOURCE_STATE, &estat);
     if (estat != AL_PLAYING || forceStart) { //Si el so ja està sonant, només el reiniciam si forceStart == true
-        alSourcePlay(sons[sonum]);
+        alSourcePlay(so);
     }
 }
 

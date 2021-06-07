@@ -127,7 +127,7 @@ float toFloat(unsigned short fltInt16) {
 void drawString(std::string str, float size) {
 	glPushMatrix();
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::FONT));
+	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture("Font"));
 	for (int i = 0; i < str.length(); i++) {
 		char c = str.at(i);
 		std::array<float, 4> tCoords;

@@ -17,7 +17,7 @@ void ChunkManager::setChunkState(Vector3<int> cPos, ChunkState cS) {
 
 ChunkState ChunkManager::getChunkState(Vector3<int> cPos) {
 	std::shared_lock lock(cSMutex);
-	std::map<Vector3<int>, ChunkState>::const_iterator iter = cestat.find(cPos);
+	std::unordered_map<Vector3<int>, ChunkState>::const_iterator iter = cestat.find(cPos);
 
 	if (iter == cestat.end())
 	{
@@ -34,7 +34,7 @@ void ChunkManager::setRegionState(Vector3<int> rPos, RegionState rS) {
 RegionState ChunkManager::getRegionState(Vector3<int> rPos) {
 	std::shared_lock lock(rSMutex);
 
-	std::map<Vector3<int>, RegionState>::const_iterator iter = restat.find(rPos);
+	std::unordered_map<Vector3<int>, RegionState>::const_iterator iter = restat.find(rPos);
 
 	if (iter == restat.end())
 	{

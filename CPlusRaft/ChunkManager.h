@@ -30,9 +30,15 @@ private:
 	//Block* blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE] = {};
 	//int height[CHUNKSIZE][CHUNKSIZE]; //Heightmap
 
-	std::map<Vector3<int>, ChunkState> cestat;
-	std::map<Vector3<int>, RegionState> restat;
-	std::map < Vector3<int>, std::array<std::array<int, CHUNKSIZE>, CHUNKSIZE > > height;
+	struct v3_hash {
+		std::size_t operator()(const Vector3<int>& vec) const {
+			return (size_t)vec.x + 128 * ((size_t)vec.y + 128 * (size_t)vec.z);
+		}
+	};
+
+
+	std::unordered_map<Vector3<int>, ChunkState, v3_hash> cestat;
+	std::unordered_map<Vector3<int>, RegionState, v3_hash> restat;
 	/*map<Vector3<int>, Chunk*> chunks;*/
 
 	std::shared_mutex cSMutex;

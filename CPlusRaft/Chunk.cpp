@@ -29,7 +29,7 @@ void Chunk::drawO() {
 		Vector3<int> cPos = this->getPos();
 		//printf("First draw a %d %d %d\n", cPos.x, cPos.y, cPos.z);
 	}
-	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
+	TextureManager::applyTexture("Bloc");
 	glTranslatef(0.5f, 0.5f, 0.5f);
 	if (Block::getMCEnabled()) {
 		glFrontFace(GL_CW);
@@ -38,20 +38,20 @@ void Chunk::drawO() {
 		glFrontFace(GL_CCW);
 	}
 	cMesh.drawO();
-	glBindTexture(GL_TEXTURE_2D, 0);
+	TextureManager::noTexture();
 }
 
 void Chunk::drawT() {
 	if (nblocs <= 0) {
 		return;
 	}
-	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
+	TextureManager::applyTexture("Bloc");
 	glFrontFace(GL_CCW);
 	glTranslatef(0.5f, 0.5f, 0.5f);
 	glDepthMask(GL_FALSE);
 	this->cMesh.drawT();
 	glDepthMask(GL_TRUE);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	TextureManager::noTexture();
 }
 
 Vector3<int> Chunk::getPos() {
@@ -59,20 +59,26 @@ Vector3<int> Chunk::getPos() {
 }
 
 bool Chunk::setBlock(Bloc bloc, Vector3<int> pos, bool overwrite) {
-	//this->dirty = true;
-	//Hi ha blocs amb les seves pròpies classes, sinó s'utilitza la classe genèrica
-	//printf("GC %d %d %d\n", pos.x, pos.y, pos.z);
 	if (this->blocs[pos.x][pos.y][pos.z] != Bloc::RES) {
 		if (!overwrite) {
 			return false;
 		}
 		/*this->blocs[pos.x][pos.y][pos.z]->destroy(this->world);
 		delete this->blocs[pos.x][pos.y][pos.z];*/
+		if (Block::isEspecial(this->blocs[pos.x][pos.y][pos.z])) {
+			if (sBlocs[pos] != nullptr) {
+				sBlocs[pos]->destroy(this->world);
+			}
+		}
 		this->nblocs--;
 	}
 		
 	this->blocs[pos.x][pos.y][pos.z] = bloc;
 	this->nblocs++;
+
+	if (Block::isEspecial(bloc)) {
+		sBlocs[pos] = Block::creaEspecial(bloc, this->cpos * CHUNKSIZE + pos, this->world);
+	}
 
 	return true;
 }
@@ -99,29 +105,22 @@ void Chunk::update(float delta) {
 //Destructor
 Chunk::~Chunk() {
 	//cMesh.erase();
-	/*for (int x = 0; x < CHUNKSIZE; x++) {
-		for (int y = 0; y < CHUNKSIZE; y++) {
-			for (int z = 0; z < CHUNKSIZE; z++) {W
-				if (blocs[x][y][z] != nullptr) {
-					blocs[x][y][z]->destroy(this->world);
-					delete blocs[x][y][z];
-				}
-			}
-		}
-	}*/
+	std::unordered_map<Vector3<int>, Block*>::iterator it;
+	for (it = sBlocs.begin(); it != sBlocs.end(); it++) {
+		(*it).second->destroy(this->world);
+	}
 	//delete[] blocs;
 }
 
-//TODO actualitzar display list
 bool Chunk::delBlock(Vector3<int> bpos, bool destroy) {
 	printf("del %d %d %d\n", bpos.x, bpos.y, bpos.z);
-  	if (this->blocs[bpos.x][bpos.y][bpos.z] != Bloc::RES) {      
-		/*if (destroy) {
-			this->blocs[bpos.x][bpos.y][bpos.z]->destroy(this->world);
-		}*/
-		/*delete this->blocs[bpos.x][bpos.y][bpos.z];*/
+  	if (this->blocs[bpos.x][bpos.y][bpos.z] != Bloc::RES) {  
+		if (Block::isEspecial(this->blocs[bpos.x][bpos.y][bpos.z])) {
+			if (sBlocs[bpos] != nullptr) {
+				sBlocs[bpos]->destroy(this->world);
+			}
+		}
 		this->blocs[bpos.x][bpos.y][bpos.z] = Bloc::RES;
-		//this->den[bpos.x][bpos.y][bpos.z] = 2;
 		nblocs--;
 		this->updateMesh();
 		world->updateNeighborChunks(this->cpos, bpos);
@@ -130,10 +129,12 @@ bool Chunk::delBlock(Vector3<int> bpos, bool destroy) {
 }
 
 void Chunk::interact(Vector3<int> bpos) {
-	/*if (blocs[bpos.x][bpos.y][bpos.z] == 0) {
+	if (!Block::isEspecial(blocs[bpos.x][bpos.y][bpos.z])) {
 		return;
 	}
-	blocs[bpos.x][bpos.y][bpos.z]->interact(this->world);*/
+	if (sBlocs[bpos] != nullptr) {
+		sBlocs[bpos]->interact(this->world);
+	}
 }
 
 bool Chunk::isVisible(Vector3<int> bpos) {

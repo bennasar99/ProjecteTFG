@@ -93,15 +93,6 @@
     <ClInclude Include="Render\ChunkMesh.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Blocks\SolidBlock.h">
-      <Filter>Header Files\Blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="Blocks\LiquidBlock.h">
-      <Filter>Header Files\Blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="Blocks\SpreadBlock.h">
-      <Filter>Header Files\Blocks</Filter>
-    </ClInclude>
     <ClInclude Include="Generation\WorldGenerator.h">
       <Filter>Header Files\Generation</Filter>
     </ClInclude>
@@ -190,15 +181,6 @@
     </ClCompile>
     <ClCompile Include="Render\Mesh.cpp">
       <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="Blocks\SolidBlock.cpp">
-      <Filter>Source Files\Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="Blocks\LiquidBlock.cpp">
-      <Filter>Source Files\Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="Blocks\SpreadBlock.cpp">
-      <Filter>Source Files\Blocks</Filter>
     </ClCompile>
     <ClCompile Include="Generation\WorldGenerator.cpp">
       <Filter>Source Files\Generation</Filter>

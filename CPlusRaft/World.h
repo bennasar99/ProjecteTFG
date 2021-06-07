@@ -15,12 +15,6 @@
 
 #include "Light.h"
 #include "Blocks/Block.h"
-#include "Blocks/LightBlock.h"
-#include "Blocks/Jukebox.h"
-#include "Blocks/EntityBlock.h"
-#include "Blocks/SolidBlock.h"
-#include "Blocks/LiquidBlock.h"
-#include "Blocks/SpreadBlock.h"
 #include "Entities/Player.h"
 #include "Utils.h"
 #include "Camera.h"
@@ -61,10 +55,6 @@ private:
 
 	struct v3_hash {
 		std::size_t operator()(const Vector3<int>& vec) const {
-			/*size_t res = 17;
-			res = res * 31 + hash<int>()(vec.x);
-			res = res * 31 + hash<int>()(vec.y);
-			res = res * 31 + hash<int>()(vec.z);*/
 			return (size_t)vec.x + 128 * ((size_t)vec.y + 128 * (size_t)vec.z);
 		}
 	};

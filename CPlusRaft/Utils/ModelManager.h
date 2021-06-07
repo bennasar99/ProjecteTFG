@@ -5,31 +5,25 @@
 #include <thread>
 #include <algorithm>
 #include <mutex>
+#include <unordered_map>
+
+using namespace std;
 
 #define NMODELS 6
 class Mesh;
-
-enum class Model {
-	OV_COS,
-	OV_DVDR,
-	OV_DVES,
-	OV_DRDR,
-	OV_DRES,
-	ESTRUC
-};
 
 //Gestió dels fils
 class ModelManager {
 private:
 
-	static Mesh *model[NMODELS];
+	static unordered_map<string, Mesh*> model;
 
 	ModelManager() {}
 
 public:
 
-	static void addModel(Model mod, int frames, std::string path);
-	static void drawModel(Model mod, int frame);
+	static void addModel(string mod, int frames, string path);
+	static void drawModel(string mod, int frame);
 	static void initialize();
 
 };

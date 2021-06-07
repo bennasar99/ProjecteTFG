@@ -130,12 +130,12 @@ void Ostrich::draw(double delta) {
 	int frameMax = frameInici[est] + frameCount[est];
 	int frameAct = (int)(anim+=((float)delta/30.0f)) + frameInici[est];
 
-	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::ESTRUC));
+	TextureManager::applyTexture("Estruç");
 	glRotatef(rot, 0, 1, 0);
 
-	ModelManager::drawModel(Model::ESTRUC, frameAct);
+	ModelManager::drawModel("Estruç", frameAct);
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+	TextureManager::noTexture();
 
 	if (frameAct >= frameMax) {
 		anim = 0;

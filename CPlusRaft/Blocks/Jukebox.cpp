@@ -17,6 +17,6 @@ void Jukebox::destroy() {
     
 }
 
-void Jukebox::interact() { //Reproduim música
-    SoundManager::playSound(So::MUSICA, Vector3<float>((float)this->pos.x, (float)this->pos.y, (float)this->pos.z), true);
+void Jukebox::interact(World* world) { //Reproduim música
+    SoundManager::playSound("Musica", Vector3<float>((float)this->pos.x, (float)this->pos.y, (float)this->pos.z), true);
 }

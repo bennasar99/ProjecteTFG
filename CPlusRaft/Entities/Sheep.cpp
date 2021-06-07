@@ -103,39 +103,39 @@ void Sheep::update(double delta) {
 //Funció de dibuix
 void Sheep::draw(double delta) {
 	glScalef(0.1f, 0.1f, 0.1f);
-	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::OVELLA));
+	TextureManager::applyTexture("Ovella");
 	glRotatef(rot, 0, 1, 0);
 
 	glPushMatrix();
 	glTranslatef(-0, 1, 0);
-	ModelManager::drawModel(Model::OV_COS, 0);
+	ModelManager::drawModel("OvellaCos", 0);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(-3.0f, -2.5f, 5.5f);
 	glRotatef(-rotDavDr, 1, 0, 0);
-	ModelManager::drawModel(Model::OV_DVDR, 0);
+	ModelManager::drawModel("OvellaCamaDavantDreta", 0);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(+3.0f, -2.5f, 5.5f);
 	glRotatef(rotDavDr, 1, 0, 0);
-	ModelManager::drawModel(Model::OV_DVES, 0);
+	ModelManager::drawModel("OvellaCamaDavantEsquerra", 0);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(+3.0f, -2.5f, -5.5f);
 	glRotatef(rotDavDr, 1, 0, 0);
-	ModelManager::drawModel(Model::OV_DRES, 0);
+	ModelManager::drawModel("OvellaCamaDarreraEsquerra", 0);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(-3.0f, -2.5f, -5.5f);
 	glRotatef(-rotDavDr, 1, 0, 0);
-	ModelManager::drawModel(Model::OV_DRDR, 0);
+	ModelManager::drawModel("OvellaCamaDarreraDreta", 0);
 	glPopMatrix();
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+	TextureManager::noTexture();
 }
 
 void Sheep::destroy() {

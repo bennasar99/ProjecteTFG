@@ -16,7 +16,7 @@ public:
 
 	void destroy();
 
-	void interact();
+	void interact(World* world);
 
 };
 

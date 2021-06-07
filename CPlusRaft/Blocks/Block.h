@@ -9,7 +9,7 @@
 
 class Chunk;
 
-#define NBLOCS 26
+#define NBLOCS 24
 
 enum class Bloc :uint8_t {
 	RES,
@@ -19,8 +19,6 @@ enum class Bloc :uint8_t {
 	TERRA,
 	VIDRE,
 	TORXA,
-	LLUMSOTIL,
-	LLUMTERRA,
 	FULLAARBRE,
 	FUSTA,
 	FUSTAARBRE,
@@ -68,6 +66,7 @@ public:
 	Bloc getId();
 	void setId(Bloc id);
 
+	static Block* creaEspecial(Bloc tipus, Vector3<int> pos, World* world);
 	static void draw(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[6]);
 	static bool getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<unsigned char, 4>& color);
 	static bool isTransparent(Bloc tipus);
@@ -76,6 +75,7 @@ public:
 	static bool isCube(Bloc tipus);
 	static bool canSeeThrough(Bloc tipus);
 	static bool isMarcheable(Bloc tipus);
+	static bool isEspecial(Bloc tipus);
 	static bool drawIcon(Bloc tipus);
 
 	static void drawBlock(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[6]);

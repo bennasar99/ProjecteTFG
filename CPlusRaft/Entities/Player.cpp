@@ -130,7 +130,7 @@ void Player::control(double delta, Camera *cam) {
 					!Block::isSolid(world->getBlock(newPos + Vector3<float>(0, eyesOffset, 0)))) {
 					this->pos = newPos;
 					if (Block::isSolid(world->getBlock(this->pos - Vector3<float>(0,1,0)))) {
-						SoundManager::playSound(So::CAMINA, this->pos, false);
+						SoundManager::playSound("Camina", this->pos, false);
 					}
 					break;
 				}
@@ -139,7 +139,7 @@ void Player::control(double delta, Camera *cam) {
 		else {
 			this->pos = newPos;
 			if (world->getBlock(this->pos - Vector3<float>(0, 1, 0)) != Bloc::AIGUA) {
-				SoundManager::playSound(So::CAMINA, this->pos, false);
+				SoundManager::playSound("Camina", this->pos, false);
 			}
 		}
 	}

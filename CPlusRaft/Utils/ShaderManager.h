@@ -2,27 +2,24 @@
 #include <climits>
 #include <vector>
 #include <ctype.h>
+#include <unordered_map>
 #include "../Render/Shader.h"
 
 #define NSHADERS 1
 class Mesh;
 
-enum class TipusShader {
-	DEFAULT
-};
-
 class ShaderManager {
 private:
 
-	static Shader shaders[NSHADERS];
+	static unordered_map<string, Shader> shaders;
 
 	ShaderManager() {}
 
 public:
 
-	static void addShader(TipusShader sh, std::string path);
-	static void useShader(TipusShader sh);
-	static unsigned int getShader(TipusShader sh);
+	static void addShader(string nom, std::string path);
+	static void useShader(string nom);
+	static unsigned int getShader(string nom);
 	static void initialize();
 
 };

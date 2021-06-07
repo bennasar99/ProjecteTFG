@@ -13,7 +13,14 @@ private:
 	//Block* blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE] = {};
 	//int height[CHUNKSIZE][CHUNKSIZE]; //Heightmap
 	Bloc blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE] = {};
-	
+
+	struct v3_hash {
+		std::size_t operator()(const Vector3<int>& vec) const {
+			return (size_t)vec.x + 128 * ((size_t)vec.y + 128 * (size_t)vec.z);
+		}
+	};
+
+	unordered_map<Vector3<int>, Block*, v3_hash> sBlocs;
 
 	Bioma bio;
 

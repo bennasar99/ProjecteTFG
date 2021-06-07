@@ -1,6 +1,8 @@
 #include "Block.h"
 #include "../World.h"
 #include "../Utils.h"
+#include "LightBlock.h"
+#include "Jukebox.h"
 
 bool Block::marching = false;
 TextureAtlas blockAtlas = TextureAtlas(8,3);
@@ -111,7 +113,7 @@ bool Block::getBlockInfo(Bloc id, std::array<float, 4>& texCoords, std::array<un
 		break;
 	}
 
-	TextureManager::getTexCoords(texNum, texCoords);
+	TextureManager::getBlockTexCoords(texNum, texCoords);
 	return true;
 }
 
@@ -140,15 +142,11 @@ void Block::setId(Bloc id) {
 }
 
 void Block::destroy(World* world){
-	//if (parent != 0) {
-	//	this->parent->destroy();
-	//}
+
 };
 
 void Block::interact(World* world) {
-	/*if (parent != 0) {
-		this->parent->interact();
-	}*/
+
 };
 
 void Block::draw(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[6]) {
@@ -191,6 +189,29 @@ void Block::draw(Bloc id, ChunkMesh* cM, Vector3<int> relPos, bool visible[6]) {
 		}
 		break;
 	}
+	case Bloc::TORXA: {
+		GLfloat vert[2][2][3] = {
+		{ {0, 0, 0}, {0, -0.5, 0} },
+		{ {0, 0.1, 0}, {0, 0, 0}},
+		};
+
+		int texNum = -1; //Per defecte sense textura
+		unsigned char color[2][4] = { {139,69,19, 255}, { 255, 255, 0, 255 } }; //Verd
+
+		//float* texCoords = TextureManager::getTexCoords(texNum);
+		float xb = 0, yb = 0, xt = 0, yt = 0;
+		//xb = texCoords[0]; yb = texCoords[1]; xt = texCoords[2]; yt = texCoords[3];
+
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 2; j++) {
+				unsigned short normal[3] = { 0,1,0 };
+				unsigned short text[2] = { 0,0 };
+				unsigned short vPos[3] = { toHFloat(vert[i][j][0] + relPos.x), toHFloat(vert[i][j][1] + relPos.y), toHFloat(vert[i][j][2] + relPos.z) };
+				cM->addVertexO(vPos, normal, color[i], text, Primitiva::LINIA);
+			}
+		}
+		break;
+	}
 	default:
 		Block::drawBlock(id, cM, relPos, visible);
 		break;
@@ -210,7 +231,7 @@ bool Block::isSolid(Bloc tipus) {
 }
 
 bool Block::isInteractable(Bloc tipus) {
-	return (Block::isSolid(tipus) || tipus == Bloc::HERBA || tipus == Bloc::NEUSUP);
+	return (Block::isSolid(tipus) || tipus == Bloc::HERBA || tipus == Bloc::NEUSUP || tipus == Bloc::TORXA);
 }
 
 //Indica si a un bloc se li pot aplicar marching cubes. Ex: Als transparents i solids (gel) no s'ha de permetre
@@ -219,9 +240,21 @@ bool Block::isMarcheable(Bloc tipus) {
 }
 
 bool Block::isCube(Bloc tipus) {
-	return (tipus != Bloc::HERBA && tipus != Bloc::TORXA && tipus != Bloc::LLUMSOTIL && tipus != Bloc::LLUMTERRA);
+	return (tipus != Bloc::HERBA && tipus != Bloc::TORXA);
 }
 
+bool Block::isEspecial(Bloc tipus) {
+	return (tipus == Bloc::TORXA || tipus == Bloc::ALTAVEU);
+}
+
+Block* Block::creaEspecial(Bloc tipus, Vector3<int> pos, World* world) {
+	switch (tipus) {
+	case Bloc::TORXA:
+		return (Block*)(new LightBlock(world, tipus, pos));
+	case Bloc::ALTAVEU:
+		return (Block*)(new Jukebox(pos));
+	}
+}
 
 bool Block::drawIcon(Bloc id) {
 	std::array<unsigned char, 4> color;
@@ -312,32 +345,6 @@ bool Block::drawIcon(Bloc id) {
 			glVertex3d(0.0, 0.2, 0.0); glVertex3d(0.0, 0.1, 0.0); //Punta
 			glEnd();
 			glLineWidth(1.0f);
-			glEnable(GL_LIGHTING);
-			break;
-		case Bloc::LLUMSOTIL: //Llum de sòtil
-			glDisable(GL_LIGHTING);
-			glColor3f(1, 1, 1);
-			glBegin(GL_QUADS);
-			glVertex3d(0.5, 0.5, 0.5); glVertex3d(0.5, 0.5, -0.5); glVertex3d(-0.5, 0.5, -0.5); glVertex3d(-0.5, 0.5, 0.5);
-			glColor3f(0, 0, 0);
-			glLineWidth(2.0f);
-			glEnd();
-			glBegin(GL_LINE_LOOP);
-			glVertex3d(0.5, 0.5, 0.5); glVertex3d(0.5, 0.5, -0.5); glVertex3d(-0.5, 0.5, -0.5); glVertex3d(-0.5, 0.5, 0.5); glVertex3d(0.5, 0.5, 0.5);
-			glEnd();
-			glEnable(GL_LIGHTING);
-			break;
-		case Bloc::LLUMTERRA: //Foco (llum de sòtil però de baix cap adalt)
-			glDisable(GL_LIGHTING);
-			glColor3f(1, 1, 1);
-			glBegin(GL_QUADS);
-			glVertex3d(0.5, -0.5, 0.5); glVertex3d(0.5, -0.5, -0.5); glVertex3d(-0.5, -0.5, -0.5); glVertex3d(-0.5, -0.5, 0.5);
-			glColor3f(0, 0, 0);
-			glLineWidth(2.0f);
-			glEnd();
-			glBegin(GL_LINE_LOOP);
-			glVertex3d(0.5, -0.5, 0.5); glVertex3d(0.5, -0.5, -0.5); glVertex3d(-0.5, -0.5, -0.5); glVertex3d(-0.5, -0.5, 0.5); glVertex3d(0.5, -0.5, 0.5);
-			glEnd();
 			glEnable(GL_LIGHTING);
 			break;
 		}

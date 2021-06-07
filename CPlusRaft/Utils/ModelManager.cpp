@@ -2,17 +2,20 @@
 #include "GL/glew.h"
 #include "../Render/Mesh.h"
 
-Mesh *ModelManager::model[NMODELS];
+unordered_map<string, Mesh*> ModelManager::model;
 
 void ModelManager::initialize() {
 	//
 }
 
-void ModelManager::addModel(Model mod, int frames, std::string path) {
-	model[static_cast<int>(mod)] = new Mesh[frames];
+void ModelManager::addModel(string mod, int frames, std::string path) {
+
+	model[mod] = new Mesh[frames];
+	Mesh* model = ModelManager::model[mod];
+
 	if (frames <= 1) { //Si només té un frame carregam directament amb el path
-		model[static_cast<int>(mod)][0] = Mesh(path);
-		model[static_cast<int>(mod)][0].update();
+		model[0] = Mesh(path);
+		model[0].update();
 		return;
 	}
 
@@ -27,8 +30,8 @@ void ModelManager::addModel(Model mod, int frames, std::string path) {
 		pathN += num;
 		pathN += ".obj";
 		printf("Model a %s\n", pathN.c_str());
-		model[static_cast<int>(mod)][i] = Mesh(pathN);
-		model[static_cast<int>(mod)][i].update();
+		model[i] = Mesh(pathN);
+		model[i].update();
 	}
 	
 
@@ -36,6 +39,6 @@ void ModelManager::addModel(Model mod, int frames, std::string path) {
 
 }
 
-void ModelManager::drawModel(Model mod, int frame) {
-	model[static_cast<int>(mod)][frame].draw();
+void ModelManager::drawModel(string mod, int frame) {
+	model[mod][frame].draw();
 }

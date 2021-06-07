@@ -278,7 +278,7 @@ void Idle() {
 
 void Draw() {
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1); //Activar VSYNC
+	//glfwSwapInterval(1); //Activar VSYNC
 	while (!glfwWindowShouldClose(window))
 	{
 		Display(window);
@@ -299,6 +299,10 @@ int main(int argc, char** argv)
 	//Fils (detecció num)
 	ThreadManager::initialize();
 	TextureManager::initialize();
+
+	//Carpetes
+	std::filesystem::create_directory("shaders");
+	std::filesystem::create_directory("worlds");
 
 	printf("World name: ");
 	std::cin >> wname;
@@ -401,41 +405,32 @@ int main(int argc, char** argv)
 
 	//Textures
 	glEnable(GL_TEXTURE_2D); //Activació
-	TextureManager::LoadTexture("Textures/texture.png", Textura::BLOC);
-	TextureManager::LoadTexture("Textures/font.png", Textura::FONT);
-	TextureManager::LoadTexture("Models/Sheep/sheep_pallete.png", Textura::OVELLA);
-	TextureManager::LoadTexture("Models/Ostrich/Ostrich.png", Textura::ESTRUC);
+	TextureManager::LoadTexture("Textures/texture.png", "Bloc");
+	TextureManager::LoadTexture("Textures/font.png", "Font");
+	TextureManager::LoadTexture("Models/Sheep/sheep_pallete.png", "Ovella");
+	TextureManager::LoadTexture("Models/Ostrich/Ostrich.png", "Estruç");
 
 	//Models
-	ModelManager::addModel(Model::ESTRUC, 231, "Models/Ostrich/Ostrich");
-	ModelManager::addModel(Model::OV_COS, 1, "Models/Sheep/sheepCentrat.obj");
-	ModelManager::addModel(Model::OV_DVDR, 1, "Models/Sheep/SheepDavDR.obj");
-	ModelManager::addModel(Model::OV_DVES, 1, "Models/Sheep/SheepDavES.obj");
-	ModelManager::addModel(Model::OV_DRDR, 1, "Models/Sheep/SheepDarDR.obj");
-	ModelManager::addModel(Model::OV_DRES, 1, "Models/Sheep/SheepDarES.obj");
+	ModelManager::addModel("Estruç", 231, "Models/Ostrich/Ostrich");
+	ModelManager::addModel("OvellaCos", 1, "Models/Sheep/sheepCentrat.obj");
+	ModelManager::addModel("OvellaCamaDavantDreta", 1, "Models/Sheep/SheepDavDR.obj");
+	ModelManager::addModel("OvellaCamaDavantEsquerra", 1, "Models/Sheep/SheepDavES.obj");
+	ModelManager::addModel("OvellaCamaDarreraDreta", 1, "Models/Sheep/SheepDarDR.obj");
+	ModelManager::addModel("OvellaCamaDarreraEsquerra", 1, "Models/Sheep/SheepDarES.obj");
 
 	//Sons
 	SoundManager::initialize();
-	SoundManager::loadSound("Sons/jukebox.wav", So::MUSICA);
-	SoundManager::loadSound("Sons/switch.wav", So::ONOFF);
-	SoundManager::loadSound("Sons/break.wav", So::DESTRUEIX);
-	SoundManager::loadSound("Sons/place.wav", So::COLOCA);
-	SoundManager::loadSound("Sons/passes/mud02.wav", So::CAMINA);
+	SoundManager::loadSound("Sons/jukebox.wav", "Musica");
+	SoundManager::loadSound("Sons/switch.wav", "OnOff");
+	SoundManager::loadSound("Sons/break.wav", "Destrueix");
+	SoundManager::loadSound("Sons/place.wav", "Coloca");
+	SoundManager::loadSound("Sons/passes/mud02.wav", "Camina");
 
 	//Antialising
 	glfwWindowHint(GLFW_SAMPLES, 8);
 	glEnable(GL_MULTISAMPLE);
 
 	setLighting();
-
-
-	//ShaderManager::addShader(TipusShader::DEFAULT, "block");
-	//ShaderManager::useShader(TipusShader::DEFAULT);
-	//unsigned int sh = ShaderManager::getShader(TipusShader::DEFAULT);
-	//glUniform3f(glGetUniformLocation(sh, "pos"), 0.01f, 0.01f, 0.01f);
-	//Shader vShader = Shader(GL_VERTEX_SHADER, "vertex.glsl");
-	//vShader.use();
-	
 
 	std::thread drw(Draw);
 	glfwMakeContextCurrent(NULL);
@@ -471,7 +466,7 @@ void draw2DUI() {
 	glTranslatef(0.9f * camera.getAspect(), 0.1f, -2);
 	glScalef(0.1f, 0.1f, 0.1f);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
+	TextureManager::applyTexture("Bloc");
 	world->drawBloc(bsel.getId());
 	glPopMatrix();
 
@@ -506,7 +501,7 @@ void draw2DUI() {
 		glEnd();
 
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, TextureManager::getTexture(Textura::BLOC));
+		TextureManager::applyTexture("Bloc");
 		glTranslatef(0.5f * aspect - 0.3f, 0.8f, -1);
 		for (int i = 1; i < NBLOCS - 1; i++) { //Objectes de l'inventari, botam primer (RES) i darrer (LIMIT)
 			glPushMatrix();
@@ -703,8 +698,8 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 			printf("%f %f\n", xi, yi);
 
 			btipus = (int)floor(yi) * 6 +  (int)floor(xi) + 1; //+2 per botar RES
-			if (btipus > NBLOCS) { //Si no se selecciona cap objecte, no n'hi haurà cap de seleccionat
-				btipus = 0;
+			if (btipus > NBLOCS - 2) { //Si no se selecciona cap objecte, no n'hi haurà cap de seleccionat
+				btipus = static_cast<int>(Bloc::RES);
 			}
 		}
 	}
@@ -714,7 +709,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 	else {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) { //Botó dret, eliminar blocs
 			if (world->deleteBlock(Vector3<int>((int)floor(ba.x), (int)floor(ba.y), (int)floor(ba.z)), true)) {
-				SoundManager::playSound(So::DESTRUEIX, ba, true);
+				SoundManager::playSound("Destrueix", ba, true);
 			}
 		}
 		else if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) { //Botó de la rodeta, canviar d'objecte
@@ -731,11 +726,11 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 				}
 				if (ent == nullptr || epos != bp) {
 					world->setBlock(tipusbloc, Vector3<int>((int)floor(bp.x), (int)floor(bp.y), (int)floor(bp.z)));
-					SoundManager::playSound(So::COLOCA, bp, true);
+					SoundManager::playSound("Coloca", bp, true);
 				}
 			}
 			else {
-				world->interact(Vector3<int>((int)ba.x, (int)ba.y, (int)ba.z)); //Si no tenim cap bloc seleccionat, interactuam
+				world->interact(Vector3<int>((int)floor(ba.x), (int)floor(ba.y), (int)floor(ba.z))); //Si no tenim cap bloc seleccionat, interactuam
 			}
 		}
 	}
