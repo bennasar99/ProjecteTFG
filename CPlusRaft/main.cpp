@@ -71,7 +71,7 @@ void scaleListener(GLFWwindow* window, double xoffset, double yoffset);
 void mouseListener(GLFWwindow* window, int button, int action, int mods);
 void lookAround(GLFWwindow* window, double x, double y);
 void movement(int key);
-void centerPointer();
+void updateMousePos();
 void updatePlayerBlock();
 void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
 void gamePad();
@@ -804,7 +804,7 @@ void movement(int key) {
 	else if (key == GLFW_KEY_ESCAPE) {
 		act = Active::JOC;
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		centerPointer();
+		updateMousePos(); //Perquè la càmera no es mogui violentament si el ratoli s'ha separat molt
 	}
 }
 
@@ -894,21 +894,13 @@ void lookAround(GLFWwindow* window, double x, double y) {
 
 		updatePlayerBlock();
 
-		//Intentam evitar que el ratoli surti de la finestra
-		if (x != (w_width / 2) || y != (w_height / 2)) {
-			centerPointer();
-		}
+		updateMousePos();
 	}
 }
 
 //Centra el ratolí enmig de la finestra, per evitar que s'escapi
-void centerPointer() {
-	double posx = w_width / 2;
-	double posy = w_height / 2;
-	glfwGetCursorPos(window, &posx, &posy);
-	//glutWarpPointer(posx, posy);
-	lastX = posx;
-	lastY = posy;
+void updateMousePos() {
+	glfwGetCursorPos(window, &lastX, &lastY);
 }
 
 //Actualitzam el bloc seleccionat (posició) segons on miri el jugador
