@@ -55,7 +55,7 @@ private:
 
 	struct v3_hash {
 		std::size_t operator()(const Vector3<int>& vec) const {
-			return (size_t)vec.x + 128 * ((size_t)vec.y + 128 * (size_t)vec.z);
+			return (vec.x * 73856093) ^ (vec.y* 19349663) ^ (vec.z * 83492791);
 		}
 	};
 

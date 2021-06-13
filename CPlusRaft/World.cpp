@@ -9,7 +9,7 @@ World::World(std::string name, int seed, Camera* camera) //Nou
 	this->cnk = std::vector< std::future<Chunk*> >(genCores);
 	this->regLoad = std::vector< std::future<bool> >(genCores);
 	this->name = name;
-	this->wGen = WorldGenerator(seed, this, Generator::DEFAULT);
+	this->wGen = WorldGenerator(seed, this, "normal");
 
 	this->seed = seed;
 	this->camera = camera;
@@ -276,18 +276,18 @@ void World::update(double delta, Vector3<float> pos) {
 	}
 
 
-	int dist = (int)floor((camera->getViewDist() / CHUNKSIZE) / 3);
-	for (int x = pcPos.x - dist; x < pcPos.x + dist; x++) {
-		for (int y = pcPos.y - dist; y < pcPos.y + dist; y++) {
-			for (int z = pcPos.z - dist; z < pcPos.z + dist; z++) {
-				Vector3<int> cPos = Vector3<int>(x, y, z);
-				Chunk* ch = getChunk(cPos);
-				if (ch != nullptr && cM.getChunkState(cPos) == ChunkState::LLEST) {
-					ch->update(delta);
-				}
-			}
-		}
-	}
+	//int dist = (int)floor((camera->getViewDist() / CHUNKSIZE) / 3);
+	//for (int x = pcPos.x - dist; x < pcPos.x + dist; x++) {
+	//	for (int y = pcPos.y - dist; y < pcPos.y + dist; y++) {
+	//		for (int z = pcPos.z - dist; z < pcPos.z + dist; z++) {
+	//			Vector3<int> cPos = Vector3<int>(x, y, z);
+	//			Chunk* ch = getChunk(cPos);
+	//			if (ch != nullptr && cM.getChunkState(cPos) == ChunkState::LLEST) {
+	//				ch->update(delta);
+	//			}
+	//		}
+	//	}
+	//}
 
 	//Actualitzam les entitats
 	std::list<Entity*>::iterator ent;

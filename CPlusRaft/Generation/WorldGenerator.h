@@ -5,6 +5,8 @@
 #include <string>
 #include <random>
 
+using namespace std;
+
 #define NBIOMES 10
 
 enum class Bioma {
@@ -18,12 +20,6 @@ enum class Bioma {
 	ARTIC,
 	BOSCNEVAT,
 	SABANA
-};
-
-enum class Generator {
-	DEFAULT,
-	BIGBIOMES,
-	OCEANWORLD
 };
 
 class World;
@@ -44,7 +40,7 @@ private:
 	FastNoiseLite oreNoise;
 
 	World *world;
-	Generator gen;
+	string gen = "normal";
 	
 	float biomeSize = 1;
 	float oceanProb = 0.1f;
@@ -63,7 +59,7 @@ private:
 public:
 
 	WorldGenerator();
-	WorldGenerator(int seed, World* world, Generator gen);
+	WorldGenerator(int seed, World* world, string gen);
 
 	Bioma getBiomeAt(int cX, int cZ);
 

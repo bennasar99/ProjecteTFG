@@ -2,7 +2,8 @@
 #include "../world.h"
 #include "../Chunk.h"
 
-WorldGenerator::WorldGenerator(int seed, World* world, Generator gen) {
+WorldGenerator::WorldGenerator(int seed, World* world, string gen) {
+	this->gen = gen;
 	this->setSeed(seed);
 	this->biomeSize = 2;
 
@@ -62,6 +63,7 @@ WorldGenerator::WorldGenerator(int seed, World* world, Generator gen) {
 }
 
 WorldGenerator::WorldGenerator() {
+	this->gen = "normal";
 	this->biomeSize = 1;
 	this->oceanProb = 0.1f;
 	this->seaToOcean = 0.1f;
@@ -433,6 +435,11 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 							toSet = ores[dist(rng) % 3];
 						}
 					}
+
+					if (toSet == Bloc::NEUSUP && bpos.y <= sealvl) { //Per evitar que quedin dins l'aigua i la generació d'arbres damunt (transició biomes)
+						toSet = Bloc::AIGUA;
+					}
+
 					chunk->setBlock(toSet, pos);
 				}
 				else {
@@ -444,7 +451,7 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 							}
 						}
 						else {
-							chunk->setBlock(Bloc::AIGUA, pos);
+							chunk->setBlock(Bloc::AIGUA, pos, true);
 						}
 						nblocs++;
 					}
@@ -493,7 +500,7 @@ void WorldGenerator::readFromFile() {
 	char* par = (char*)str.c_str();
 	c4::substr parse = c4::to_substr(par);
 	ryml::Tree tree = ryml::parse(parse);
-	auto gen = tree["generators"]["normal"];
+	auto gen = tree["generators"][c4::to_substr((char*)this->gen.c_str())];
 	ryml::read(gen["biome_size"], &this->biomeSize);
 	ryml::read(gen["ocean_prob"], &this->oceanProb);
 	ryml::read(gen["sea_to_ocean_ratio"], &this->seaToOcean);

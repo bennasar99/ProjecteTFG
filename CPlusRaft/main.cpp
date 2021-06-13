@@ -16,17 +16,21 @@
 #include <sys/stat.h>
 #include <thread>  
 
-#define TPS 60 //Actualitzacions del món per segon
+#define TPS 20 //Actualitzacions del món per segon
 
 int w_width = 500;
 int w_height = 500;
 GLFWwindow* window;
 
+
+#include "World.h"
+World* world;
+
 //Clipping planes
 const float zNear = 0.001f;
-float zFar = 280.0f;
-float viewDist = 16.0f; //Distància de visió (en chunks)
+float viewDist = 32.0f; //Distància de visió (en chunks)
 
+float zFar = viewDist*CHUNKSIZE + CHUNKSIZE;
 const float axisSize = zFar;
 
 Vector3<float> ba; //Bloc actual (posició)
@@ -36,9 +40,6 @@ int btipus = 2; //Bloc actual (tipus)
 
 #include "Camera.h"
 Camera camera = Camera(Vector3<float>(64, 66, 64), Vector3<float>(64, 66, 60));
-
-#include "World.h"
-World* world;
 
 int darrerIdle = 0, darrerDisplay = 0; //Control del temps
 
@@ -57,7 +58,7 @@ Entity* ent; //Entitat controlada
 
 bool axisVisible = false; //Eixos ON/OFF
 
-int mapMult = 1; //Multiplicador mapa
+float mapMult = 1; //Multiplicador mapa
 
 //Nom del món
 std::string wname;
@@ -250,14 +251,11 @@ void Update(void)
 	if (ent != nullptr) { //L'entitat que controlam s'ha d'actualitzar quan l'ordinador ho permeti
 		ent->update(delta);
 		ent->setRot(camera.yaw);
-	}
-
-	//Si tenim una entitat controlada
-	if (ent != 0) {
 		ent->control(delta, &camera); //Actualitzam el seu estat intern
 		Vector3 pos = ent->getPos();
 		alListener3f(AL_POSITION, pos.x, pos.y, pos.z); //Actualitzam la posició de l'escoltador a l'entitat
 	}
+
 	updatePlayerBlock();
 
 
@@ -543,7 +541,7 @@ void draw2DUI() {
 		glPopMatrix();
 	}
 	else if (act == Active::MAPA) {
-		world->drawMap(camera.getAspect(), ent, mapY, (int)ceil(camera.getViewDist() / CHUNKSIZE) * mapMult);
+		world->drawMap(camera.getAspect(), ent, mapY, (int)ceil((camera.getViewDist() / CHUNKSIZE) * mapMult));
 	}
 	else {
 		glColor3i(0, 0, 0);
@@ -806,6 +804,7 @@ void movement(int key) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		updateMousePos(); //Perquè la càmera no es mogui violentament si el ratoli s'ha separat molt
 	}
+	mapMult = max(mapMult, 0.5f);
 }
 
 //Control amb la rodeta del ratolí
@@ -817,6 +816,12 @@ void scaleListener(GLFWwindow* window, double xoffset, double yoffset) {
 		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, cutoff);
 	}
 	else { //Feim zoom
+		if (act == Active::MAPA) {
+			mapMult -= yoffset*0.2f;
+			mapMult = max(mapMult, 0.5f);
+			return;
+		}
+
 		camera.zoom((float)yoffset * 0.5f);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
