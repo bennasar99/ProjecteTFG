@@ -30,7 +30,7 @@
 #include "Entities/Sheep.h"
 #include "Entities/Ostrich.h"
 
-#include "ChunkManager.h"
+#include "ChunkStateManager.h"
 
 using namespace std;
 #define REGIONSIZE 16
@@ -51,7 +51,7 @@ private:
 	std::vector< std::future<bool> > regLoad;
 
 	WorldGenerator wGen;
-	ChunkManager cM;
+	ChunkStateManager cM;
 
 	struct v3_hash {
 		std::size_t operator()(const Vector3<int>& vec) const {

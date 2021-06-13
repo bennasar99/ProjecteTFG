@@ -25,7 +25,7 @@ enum class RegionState : uint8_t {
 	DIRTY,
 };
 
-class ChunkManager {
+class ChunkStateManager {
 private:
 	//Block* blocs[CHUNKSIZE][CHUNKSIZE][CHUNKSIZE] = {};
 	//int height[CHUNKSIZE][CHUNKSIZE]; //Heightmap
@@ -57,6 +57,6 @@ public:
 	void removeChunk(Vector3<int> cPos);
 	void removeRegion(Vector3<int> rPos);
 
-	ChunkManager();
-	~ChunkManager();
+	ChunkStateManager();
+	~ChunkStateManager();
 };

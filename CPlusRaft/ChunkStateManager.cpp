@@ -1,21 +1,21 @@
-#include "ChunkManager.h"
+#include "ChunkStateManager.h"
 
-ChunkManager::ChunkManager() {
+ChunkStateManager::ChunkStateManager() {
 
 }
 
 
-ChunkManager::~ChunkManager() {
+ChunkStateManager::~ChunkStateManager() {
 	
 }
 
 
-void ChunkManager::setChunkState(Vector3<int> cPos, ChunkState cS) {
+void ChunkStateManager::setChunkState(Vector3<int> cPos, ChunkState cS) {
 	std::unique_lock lock(cSMutex);
 	cestat[cPos] = cS;
 }
 
-ChunkState ChunkManager::getChunkState(Vector3<int> cPos) {
+ChunkState ChunkStateManager::getChunkState(Vector3<int> cPos) {
 	std::shared_lock lock(cSMutex);
 	std::unordered_map<Vector3<int>, ChunkState>::const_iterator iter = cestat.find(cPos);
 
@@ -26,12 +26,12 @@ ChunkState ChunkManager::getChunkState(Vector3<int> cPos) {
 	return iter->second;
 }
 
-void ChunkManager::setRegionState(Vector3<int> rPos, RegionState rS) {
+void ChunkStateManager::setRegionState(Vector3<int> rPos, RegionState rS) {
 	std::unique_lock lock(rSMutex);
 	restat[rPos] = rS;
 }
 
-RegionState ChunkManager::getRegionState(Vector3<int> rPos) {
+RegionState ChunkStateManager::getRegionState(Vector3<int> rPos) {
 	std::shared_lock lock(rSMutex);
 
 	std::unordered_map<Vector3<int>, RegionState>::const_iterator iter = restat.find(rPos);
@@ -43,7 +43,7 @@ RegionState ChunkManager::getRegionState(Vector3<int> rPos) {
 	return iter->second;
 }
 
-void ChunkManager::removeChunk(Vector3<int> cPos) {
+void ChunkStateManager::removeChunk(Vector3<int> cPos) {
 	{
 		std::unique_lock lock(cSMutex);
 		cestat.erase(cPos);
@@ -55,7 +55,7 @@ void ChunkManager::removeChunk(Vector3<int> cPos) {
 	}
 }
 
-void ChunkManager::removeRegion(Vector3<int> rPos) {
+void ChunkStateManager::removeRegion(Vector3<int> rPos) {
 	{
 		std::unique_lock lock(rSMutex);
 		restat.erase(rPos);
