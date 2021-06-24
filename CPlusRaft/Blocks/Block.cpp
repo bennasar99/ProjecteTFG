@@ -236,7 +236,7 @@ bool Block::isInteractable(Bloc tipus) {
 
 //Indica si a un bloc se li pot aplicar marching cubes. Ex: Als transparents i solids (gel) no s'ha de permetre
 bool Block::isMarcheable(Bloc tipus) {
-	return (isSolid(tipus) && !canSeeThrough(tipus));
+	return (isSolid(tipus) && !canSeeThrough(tipus) && tipus != Bloc::LIMIT);
 }
 
 bool Block::isCube(Bloc tipus) {

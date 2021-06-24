@@ -18,8 +18,8 @@
 
 #define TPS 20 //Actualitzacions del món per segon
 
-int w_width = 500;
-int w_height = 500;
+int w_width = 1366;
+int w_height = 768;
 GLFWwindow* window;
 
 
@@ -276,6 +276,7 @@ void Idle() {
 
 void Draw() {
 	glfwMakeContextCurrent(window);
+	onWindowResize(window, w_width, w_height);
 	//glfwSwapInterval(1); //Activar VSYNC
 	while (!glfwWindowShouldClose(window))
 	{
