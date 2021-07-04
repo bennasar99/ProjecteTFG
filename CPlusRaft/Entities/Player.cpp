@@ -69,7 +69,7 @@ void Player::update(double delta) {
 //Control per teclat
 void Player::control(int key) {
 	if (key == GLFW_KEY_SPACE && Block::isSolid(world->getBlock(this->pos - Vector3<float>(0, 2, 0))) && grav >= 0.00f && this->gamemode == 1) {
-		grav = -2.0f;
+		grav = -4.0f;
 	}
 	if (key == GLFW_KEY_G) {
 		if (gamemode == 0) {

@@ -15,7 +15,7 @@ protected:
 
 	float height = 1.0f;
 
-	float grav = 1.0f;
+	float grav = 0.0f;
 
 	World* world; //Món de l'entitat
 	Vector3<float> pos; //Posició de l'entitat
@@ -28,7 +28,7 @@ protected:
 
 public:
 
-	inline static float GRAVMAX = 100.0f;
+	inline static float GRAVMAX = 16.0f;
 	inline static float GRAVITY = 9.8f;
 
 	virtual void draw(double delta);

@@ -22,6 +22,8 @@ Sheep::Sheep(World* world, Vector3<float> pos): Entity(world, pos, 1.2f)
   */
 void Sheep::update(double delta) {
 	Entity::update(delta);
+	printf("gravS %f\n", this->grav);
+	float offset = this->height / 2.0f;
 	rotCounter += (float)delta;
 	//printf("rc %f\n", rotCounter);
 	if (rotCounter > 5) {
@@ -63,13 +65,12 @@ void Sheep::update(double delta) {
 	//this->pos = this->pos; /*Vector3<float>(sinf(toRad(this->rot)), 0, sinf(toRad(this->rot)))/100.0f*/;
 	//this->pos.x += 0.001f;;
 	Vector3<float> newPos = this->pos + dir;
-	Bloc nbd = world->getBlock(newPos - Vector3<float>(0, 1.0f, 0));
+	Bloc nbd = world->getBlock(newPos - Vector3<float>(0, offset, 0));
 	Bloc nba = world->getBlock(newPos + Vector3<float>(0, 0, 0));
-	Bloc nbu = world->getBlock(newPos + Vector3<float>(0, 1, 0));
+	Bloc nbu = world->getBlock(newPos + Vector3<float>(0, offset, 0));
 	//printf("abaix %d normal %d amunt %d grav %f\n", nbd, nba, nbu, this->grav);
-	if (nbu == Bloc::RES && Block::isSolid(nba)) {
+	if (!Block::isSolid(nbu) && Block::isSolid(nba)) {
 		this->grav = -5.0f;
-		//newPos = this->pos + Vector3<float>(dir.x, 0, dir.z) * 0.1f + Vector3<float>(0, 1, 0);
 	}
 	if (this->grav < 0) { //Si tocam adalt, tornam caure
 		if (Block::isSolid(nbu)) {

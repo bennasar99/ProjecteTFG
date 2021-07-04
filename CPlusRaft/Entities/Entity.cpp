@@ -19,7 +19,7 @@ void Entity::update(double delta) {
 
 	//Gravetat
 	if (!checkCollisions) {
-		printf("pos %f %f %f speed %f %f %f delta %f\n", this->pos.x, this->pos.y, this->pos.z, this->speed.x, this->speed.y, this->speed.z, (float)delta);
+		//printf("pos %f %f %f speed %f %f %f delta %f\n", this->pos.x, this->pos.y, this->pos.z, this->speed.x, this->speed.y, this->speed.z, (float)delta);
 		this->pos = this->pos + this->speed * (float)delta;
 		return;
 	}
@@ -32,7 +32,7 @@ void Entity::update(double delta) {
 		this->grav = 0;
 	}
 	else if (this->grav < GRAVMAX) { //"Gravetat"
-		float mult = 1;
+		float mult = 1.0f;
 		if (ba == Bloc::AIGUA) { //A l'aigua queim més lent
 			mult = -1.0f;
 		}
@@ -47,7 +47,9 @@ void Entity::update(double delta) {
 		this->grav = -5.0f;
 		newPos = this->pos + Vector3<float>(0, 1, 0);
 	}*/
-	Vector3<float> add = Vector3<float>(0, -1, 0) * (float)delta * this->grav + this->speed * (float)delta;
+	this->speed.y = -1.0f * this->grav;
+	printf("speedY %f\n", this->speed.y);
+	Vector3<float> add = this->speed * (float)delta;
 	Vector3<float> newPos = this->pos + add;
 	Vector3<float> checkPos = newPos;
 	Bloc nbd = world->getBlock(newPos - Vector3<float>(0, offset, 0));

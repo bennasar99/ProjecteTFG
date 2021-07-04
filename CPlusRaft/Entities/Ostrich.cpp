@@ -20,8 +20,9 @@ Ostrich::Ostrich(World* world, Vector3<float> pos): Entity(world, pos, 2.2f)
 /**
   * Funció d'actualització de l'estat intern del jugador (passiva)
   */
-void Ostrich::update(double delta) { 
+void Ostrich::update(double delta) {
 	Entity::update(delta);
+	printf("gravO %f\n", this->grav);
 	rotCounter += (float)delta;
 	//printf("rc %f\n", rotCounter);
 	if (rotCounter > 5) {
@@ -71,7 +72,7 @@ void Ostrich::update(double delta) {
 
 	//printf("abaix %d normal %d amunt %d grav %f\n", nbd, nba, nbu, this->grav);
 	if (!Block::isSolid(nba) && Block::isSolid(nbd) && this->estat == Estat::CAMINANT) {
-		this->grav = -5.0f;
+		this->grav = -4.0f;
 	}
 
 	if (canviEstat) {
