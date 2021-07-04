@@ -28,7 +28,7 @@ World* world;
 
 //Clipping planes
 const float zNear = 0.001f;
-float viewDist = 32.0f; //Distància de visió (en chunks)
+float viewDist = 8.0f; //Distància de visió (en chunks)
 
 float zFar = viewDist*CHUNKSIZE + CHUNKSIZE;
 const float axisSize = zFar;
@@ -852,10 +852,16 @@ void onWindowResize(GLFWwindow* window, int width, int height) {
 
 
 void onKeyboardDown(unsigned char key, int x, int y) {
+	if (key == GLFW_KEY_UNKNOWN) {
+		return;
+	}
 	KeyboardManager::onKeyDown(key);
 }
 
 void onKeyboardUp(unsigned char key, int x, int y) {
+	if (key == GLFW_KEY_UNKNOWN) {
+		return;
+	}
 	KeyboardManager::onKeyUp(key);
 }
 

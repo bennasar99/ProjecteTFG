@@ -14,8 +14,6 @@ class World;
 */
 class Player : public Entity {
 private:
-	float gravmax = 100;
-	float speed = 16.0f;
 
 	int health;
 	float rot = 0;
@@ -27,7 +25,6 @@ private:
 	int gamemode = 0; //0 = creative, 1 = survival
 
 public:
-	float grav = 1;
 
 	Player(World* world, Vector3<float> pos);
 

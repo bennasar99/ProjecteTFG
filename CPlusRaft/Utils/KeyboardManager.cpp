@@ -31,7 +31,7 @@ void KeyboardManager::onKeyDown(int key) {
 }
 
 void KeyboardManager::onKeyUp(int key) {
-	if (key >= KEYNUM) {
+	if (key >= KEYNUM || key < 0) {
 		return;
 	}
 	// marcar que es pot tornar a cridar l'esdeveniment de la tecla

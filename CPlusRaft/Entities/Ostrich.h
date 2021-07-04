@@ -29,9 +29,7 @@ private:
 	int frameInici[4] = { 0, 65, 130, 180 };
 	int frameCount[4] = { 60, 60, 45, 50 };
 
-	float grav = 1;
-	float gravmax = 100;
-	float speed = 16.0f;
+	float speedM = 16.0f;
 
 
 	int health;

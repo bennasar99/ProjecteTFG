@@ -2,9 +2,10 @@
 #include "../World.h"
 #include <iostream>
 
-Entity::Entity(World* world, Vector3<float> pos) {
+Entity::Entity(World* world, Vector3<float> pos, float height){
 	this->world = world;
 	this->pos = pos;
+	this->height = height;
 }
 
 Entity::Entity() {
@@ -14,7 +15,69 @@ Entity::Entity() {
 
 void Entity::draw(double delta) {}
 
-void Entity::update(double delta) {}
+void Entity::update(double delta) {
+
+	//Gravetat
+	if (!checkCollisions) {
+		printf("pos %f %f %f speed %f %f %f delta %f\n", this->pos.x, this->pos.y, this->pos.z, this->speed.x, this->speed.y, this->speed.z, (float)delta);
+		this->pos = this->pos + this->speed * (float)delta;
+		return;
+	}
+	float offset = this->height / 2.0f;
+	Bloc bd = world->getBlock(this->pos - Vector3<float>(0, offset, 0));
+	Bloc ba = world->getBlock(this->pos + Vector3<float>(0, 0, 0));
+	Bloc bu = world->getBlock(this->pos + Vector3<float>(0, offset, 0));
+
+	if (this->grav >= 0 && Block::isSolid(bd)) {
+		this->grav = 0;
+	}
+	else if (this->grav < GRAVMAX) { //"Gravetat"
+		float mult = 1;
+		if (ba == Bloc::AIGUA) { //A l'aigua queim més lent
+			mult = -1.0f;
+		}
+		this->grav += (float)delta * GRAVITY * mult;
+		if (ba == Bloc::AIGUA) {
+			this->grav = std::max(this->grav, -1.0f);
+		}
+	}
+
+	//printf("abaix %d normal %d amunt %d grav %f\n", nbd, nba, nbu, this->grav);
+	/*if (nbu == Bloc::RES && Block::isSolid(nba)) {
+		this->grav = -5.0f;
+		newPos = this->pos + Vector3<float>(0, 1, 0);
+	}*/
+	Vector3<float> add = Vector3<float>(0, -1, 0) * (float)delta * this->grav + this->speed * (float)delta;
+	Vector3<float> newPos = this->pos + add;
+	Vector3<float> checkPos = newPos;
+	Bloc nbd = world->getBlock(newPos - Vector3<float>(0, offset, 0));
+	Bloc nba = world->getBlock(newPos);
+	Bloc nbu = world->getBlock(newPos + Vector3<float>(0, offset, 0));
+
+	if (newPos != this->pos) {
+		if (Block::isSolid(world->getBlock(newPos - Vector3<float>(0, 1, 0))) ||
+			Block::isSolid(world->getBlock(newPos))) {
+			Vector3<float> poss[6] = { Vector3<float>(add.x, 0, add.z), Vector3<float>(add.x, add.y, 0), Vector3<float>(0, add.y, add.z),
+				Vector3<float>(add.x, 0, 0), Vector3<float>(0, add.y, 0), Vector3<float>(0, 0, add.z) };
+			for (int i = 0; i < 6; i++) {
+				Vector3<float> newAdd = poss[i];
+				newPos = this->pos + newAdd;
+				if (!Block::isSolid(world->getBlock(newPos - Vector3<float>(0, 1, 0))) &&
+					!Block::isSolid(world->getBlock(newPos + Vector3<float>(0, 0, 0)))) {
+					this->pos = newPos;
+					break;
+				}
+			}
+		}
+		else {
+			this->pos = newPos;
+		}
+	}
+
+	if (!Block::isSolid(world->getBlock(newPos)) && this->grav >= 0.0f) { //Caiem
+		this->pos = newPos;
+	}
+}
 
 void Entity::destroy() {}
 

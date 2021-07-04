@@ -17,7 +17,6 @@ class Sheep : public Entity {
 private:
 	float grav = 1;
 	float gravmax = 100;
-	float speed = 16.0f;
 
 	int health;
 	float rotCounter = 0;

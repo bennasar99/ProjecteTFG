@@ -21,10 +21,14 @@ void Chunk::drawO() {
 		return;
 	}
 	if (firstdraw == true) {
-		firstdraw = false;
-		oMutex.lock();
+		if (oMutex.try_lock()) {
 			cMesh.updateO();
-		oMutex.unlock();
+			firstdraw = false;
+			oMutex.unlock();
+		}
+		else {
+			return;
+		}
 		this->updateTransparency(Vector3<float>(100, 100, 100));
 		Vector3<int> cPos = this->getPos();
 		//printf("First draw a %d %d %d\n", cPos.x, cPos.y, cPos.z);
@@ -37,7 +41,11 @@ void Chunk::drawO() {
 	else {
 		glFrontFace(GL_CCW);
 	}
-	cMesh.drawO();
+	if (oMutex.try_lock()) {
+		this->cMesh.drawO();
+		oMutex.unlock();
+	}
+
 	TextureManager::noTexture();
 }
 
