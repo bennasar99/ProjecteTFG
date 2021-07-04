@@ -1,6 +1,6 @@
 #pragma once
 #include "../Utils/Vector3.h"
-#include "Entity.h"
+#include "Mob.h"
 #include <list>
 #include "../Utils/KeyboardManager.h"
 #include "../Utils/SoundManager.h"
@@ -21,7 +21,7 @@ enum class Estat {
 /*
 	Entitat jugador
 */
-class Ostrich : public Entity {
+class Ostrich : public Mob {
 private:
 	float anim = 0;
 
@@ -29,15 +29,10 @@ private:
 	int frameInici[4] = { 0, 65, 130, 180 };
 	int frameCount[4] = { 60, 60, 45, 50 };
 
-	float speedM = 16.0f;
-
 
 	int health;
-	float rotCounter = 0;
-	float rot = 0;
-	float rotDavDr = 0;
-	float rotDR = 1;
-	short rotAct = 0;
+
+	float canviEstatCounter;
 
 	float eyesOffset = 0.5f; //Alçada ulls
 

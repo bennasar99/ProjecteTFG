@@ -161,6 +161,7 @@
     <ClInclude Include="Chunk.h" />
     <ClInclude Include="ChunkStateManager.h" />
     <ClInclude Include="Entities\Entity.h" />
+    <ClInclude Include="Entities\Mob.h" />
     <ClInclude Include="Entities\Ostrich.h" />
     <ClInclude Include="Entities\Player.h" />
     <ClInclude Include="Entities\Sheep.h" />
@@ -193,6 +194,7 @@
     <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="ChunkStateManager.cpp" />
     <ClCompile Include="Entities\Entity.cpp" />
+    <ClCompile Include="Entities\Mob.cpp" />
     <ClCompile Include="Entities\Ostrich.cpp" />
     <ClCompile Include="Entities\Player.cpp" />
     <ClCompile Include="Entities\Sheep.cpp" />

@@ -1,6 +1,6 @@
 #pragma once
 #include "../Utils/Vector3.h"
-#include "Entity.h"
+#include "Mob.h"
 #include <list>
 #include "../Utils/KeyboardManager.h"
 #include "../Utils/SoundManager.h"
@@ -13,17 +13,11 @@ class World;
 /*
 	Entitat jugador
 */
-class Sheep : public Entity {
+class Sheep : public Mob {
 private:
-	float grav = 1;
-	float gravmax = 100;
 
-	int health;
-	float rotCounter = 0;
-	float rot = 0;
 	float rotDavDr = 0;
 	float rotDR = 1;
-	short rotAct = 0;
 
 	float eyesOffset = 0.5f; //Alçada ulls
 

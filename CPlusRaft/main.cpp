@@ -16,7 +16,7 @@
 #include <sys/stat.h>
 #include <thread>  
 
-#define TPS 20 //Actualitzacions del món per segon
+#define TPS 30 //Actualitzacions del món per segon
 
 int w_width = 1366;
 int w_height = 768;
@@ -312,7 +312,7 @@ int main(int argc, char** argv)
 		printf("Loading world %s... \n", wname.c_str());
 		world = new World(wname, &camera);
 		//ent = new Player(world, Vector3<float>(400, 120, 400) + Vector3<float>(0, 2.0f, 0));
-		ent = new Player(world, Vector3<float>(0, 0, 0) + Vector3<float>(0, 2.0f, 0));
+		ent = new Player(world, Vector3<float>(0, 128, 0) + Vector3<float>(0, 2.0f, 0));
 		world->addEntity(Entitat::OVELLA, Vector3<float>(30, 200, 60));
 		world->addEntity(Entitat::ESTRUC, Vector3<float>(-30, 200, 30));
 		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
@@ -337,7 +337,7 @@ int main(int argc, char** argv)
 		world = new World(wname, seed, &camera);
 		world->setRandomSpawn();
 		world->save();
-		ent = new Player(world, Vector3<float>(0, 0, 0) + Vector3<float>(0, 2.0f, 0));
+		ent = new Player(world, Vector3<float>(0, 128, 0) + Vector3<float>(0, 2.0f, 0));
 		//ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 2.0f, 0));
 	}
 	// Inicialitzam el GLFW
@@ -729,6 +729,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 				}
 			}
 			else {
+
 				world->interact(Vector3<int>((int)floor(ba.x), (int)floor(ba.y), (int)floor(ba.z))); //Si no tenim cap bloc seleccionat, interactuam
 			}
 		}

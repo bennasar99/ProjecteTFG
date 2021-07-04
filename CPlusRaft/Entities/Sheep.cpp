@@ -11,7 +11,7 @@
 
 class World;
 
-Sheep::Sheep(World* world, Vector3<float> pos): Entity(world, pos, 1.2f)
+Sheep::Sheep(World* world, Vector3<float> pos): Mob(world, pos, 1.2f)
 {
 	this->health = 5;
 	this->rot = float(rand() % 300);
@@ -21,15 +21,8 @@ Sheep::Sheep(World* world, Vector3<float> pos): Entity(world, pos, 1.2f)
   * Funció d'actualització de l'estat intern del jugador (passiva)
   */
 void Sheep::update(double delta) {
-	Entity::update(delta);
-	printf("gravS %f\n", this->grav);
+	Mob::update(delta);
 	float offset = this->height / 2.0f;
-	rotCounter += (float)delta;
-	//printf("rc %f\n", rotCounter);
-	if (rotCounter > 5) {
-		rotAct = rand() % 5;
-		rotCounter = 0;
-	}
 	//printf("grav %f \n", this->grav);
 	if (rotDavDr > 25) {
 		rotDR = -1;
@@ -39,9 +32,6 @@ void Sheep::update(double delta) {
 	}
 	rotDavDr += (float)delta * 25 * rotDR;
 
-	//if (Block::isSolid(world->getBlock(front))) {
-		//this->rot += delta;
-	//}
 	switch (rotAct) {
 	case 1:
 		this->rot += (float)delta*25;
@@ -52,31 +42,7 @@ void Sheep::update(double delta) {
 	default:
 		break;
 	}
-	this->rot = fmod(this->rot, 360.0f);
-	Vector3<float> front = Vector3<float>(-sinf(toRad(this->rot)), 0, -cosf(toRad(this->rot)));
-	Vector3<float> dir = Vector3<float>::normalize(front);
-	this->speed.x = dir.x;
-	this->speed.z = dir.z;
-
-	//this->rot = toDegree(Vector3<float>::angle(Vector3<float>(dir.x, 0, dir.z), Vector3<float>(0, 0, 1)));
-	//if (dir.x < 0) {
-	//	this->rot = 360 - rot; //Conversió de 180 a 360 graus
-	//}
-	//this->pos = this->pos; /*Vector3<float>(sinf(toRad(this->rot)), 0, sinf(toRad(this->rot)))/100.0f*/;
-	//this->pos.x += 0.001f;;
-	Vector3<float> newPos = this->pos + dir;
-	Bloc nbd = world->getBlock(newPos - Vector3<float>(0, offset, 0));
-	Bloc nba = world->getBlock(newPos + Vector3<float>(0, 0, 0));
-	Bloc nbu = world->getBlock(newPos + Vector3<float>(0, offset, 0));
-	//printf("abaix %d normal %d amunt %d grav %f\n", nbd, nba, nbu, this->grav);
-	if (!Block::isSolid(nbu) && Block::isSolid(nba)) {
-		this->grav = -5.0f;
-	}
-	if (this->grav < 0) { //Si tocam adalt, tornam caure
-		if (Block::isSolid(nbu)) {
-			this->grav = 0;
-		}
-	}
+	
 }
 
 
@@ -84,7 +50,7 @@ void Sheep::update(double delta) {
 void Sheep::draw(double delta) {
 	glScalef(0.1f, 0.1f, 0.1f);
 	TextureManager::applyTexture("Ovella");
-	glRotatef(rot, 0, 1, 0);
+	glRotatef(rot + 180, 0, 1, 0);
 
 	glPushMatrix();
 	glTranslatef(-0, 1, 0);

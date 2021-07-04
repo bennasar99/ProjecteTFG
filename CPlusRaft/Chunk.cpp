@@ -223,9 +223,9 @@ void Chunk::updateMesh() {
 	if (this->nblocs <= 0 && !Block::getMCEnabled()) { //CAs chunk que queda buit?
 		return; //No cal fer res
 	}
-	cMesh.eraseO();
 	{
 		const std::lock_guard<std::mutex> lock(oMutex);
+		cMesh.eraseO();
 		const std::lock_guard<std::mutex> lock2(tMutex);
 		std::list<dT> transparent;
 		int nb = 0;

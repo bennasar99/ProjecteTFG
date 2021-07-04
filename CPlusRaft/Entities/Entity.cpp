@@ -20,7 +20,7 @@ void Entity::update(double delta) {
 	//Gravetat
 	if (!checkCollisions) {
 		//printf("pos %f %f %f speed %f %f %f delta %f\n", this->pos.x, this->pos.y, this->pos.z, this->speed.x, this->speed.y, this->speed.z, (float)delta);
-		this->pos = this->pos + this->speed * (float)delta;
+		this->pos = this->pos + this->speed * (float)delta * this->speedM;
 		return;
 	}
 	float offset = this->height / 2.0f;
@@ -33,23 +33,18 @@ void Entity::update(double delta) {
 	}
 	else if (this->grav < GRAVMAX) { //"Gravetat"
 		float mult = 1.0f;
-		if (ba == Bloc::AIGUA) { //A l'aigua queim més lent
-			mult = -1.0f;
+		if (ba == Bloc::AIGUA) {
+			if (this->grav < 1.0f) {
+				mult = 0.5f;
+			}
+			else {
+				mult = -1.0f;
+			}
 		}
 		this->grav += (float)delta * GRAVITY * mult;
-		if (ba == Bloc::AIGUA) {
-			this->grav = std::max(this->grav, -1.0f);
-		}
 	}
 
-	//printf("abaix %d normal %d amunt %d grav %f\n", nbd, nba, nbu, this->grav);
-	/*if (nbu == Bloc::RES && Block::isSolid(nba)) {
-		this->grav = -5.0f;
-		newPos = this->pos + Vector3<float>(0, 1, 0);
-	}*/
-	this->speed.y = -1.0f * this->grav;
-	printf("speedY %f\n", this->speed.y);
-	Vector3<float> add = this->speed * (float)delta;
+	Vector3<float> add = this->speed * (float)delta * this->speedM + Vector3<float>(0, -1, 0) * grav * (float)delta;
 	Vector3<float> newPos = this->pos + add;
 	Vector3<float> checkPos = newPos;
 	Bloc nbd = world->getBlock(newPos - Vector3<float>(0, offset, 0));
@@ -78,6 +73,12 @@ void Entity::update(double delta) {
 
 	if (!Block::isSolid(world->getBlock(newPos)) && this->grav >= 0.0f) { //Caiem
 		this->pos = newPos;
+	}
+
+	if (this->grav < 0) { //Si tocam adalt, tornam caure
+		if (Block::isSolid(nbu)) {
+			this->grav = 0;
+		}
 	}
 }
 
