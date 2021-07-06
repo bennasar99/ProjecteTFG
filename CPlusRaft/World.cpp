@@ -57,16 +57,20 @@ World::World(std::string name, Camera* camera) : World(name, 0, camera) { //Càrr
 }
 
 bool World::setRandomSpawn() {
+	Vector3<int> spawn = Vector3<int>(0, 0, 0);
 	int x = rand() % (512 * CHUNKSIZE);
 	int z = rand() % (512 * CHUNKSIZE);
 	bool trobat = false;
-	for (int y = 256; y > 0 && (!trobat); y--) {
-		Bloc b = getBlock(Vector3<int>(x, y, z));
-		if (b != Bloc::RES) {
+	int intents = 10;
+	for (int intents = 100; intents > 0 && !trobat; intents--) {
+		spawn = Vector3<int>(rand() % 512, 128, rand() % 512);
+		Bioma spawnBioma = wGen.getBiomeAt(spawn.x, spawn.z);
+		if (spawnBioma != Bioma::MAR && spawnBioma != Bioma::OCEA) {
 			trobat = true;
-			spawn = Vector3<int>(x, y + 2, z);
 		}
+		intents--;
 	}
+	this->spawn = spawn;
 	return trobat;
 }
 
@@ -856,8 +860,8 @@ void World::updateNeighborChunks(Vector3<int> cpos, Vector3<int> bpos) {
 	}
 }
 
-Vector3<int> World::getSpawn() {
-	return this->spawn;
+Vector3<float> World::getSpawn() {
+	return Vector3<float>((float)this->spawn.x, (float)this->spawn.y, (float)this->spawn.z);
 }
 
 void World::drawMap(float scrAspect, Entity *ent, int y, int range) {

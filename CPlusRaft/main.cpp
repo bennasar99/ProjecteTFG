@@ -312,7 +312,7 @@ int main(int argc, char** argv)
 		printf("Loading world %s... \n", wname.c_str());
 		world = new World(wname, &camera);
 		//ent = new Player(world, Vector3<float>(400, 120, 400) + Vector3<float>(0, 2.0f, 0));
-		ent = new Player(world, Vector3<float>(0, 128, 0) + Vector3<float>(0, 2.0f, 0));
+		ent = new Player(world, world->getSpawn() + Vector3<float>(0, 2.0f, 0));
 		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
 	}
 	else {
@@ -335,7 +335,7 @@ int main(int argc, char** argv)
 		world = new World(wname, seed, &camera);
 		world->setRandomSpawn();
 		world->save();
-		ent = new Player(world, Vector3<float>(0, 128, 0) + Vector3<float>(0, 2.0f, 0));
+		ent = new Player(world, world->getSpawn() + Vector3<float>(0, 2.0f, 0));
 		//ent = new Player(world, Vector3<float>((float)world->getSpawn().x, (float)world->getSpawn().y, (float)world->getSpawn().z) + Vector3<float>(0, 2.0f, 0));
 	}
 	// Inicialitzam el GLFW

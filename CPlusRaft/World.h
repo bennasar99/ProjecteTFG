@@ -101,7 +101,7 @@ public:
 
 	void destroy();
 
-	Vector3<int> getSpawn();
+	Vector3<float> getSpawn();
 
 	void drawAxis(Vector3<float> pos, float axisSize);
 	void draw(Vector3<float> pos, float dist, double delta);
