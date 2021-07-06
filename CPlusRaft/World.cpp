@@ -969,7 +969,7 @@ void World::drawMap(float scrAspect, Entity *ent, int y, int range) {
 	glVertex2f(dX/2, -dZ/2);
 	glEnd();
 	//Petit indica visió jugador
-	glColor3f(0, 0, 1);
+	glColor3f(0, 0, 0);
 	glBegin(GL_TRIANGLES);
 	glVertex2f(dX /4, 0);
 	glVertex2f(0, dZ / 2);
