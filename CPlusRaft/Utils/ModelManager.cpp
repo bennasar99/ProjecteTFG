@@ -29,7 +29,7 @@ void ModelManager::addModel(string mod, int frames, std::string path) {
 		}
 		pathN += num;
 		pathN += ".obj";
-		printf("Model a %s\n", pathN.c_str());
+		//printf("Model a %s\n", pathN.c_str());
 		model[i] = Mesh(pathN);
 		model[i].update();
 	}

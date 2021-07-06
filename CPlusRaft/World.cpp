@@ -260,10 +260,10 @@ void World::update(double delta, Vector3<float> pos) {
 			if (!regLoad[i].valid()) {
 				cM.setRegionState(*it2, RegionState::PENDENT);
 				if (save) {
-					printf("Saving and unloading region %d %d %d\n", (*it2).x, (*it2).y, (*it2).z);
+					printf("Guardant i descarregant regio %d %d %d\n", (*it2).x, (*it2).y, (*it2).z);
 				}
 				else {
-					printf("Unloading region %d %d %d\n", (*it2).x, (*it2).y, (*it2).z); //Surt repetit a diferents unloads
+					printf("Descarregant regio %d %d %d\n", (*it2).x, (*it2).y, (*it2).z); //Surt repetit a diferents unloads
 				}
 				regLoad[i] = std::async(std::launch::async, &World::doRegion, this, *it2, save, true);
 				trobat = true;
@@ -442,7 +442,7 @@ void World::destroy() {
 	for (cit = chunks.begin(); cit != chunks.end(); cit++) {
 		delete cit->second;
 		count++;
-		printf("Deleting chunk %d\n", count);
+		//printf("Deleting chunk %d\n", count);
 	}
 
 	std::list<Entity*>::iterator ent;
@@ -507,8 +507,8 @@ bool World::setBlock(Bloc tipus, Vector3<int> pos, bool overwrite, bool listUpda
 	Vector3<int> bpos = pos % CHUNKSIZE;
 
 	if (listUpdate) {
-		printf("set block on chunk %d %d %d\n", cPos.x, cPos.y, cPos.z);
-		printf("set block on pos %d %d %d\n", bpos.x, bpos.y, bpos.z);
+		//printf("set block on chunk %d %d %d\n", cPos.x, cPos.y, cPos.z);
+		//printf("set block on pos %d %d %d\n", bpos.x, bpos.y, bpos.z);
 	}
 
 	if (getChunk(cPos) == nullptr && cM.getChunkState(cPos) == ChunkState::LLEST){
@@ -988,7 +988,7 @@ bool World::doRegion(Vector3<int> rPos, bool save, bool unload) {
 	std::string path = "worlds/" + this->name + "/chunks/reg" + std::to_string(rPos.x) + "_" + std::to_string(rPos.y) + "_" + std::to_string(rPos.z) + ".cnk";
 	if (save) {
 		file.open(path.c_str(), std::ios::out | std::ios::binary);
-		printf("escrivint a fitxer %s\n", path.c_str());
+		//printf("escrivint a fitxer %s\n", path.c_str());
 	}
 	int nChunks = 0;
 	for (int x = rPos.x * REGIONSIZE; x < (rPos.x+1) * REGIONSIZE; x++) {
@@ -1142,7 +1142,7 @@ bool World::loadRegion(Vector3<int> rPos) {
 		printf("Carregada regio %d %d %d\n", rPos.x, rPos.y, rPos.z);
 	}
 	else { //No s'ha carregat
-		printf("No es pot carregar regio %d %d %d amd path %s\n", rPos.x, rPos.y, rPos.z, path.c_str());
+		printf("No es pot carregar regio %d %d %d amd path %s. Es creara.\n", rPos.x, rPos.y, rPos.z, path.c_str());
 		ret = false;
 	}
 	cM.setRegionState(rPos, RegionState::LLEST);

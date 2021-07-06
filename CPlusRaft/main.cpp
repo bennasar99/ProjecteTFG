@@ -28,7 +28,7 @@ World* world;
 
 //Clipping planes
 const float zNear = 0.001f;
-float viewDist = 8.0f; //Distància de visió (en chunks)
+float viewDist = 16.0f; //Distància de visió (en chunks)
 
 float zFar = viewDist*CHUNKSIZE + CHUNKSIZE;
 const float axisSize = zFar;
@@ -823,7 +823,7 @@ void scaleListener(GLFWwindow* window, double xoffset, double yoffset) {
 	}
 	else { //Feim zoom
 		if (act == Active::MAPA) {
-			mapMult -= yoffset*0.2f;
+			mapMult -= (float)yoffset*0.2f;
 			mapMult = max(mapMult, 0.5f);
 			return;
 		}
