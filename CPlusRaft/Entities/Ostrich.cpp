@@ -18,7 +18,7 @@ Ostrich::Ostrich(World* world, Vector3<float> pos): Mob(world, pos, 2.2f)
 }
 
 /**
-  * Funció d'actualització de l'estat intern del jugador (passiva)
+  * Funció d'actualització de l'estat intern de l'estruç
   */
 void Ostrich::update(double delta) {
 	Mob::update(delta);
@@ -47,7 +47,6 @@ void Ostrich::update(double delta) {
 		if (world->getBlock(this->pos) == Bloc::HERBA && this->estat != Estat::MENJANT) {
 			this->speedM = 0;
 			this->estat = Estat::MENJANT;
-			//printf("EAT BEGIN\n");
 		}
 		else {
 			int r = rand() % 3;
@@ -61,7 +60,6 @@ void Ostrich::update(double delta) {
 				this->speedM = 1.0f;
 			}
 			if (antest == Estat::MENJANT) {
-				//printf("EAT END\n");
 				//world->setBlock(Bloc::RES, newPos.toInt(), true, true); //No lleva el que toca, sinó el de darrera
 			}
 		}

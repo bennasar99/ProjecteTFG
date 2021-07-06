@@ -6,7 +6,8 @@
 #include <algorithm>
 #include <mutex>
 
-//Gestió dels fils
+//Serveix per eliminar aquells VAOs i VBOs que deixen de ser útils per acció del fil d'actualització. 
+//El fil de rendertizació els ha d'eliminar més tard.
 class RenderManager {
 private:
 

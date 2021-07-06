@@ -5,8 +5,6 @@
 #include "../Utils.h"
 
 
-#define NSONS 5 //Nombre de sons
-
 class SoundManager {
 private:
 	static unordered_map<string, ALuint> sons;

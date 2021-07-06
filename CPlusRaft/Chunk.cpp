@@ -220,7 +220,7 @@ bool Chunk::readFromByteData(char* arr) {
 }
 
 void Chunk::updateMesh() {
-	if (this->nblocs <= 0 && !Block::getMCEnabled()) { //CAs chunk que queda buit?
+	if (this->nblocs <= 0 && !Block::getMCEnabled()) { //Cas chunk que queda buit?
 		return; //No cal fer res
 	}
 	{
@@ -275,7 +275,6 @@ void Chunk::updateMesh() {
 							}
 						}
 						if (qualcun) {
-							//blocs[x][y][z]->draw(&cMesh, visible, Vector3<int>(x, y, z));
 							Block::draw(blocs[x][y][z], &cMesh, bpos, visible);
 						}
 						if (Block::getMCEnabled() && Block::canSeeThrough(bt)) { //Amb els sòlids que no cobreixen totalment s'ha d'aplicar MC com si fos aire
@@ -300,9 +299,8 @@ void Chunk::updateTransparency(Vector3<float> pPos){
 	std::list<dT> transparent;
 	{
 		const std::lock_guard<std::mutex> lock(mutex);
-		//if (!this->transparent.empty()) { //AIXO FA ERROR DE LA MAR perque A LO 1R té algo a sa llista pes buits des chunk següent i després no i es cMesh no s'actualitza bé
-			transparent = std::list<dT>(this->transparent);
-		//}
+		transparent = std::list<dT>(this->transparent);
+
 	}
 	/*if (transparent.empty()) { //I AIXO
 		return;
@@ -338,9 +336,6 @@ void Chunk::updateTransparency(Vector3<float> pPos){
 	tMutex.lock();
 	cMesh.updateT();
 	tMutex.unlock();
-	//if ((pPos / CHUNKSIZE).toInt() == this->getPos()) {
-		//printf("first %d %d last %d %d pPos %d %d\n", (int)first.x, (int)first.z, (int)last.x, (int)last.z, (int)pPos.x, (int)pPos.z);
-	//}
 }
 
 Bioma Chunk::getBiome() {

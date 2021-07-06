@@ -18,7 +18,7 @@ Sheep::Sheep(World* world, Vector3<float> pos): Mob(world, pos, 1.2f)
 }
 
 /**
-  * Funció d'actualització de l'estat intern del jugador (passiva)
+  * Funció d'actualització de l'estat intern de l'ovella
   */
 void Sheep::update(double delta) {
 	Mob::update(delta);

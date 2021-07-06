@@ -17,15 +17,12 @@ bool MarchingCubes::apply(float surface, std::array<float, 8>& density, std::vec
 
     int edgeFlags = cubeEdgeFlags[bitfield];
 
-    //If the cube is entirely inside or outside of the surface, then there will be no intersections
     if (edgeFlags == 0) return false;
 
     Vector3<float> EdgeVertex[12];
 
-    //Find the point of intersection of the surface with each edge
     for (int i = 0; i < 12; i++)
     {
-        //if there is an intersection on this edge
         if ((edgeFlags & (1 << i)) != 0)
         {
             float offset = GetOffset(surface, density[EdgeConnection[i][0]], density[EdgeConnection[i][1]]);
@@ -49,7 +46,6 @@ bool MarchingCubes::apply(float surface, std::array<float, 8>& density, std::vec
             vertexs.push_back(EdgeVertex[vert]);
         }
 
-        //TODO?: Solució alternativa a decidir tipus bloc: mirar centre de cada triangle i bloc sòlid més proper a aquest
         Vector3<float> a = triangle[1] - triangle[0];
         Vector3<float> b = triangle[2] - triangle[0];
         Vector3<float> normal = Vector3<float>::normalize(Vector3<float>::cross(a, b));

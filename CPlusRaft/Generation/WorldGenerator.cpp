@@ -19,8 +19,6 @@ WorldGenerator::WorldGenerator(int seed, World* world, string gen) {
 	this->seaNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	this->seaNoise.SetFrequency(0.001f);
 	this->seaNoise.SetFractalType(FastNoiseLite::FractalType_Ridged);
-	//this->riverNoise.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_Hybrid);
-	//this->riverNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_Distance2Div);
 
 	//Rius
 	this->riverNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
@@ -31,7 +29,6 @@ WorldGenerator::WorldGenerator(int seed, World* world, string gen) {
 	//Clima (calor, templat, fred)
 	this->climateNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	this->climateNoise.SetFrequency(0.001f / biomeSize); //0.01
-	//this->climateNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
 
 	//Bioma (depen del clima)
 	this->biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
@@ -43,13 +40,10 @@ WorldGenerator::WorldGenerator(int seed, World* world, string gen) {
 	this->caveNoise.SetFrequency(0.1f * caveProb); //0.01
 	this->caveNoise.SetFractalOctaves(3);
 	this->caveNoise.SetFractalType(FastNoiseLite::FractalType_Ridged);
-	//this->caveNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_Distance2);
 
 	//Ores
 	this->oreNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	this->oreNoise.SetFrequency(1.0f * oreProb); //0.01
-	//this->oreNoise.SetFractalOctaves(3);
-	//this->oreNoise.SetFractalType(FastNoiseLite::FractalType_Ridged);
 
 	//Densitat biomes
 	this->normalNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
@@ -141,7 +135,6 @@ Bioma WorldGenerator::getBiomeAt(int bX, int bZ) {
 	return Bioma::OCEA;
 }
 
-//TODO: pot petar l'execució si és descarrega el chunk quan ja s'ha entrat aquí
 Chunk* WorldGenerator::generateDetail(Chunk* chunk) { //Estructures, els chunks dels voltants ja estan generats
 
 	Vector3<int> cPos = chunk->getPos();
@@ -316,15 +309,6 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 				bio = getBiomeAt(cPos.x * CHUNKSIZE + x, cPos.z * CHUNKSIZE + z);
 			}
 
-			//float height = 1;
-			//if (!WorldGenerator::isBiome3D(bio)) {
-			//	height = getHeight(bio, x + cPos.x * CHUNKSIZE, z + cPos.z * CHUNKSIZE);
-			//	if (height < (cPos.y) * CHUNKSIZE && (cPos.y)*CHUNKSIZE > sealvl) { //No importa generar la columna
-			//		continue;
-			//	}
-			//}
-
-
 			for (int y = 0; y < CHUNKSIZE; y++) {
 
 				Vector3<int> pos = Vector3<int>(x, y, z);
@@ -455,9 +439,6 @@ Chunk* WorldGenerator::generateTerrain(Vector3<int> cPos){ //Sense estructures, 
 						}
 						nblocs++;
 					}
-					/*else if (!WorldGenerator::isBiome3D(bio) && !transition) {
-						y = CHUNKSIZE;
-					}*/
 				}
 			}
 		}

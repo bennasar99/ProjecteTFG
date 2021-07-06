@@ -9,10 +9,9 @@
 
 using namespace std;
 
-#define NMODELS 6
 class Mesh;
 
-//Gestió dels fils
+//Gestió de models
 class ModelManager {
 private:
 

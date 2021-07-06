@@ -18,7 +18,7 @@ Mob::Mob(World* world, Vector3<float> pos, float height): Entity(world, pos, hei
 }
 
 /**
-  * Funció d'actualització de l'estat intern del jugador (passiva)
+  * Funció d'actualització de l'estat intern del mob
   */
 void Mob::update(double delta) {
 	Entity::update(delta);

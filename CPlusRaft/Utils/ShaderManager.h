@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include "../Render/Shader.h"
 
-#define NSHADERS 1
 class Mesh;
 
 class ShaderManager {

@@ -48,11 +48,6 @@ void ChunkStateManager::removeChunk(Vector3<int> cPos) {
 		std::unique_lock lock(cSMutex);
 		cestat.erase(cPos);
 	}
-	{
-		//std::unique_lock lock(cMutex);
-		//delete chunks[cPos];
-		//chunks.erase(cPos);
-	}
 }
 
 void ChunkStateManager::removeRegion(Vector3<int> rPos) {

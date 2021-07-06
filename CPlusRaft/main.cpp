@@ -313,8 +313,6 @@ int main(int argc, char** argv)
 		world = new World(wname, &camera);
 		//ent = new Player(world, Vector3<float>(400, 120, 400) + Vector3<float>(0, 2.0f, 0));
 		ent = new Player(world, Vector3<float>(0, 128, 0) + Vector3<float>(0, 2.0f, 0));
-		world->addEntity(Entitat::OVELLA, Vector3<float>(30, 200, 60));
-		world->addEntity(Entitat::ESTRUC, Vector3<float>(-30, 200, 30));
 		//printf("with spawn at %f %f %f\n", world->getSpawn().x, world->getSpawn().y, world->getSpawn().z);
 	}
 	else {
@@ -423,7 +421,7 @@ int main(int argc, char** argv)
 	SoundManager::loadSound("Sons/switch.wav", "OnOff");
 	SoundManager::loadSound("Sons/break.wav", "Destrueix");
 	SoundManager::loadSound("Sons/place.wav", "Coloca");
-	SoundManager::loadSound("Sons/passes/mud02.wav", "Camina");
+	SoundManager::loadSound("Sons/passes.wav", "Camina");
 
 	//Antialising
 	glfwWindowHint(GLFW_SAMPLES, 8);
@@ -460,14 +458,16 @@ void draw2DUI() {
 	}
 
 	//Dibuixam el bloc seleccionat al cantó esquerra inferior
-	glPushMatrix();
-	Block bsel = Block(static_cast<Bloc>(btipus));
-	glTranslatef(0.9f * camera.getAspect(), 0.1f, -2);
-	glScalef(0.1f, 0.1f, 0.1f);
-	glEnable(GL_TEXTURE_2D);
-	TextureManager::applyTexture("Bloc");
-	world->drawBloc(bsel.getId());
-	glPopMatrix();
+	Bloc bsel = static_cast<Bloc>(btipus);
+	if (bsel != Bloc::LIMIT && bsel != Bloc::RES) {
+		glPushMatrix();
+		glTranslatef(0.9f * camera.getAspect(), 0.1f, -2);
+		glScalef(0.1f, 0.1f, 0.1f);
+		glEnable(GL_TEXTURE_2D);
+		TextureManager::applyTexture("Bloc");
+		world->drawBloc(bsel);
+		glPopMatrix();
+	}
 
 	if (act == Active::INVENTARI) { //Dibuixam inventari
 		glPushMatrix();
@@ -717,7 +717,11 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 		else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) { //Botó dret, col·locar bloc / interactuar
 			Vector3 front = Vector3<float>::normalize(camera.getFront());
 			Bloc tipusbloc = static_cast<Bloc>(btipus);
-			if (!Block::isSolid(world->getBlock(bp)) && tipusbloc != Bloc::RES) { //Només deixam posar un bloc si no n'hi ha un ja
+			if (bp == Vector3<float>(FLT_MIN, FLT_MIN, FLT_MIN)) {
+				return;
+			}
+			Bloc blocApuntat = world->getBlock(bp);
+			if (!Block::isSolid(blocApuntat) && tipusbloc != Bloc::RES) { //Només deixam posar un bloc si no n'hi ha un ja
 				Vector3<float> epos;
 				if (ent != nullptr) {
 					epos = ent->getPos() - Vector3<float>(0,1,0);
@@ -728,8 +732,8 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods) {
 					SoundManager::playSound("Coloca", bp, true);
 				}
 			}
-			else {
-
+			else if (Block::isInteractable(world->getBlock(ba))){
+				
 				world->interact(Vector3<int>((int)floor(ba.x), (int)floor(ba.y), (int)floor(ba.z))); //Si no tenim cap bloc seleccionat, interactuam
 			}
 		}
@@ -928,8 +932,8 @@ void updatePlayerBlock() {
 		i++;
 	}
 	if (i == 100) { //Si no hem trobat cap bloc, no es veurà la selecció
-		baN = Vector3<float>(0, 0, 0);
-		bpN = Vector3<float>(0, 0, 0);
+		baN = Vector3<float>(FLT_MIN, FLT_MIN, FLT_MIN);
+		bpN = Vector3<float>(FLT_MIN, FLT_MIN, FLT_MIN);
 	}
 	ba = baN;
 	bp = bpN;

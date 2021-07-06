@@ -18,18 +18,6 @@ LightBlock::LightBlock(World* world, Bloc id, Vector3<int> pos) : Block(id) {
         this->light->setLightConcentration(3.0f);
         this->light->setAttenuation(Attenuation::QUADRATIC, 1.0f);
         break;
-    //case Bloc::LLUMSOTIL:
-    //    this->light = world->addLight(Vector3<float>((float)pos.x, (float)pos.y, (float)pos.z) + Vector3<float>(0, 0.5f,0));
-    //    this->light->setDir(Vector3<float>(0, -1, 0));
-    //    this->light->setSpreadAngle(90.0f);
-    //    this->light->setLightConcentration(5.0f);
-    //    break;
-    //case Bloc::LLUMTERRA:
-    //    this->light = world->addLight(Vector3<float>((float)pos.x, (float)pos.y, (float)pos.z) - Vector3<float>(0, 0.49f, 0));
-    //    this->light->setDir(Vector3<float>(0, 1, 0));
-    //    this->light->setSpreadAngle(135.0f);
-    //    this->light->setLightConcentration(4.0f);
-    //    break;
     }
 }
 

@@ -9,10 +9,7 @@
 //Gestió dels fils
 class ThreadManager {
 private:
-	static int cores; //True si la tecla està pitjada
-
-	static std::vector<unsigned int> vaos;
-	static std::vector<unsigned int> vbos;
+	static int cores; //N de cores
 
 	static std::mutex mutex;
 
