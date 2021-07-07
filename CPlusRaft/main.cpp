@@ -49,9 +49,6 @@ double lastX = 250, lastY = 250; //Darreres posicions del ratolí
 bool llanterna = false;
 bool smoothlight = true;
 
-//Control amb gamepad (control press)
-bool press[GLFW_GAMEPAD_BUTTON_LAST+1];
-
 //Entitats
 #include "Entities/Entity.h"
 Entity* ent; //Entitat controlada
@@ -75,7 +72,6 @@ void movement(int key);
 void updateMousePos();
 void updatePlayerBlock();
 void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
-void gamePad();
 void draw2DUI();
 
 double lastTime;
@@ -436,7 +432,6 @@ int main(int argc, char** argv)
 	lastTime = (float)glfwGetTime();
 	lastTimeW = lastTime;
 	while (run) {
-		gamePad();
 		glfwPollEvents();
 		Update();
 	}
@@ -553,129 +548,6 @@ void draw2DUI() {
 		glVertex3f((camera.getAspect() / 2), 0.48f, -1);
 		glVertex3f((camera.getAspect() / 2), 0.52f, -1);
 		glEnd();
-	}
-}
-
-void gamePad() {
-	if (!glfwJoystickIsGamepad(GLFW_JOYSTICK_1)) {
-		return;
-	}
-	GLFWgamepadstate state;
-	if (glfwGetGamepadState(GLFW_JOYSTICK_1, &state))
-	{
-		if (act == Active::JOC) {
-			//Control càmera
-			float aX = state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X];
-			float aY = state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y];
-			if (abs(aX) > 0.2f || abs(aY) > 0.2f) {
-				lookAround(window, lastX + aX / 50, lastY + aY / 50);
-			}
-
-			//Bot
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_A] == GLFW_PRESS && !press[GLFW_GAMEPAD_BUTTON_A])
-			{
-				KeyboardManager::onKeyDown(GLFW_KEY_SPACE);
-			}
-			else if (state.buttons[GLFW_GAMEPAD_BUTTON_A] == GLFW_RELEASE) {
-				KeyboardManager::onKeyUp(GLFW_KEY_SPACE);
-			}
-
-			//Crouch
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_B] == GLFW_PRESS)
-			{
-				KeyboardManager::onKeyDown(GLFW_KEY_LEFT_CONTROL);
-			}
-			else {
-				KeyboardManager::onKeyUp(GLFW_KEY_LEFT_CONTROL);
-			}
-
-			//Item seleccionat
-
-			//Moviment DPAD
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN] == GLFW_PRESS || state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] > 0.2f)
-			{
-				KeyboardManager::onKeyDown(GLFW_KEY_S);
-			}
-			else {
-				KeyboardManager::onKeyUp(GLFW_KEY_S);
-			}
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP] == GLFW_PRESS || state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] < -0.2f)
-			{
-				KeyboardManager::onKeyDown(GLFW_KEY_W);
-			}
-			else {
-				KeyboardManager::onKeyUp(GLFW_KEY_W);
-			}
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT] == GLFW_PRESS || state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] < -0.2f)
-			{
-				KeyboardManager::onKeyDown(GLFW_KEY_A);
-			}
-			else {
-				KeyboardManager::onKeyUp(GLFW_KEY_A);
-			}
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT] == GLFW_PRESS || state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] > 0.2f)
-			{
-				KeyboardManager::onKeyDown(GLFW_KEY_D);
-			}
-			else {
-				KeyboardManager::onKeyUp(GLFW_KEY_D);
-			}
-
-
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER] == GLFW_PRESS && !press[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER]) //Col·locar bloc
-			{
-				mouseListener(window, GLFW_MOUSE_BUTTON_RIGHT, GLFW_PRESS, 0);
-			}
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER] == GLFW_PRESS && !press[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER]) //Llevar bloc
-			{
-				mouseListener(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
-			}
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_Y] && !press[GLFW_GAMEPAD_BUTTON_Y]) //INVENTARI
-			{
-				movement(GLFW_KEY_TAB);
-			}
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_X] && !press[GLFW_GAMEPAD_BUTTON_X]) //INVENTARI
-			{
-				movement(GLFW_KEY_F);
-			}
-		}
-		else if (act == Active::INVENTARI) {
-			int nbtipus = btipus;
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_Y] && !press[GLFW_GAMEPAD_BUTTON_Y]) //INVENTARI
-			{
-				movement(GLFW_KEY_ESCAPE);
-			}
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT] && !press[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT]) //INVENTARI
-			{
-				nbtipus++;
-			}
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT] && !press[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]) //INVENTARI
-			{
-				nbtipus--;
-			}
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN] && !press[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]) //INVENTARI
-			{
-				nbtipus+=6;
-			}
-			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP] && !press[GLFW_GAMEPAD_BUTTON_DPAD_UP]) //INVENTARI
-			{
-				nbtipus-=6;
-			}
-			if (nbtipus >= 2 && nbtipus <= NBLOCS) {
-				btipus = nbtipus;
-			}
-		}
-
-		//Actualitzam l'estat dels botons
-		for (int i = 0; i <= GLFW_GAMEPAD_BUTTON_LAST; i++) {
-			if (state.buttons[i] == GLFW_PRESS && !press[GLFW_GAMEPAD_BUTTON_A])
-			{
-				press[i] = true;
-			}
-			else if (state.buttons[i] == GLFW_RELEASE) {
-				press[i] = false;
-			}
-		}
 	}
 }
 
